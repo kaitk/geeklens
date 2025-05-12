@@ -38,6 +38,7 @@
 
 <div class="popup-container">
   <header>
+    <div><img src="/icon2.svg" alt="GeekLens Logo" width="32" height="32"></div>
     <h1>GeekLens</h1>
     <div class="version">v0.1.0</div>
   </header>
@@ -92,7 +93,7 @@
         <h2>CPU Instruction Sets</h2>
         <p class="description">
           Modern CPUs support various instruction set extensions that accelerate specific types of operations.
-          Geekbench uses these instruction sets to optimize benchmark performance.
+          Geekbench uses these instruction sets to optimize benchmark performance on some CPUs where available.
         </p>
 
         <div class="instruction-list">
@@ -119,7 +120,7 @@
     {:else if activeTab === 'about'}
       <div class="about-panel">
         <div class="logo">
-          <img src="icons/icon128.png" alt="GeekLens Logo" width="64" height="64">
+          <img src="/icon2.svg" alt="GeekLens Logo" width="64" height="64">
         </div>
 
         <h2>GeekLens v0.1.0</h2>
@@ -135,7 +136,7 @@
         </div>
 
         <div class="copyright">
-          © {new Date().getFullYear()} GeekLens | MIT License
+          {new Date().getFullYear()} GeekLens | MIT License
         </div>
       </div>
     {/if}
