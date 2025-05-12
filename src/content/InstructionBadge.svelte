@@ -1,22 +1,16 @@
 <script lang="ts">
   import type { InstructionType } from '../data/instructionSets';
-  import { getSettingsStore } from '../settings/settings-store.svelte';
 
   interface Props {
     instruction: string;
+    colorBadges?: boolean;
     type: InstructionType | string;
     uppercase?: boolean;
   }
 
-  const { instruction, type, uppercase = false }: Props = $props();
-
-  let settingsStore = getSettingsStore();
+  const { instruction, type, colorBadges = true, uppercase = false }: Props = $props();
 
   function getBadgeClass(instructionType: InstructionType | string): string {
-    if (!settingsStore.value.coloredBadges) {
-      return 'gb-instr-default';
-    }
-
     switch (instructionType) {
       case 'AVX-512':
         return 'gb-instr-avx512';
@@ -34,7 +28,7 @@
   }
 </script>
 
-<span class="gb-instruction-badge {getBadgeClass(type)}">
+<span class="gb-instruction-badge {colorBadges ? getBadgeClass(type) : 'gb-instr-default'}">
   {uppercase ? instruction.toUpperCase() : instruction}
 </span>
 

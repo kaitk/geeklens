@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Instruction } from '../data/instructionSets';
+  import { getSettingsStore } from '../settings/settings-store.svelte';
   import InstructionBadge from './InstructionBadge.svelte';
 
   interface Props {
@@ -7,6 +8,8 @@
   }
 
   const { instructions }: Props = $props();
+
+  let settingsStore = getSettingsStore();
 </script>
 
 <div class="gb-instruction-container">
@@ -14,6 +17,7 @@
     <InstructionBadge
         instruction={instruction.name}
         type={instruction.type}
+        colorBadges={settingsStore.value.coloredBadges}
     />
   {/each}
 </div>

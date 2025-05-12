@@ -1,7 +1,7 @@
 import { mount } from 'svelte';
 import browser from 'webextension-polyfill';
-import { categorizeInstructionSets, instructionSets } from '../data/instructionSets';
-import { extractBenchmarkName, findBenchmarkTables, findCPUInfoTable, findInstructionSetsRow, waitForElement } from './domUtils';
+import { categorizeInstructionSets, instructionSets, type InstructionType } from '../data/instructionSets';
+import { extractBenchmarkName, findBenchmarkTables, waitForElement } from './domUtils';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 
@@ -15,7 +15,7 @@ browser.runtime.onMessage.addListener((message) => {
 // Main function to annotate the Geekbench results
 async function annotateGeekbenchResults() {
 
-    if(document.getElementById('geeklens-info')) {
+    if (document.getElementById('geeklens-info')) {
         return; // page already annotated
     }
 
@@ -30,16 +30,67 @@ async function annotateGeekbenchResults() {
 
     // Wait for benchmark tables to ensure page is fully rendered
     try {
-        await waitForElement('table.benchmark-table');
-        annotateBenchmarkTables();
-        annotateSystemInstructionSets();
+        await waitForElement('table.system-table');
+        const groups = findAndAnnotateSystemInstructionSets();
+
+        if(!groups) return;
+        const supportedInstructions = new Set<string>();
+        Object.values(groups).forEach(instructionList => {
+            instructionList.forEach(instruction => {
+                supportedInstructions.add(instruction.toUpperCase());
+            });
+        });
+        annotateBenchmarkTables(supportedInstructions);
     } catch (error) {
         console.error('GeekLens: Failed to find benchmark tables', error);
     }
 }
 
+
+function findAndAnnotateSystemInstructionSets() {
+    const cells = document.querySelectorAll('table.system-table tbody tr td.name')
+    const valueCell = Array.from(cells)
+        .find(td => td.textContent?.trim() === 'Instruction Sets')
+        ?.nextElementSibling;
+
+    if (!valueCell) {
+        console.error('GeekLens: Instruction sets value cell not found');
+        return;
+    }
+
+
+    const currentText = valueCell.textContent?.trim() || '';
+
+    // Categorize instruction sets
+    const instructionGroups = categorizeInstructionSets(currentText);
+    if (valueCell.querySelector('.gb-extension-enhanced')) {
+        return instructionGroups;
+    }
+
+
+    // Clear the current content
+    valueCell.innerHTML = '';
+
+    // Create a container for the Svelte component
+    const container = document.createElement('div');
+    valueCell.appendChild(container);
+
+    // Create and mount the Svelte component
+    mount(SystemInstructionSetsComponent, {
+        target: container,
+        props: {
+            instructionGroups
+        }
+    })
+
+    return instructionGroups;
+}
+
+
 // Function to annotate benchmark tables
-function annotateBenchmarkTables() {
+function annotateBenchmarkTables(allSupportedInstructions: Set<string>) {
+
+    console.warn('GOT HERE with', allSupportedInstructions)
     const benchmarkTables = findBenchmarkTables();
 
     if (benchmarkTables.length === 0) {
@@ -51,13 +102,17 @@ function annotateBenchmarkTables() {
         const rows = Array.from(table.querySelectorAll('tr'));
 
         rows.forEach(row => {
-            // Extract benchmark name safely
             const benchmarkName = extractBenchmarkName(row);
+            if (!benchmarkName || !instructionSets[benchmarkName]?.length) {
+                return;
+            }
 
-            // Skip if no benchmark name or no instruction sets for this benchmark
-            if (!benchmarkName ||
-                !instructionSets[benchmarkName] ||
-                instructionSets[benchmarkName].length === 0) {
+            const supportedInstructions = instructionSets[benchmarkName]
+                .filter(instruction => allSupportedInstructions.has(instruction?.name));
+
+            console.warn(instructionSets[benchmarkName])
+
+            if (supportedInstructions.length === 0) {
                 return;
             }
 
@@ -76,64 +131,13 @@ function annotateBenchmarkTables() {
             mount(TableInstructionSetsComponent, {
                 target: container,
                 props: {
-                    instructions: instructionSets[benchmarkName]
+                    instructions: supportedInstructions
                 }
             })
         });
     });
 }
 
-// Function to annotate system instruction sets
-function annotateSystemInstructionSets() {
-    const cpuInfoTable = findCPUInfoTable();
-    if (!cpuInfoTable) {
-        console.error('GeekLens: CPU info table not found');
-        return;
-    }
-
-    const instructionSetsRow = findInstructionSetsRow(cpuInfoTable);
-    if (!instructionSetsRow) {
-        console.error('GeekLens: Instruction sets row not found');
-        return;
-    }
-
-    // Get the cell containing instruction sets - more safely
-    const cells = Array.from(instructionSetsRow.querySelectorAll('td, th'));
-    if (cells.length < 2) {
-        console.error('GeekLens: Instruction sets row does not have enough cells');
-        return;
-    }
-
-    const valueCell = cells[1];
-    if (!valueCell) {
-        console.error('GeekLens: Value cell not found in instruction sets row');
-        return;
-    }
-
-    if (valueCell.querySelector('.gb-extension-enhanced')) {
-        return;
-    }
-
-    const currentText = valueCell.textContent?.trim() || '';
-
-    // Categorize instruction sets
-    const instructionGroups = categorizeInstructionSets(currentText);
-
-    // Clear the current content
-    valueCell.innerHTML = '';
-
-    // Create a container for the Svelte component
-    const container = document.createElement('div');
-    valueCell.appendChild(container);
-
-    // Create and mount the Svelte component
-    mount(SystemInstructionSetsComponent, {
-        target: container,
-        props: {
-            instructionGroups
-        }
-    })
-}
 
 // Start the annotation process when the page is loaded
 if (document.readyState === 'loading') {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { InstructionType } from '../data/instructionSets';
+  import { getSettingsStore } from '../settings/settings-store.svelte';
   import InstructionBadge from './InstructionBadge.svelte';
 
   interface Props {
@@ -7,6 +8,8 @@
   }
 
   const { instructionGroups }: Props = $props();
+
+  let settingsStore = getSettingsStore();
 
   // Only show groups that have instructions
   let activeGroups = $derived(Object.entries(instructionGroups)
@@ -22,6 +25,7 @@
         <InstructionBadge
             instruction={instruction}
             type={groupType}
+            colorBadges={settingsStore.value.coloredBadges}
             uppercase={true}
         />
       {/each}

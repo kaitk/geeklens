@@ -60,12 +60,7 @@ export const instructionSets: BenchmarkInstructionMap = {
  * Helper function to categorize instruction set strings by type
  * This converts a space-separated list of instruction sets into categorized groups
  */
-export function categorizeInstructionSets(instructionSetString: string): Record<InstructionType, string[]> {
-    // Ensure we have a string to work with
-    if (!instructionSetString || typeof instructionSetString !== 'string') {
-        instructionSetString = '';
-    }
-
+export function categorizeInstructionSets(instructionSetString = ''): Record<InstructionType, string[]> {
     // Split by space and filter out empty strings
     const instructionSets = instructionSetString.split(' ').filter(x => x.trim() !== '');
 
