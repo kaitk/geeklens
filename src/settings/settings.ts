@@ -2,12 +2,12 @@ import browser from "webextension-polyfill";
 
 export interface Settings {
     enabled: boolean,
-    showBadges: boolean,
+    coloredBadges: boolean,
 }
 
 export let defaultSettings: Settings = {
     enabled: true,
-    showBadges: true,
+    coloredBadges: true,
 };
 
 

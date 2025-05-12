@@ -1,48 +1,79 @@
 <script lang="ts">
-    import type { Instruction } from '../data/instructionSets';
+  import type { InstructionType } from '../data/instructionSets';
+  import { getSettingsStore } from '../settings/settings-store.svelte';
 
-    export let instructions: Instruction[];
+  interface Props {
+    instruction: string;
+    type: InstructionType | string;
+    uppercase?: boolean;
+  }
 
-    function getBadgeClass(type: string): string {
-        switch (type) {
-            case "AVX-512": return "gb-instr-avx512";
-            case "AVX": return "gb-instr-avx";
-            case "SSE": return "gb-instr-sse";
-            case "AES": return "gb-instr-aes";
-            case "SHA": return "gb-instr-sha";
-            default: return "gb-instr-default";
-        }
+  const { instruction, type, uppercase = false }: Props = $props();
+
+  let settingsStore = getSettingsStore();
+
+  function getBadgeClass(instructionType: InstructionType | string): string {
+    if (!settingsStore.value.coloredBadges) {
+      return 'gb-instr-default';
     }
+
+    switch (instructionType) {
+      case 'AVX-512':
+        return 'gb-instr-avx512';
+      case 'AVX':
+        return 'gb-instr-avx';
+      case 'SSE':
+        return 'gb-instr-sse';
+      case 'AES':
+        return 'gb-instr-aes';
+      case 'SHA':
+        return 'gb-instr-sha';
+      default:
+        return 'gb-instr-default';
+    }
+  }
 </script>
 
-<div class="gb-instruction-container">
-    {#each instructions as instruction}
-    <span class="gb-instruction-badge {getBadgeClass(instruction.type)}">
-      {instruction.name}
-    </span>
-    {/each}
-</div>
+<span class="gb-instruction-badge {getBadgeClass(type)}">
+  {uppercase ? instruction.toUpperCase() : instruction}
+</span>
 
 <style>
-    .gb-instruction-container {
-        margin-top: 5px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
-    }
+  .gb-instruction-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+  }
 
-    .gb-instruction-badge {
-        display: inline-block;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 10px;
-        font-weight: 500;
-    }
+  .gb-instr-avx512 {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
 
-    .gb-instr-avx512 { background-color: #dbeafe; color: #1e40af; }
-    .gb-instr-avx { background-color: #e0f2fe; color: #0369a1; }
-    .gb-instr-sse { background-color: #ffedd5; color: #9a3412; }
-    .gb-instr-aes { background-color: #dcfce7; color: #166534; }
-    .gb-instr-sha { background-color: #bbf7d0; color: #15803d; }
-    .gb-instr-default { background-color: #f3f4f6; color: #374151; }
+  .gb-instr-avx {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+
+  .gb-instr-sse {
+    background-color: #ffedd5;
+    color: #9a3412;
+  }
+
+  .gb-instr-aes {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .gb-instr-sha {
+    background-color: #bbf7d0;
+    color: #15803d;
+  }
+
+  .gb-instr-default {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
 </style>

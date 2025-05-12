@@ -1,9 +1,9 @@
-import { instructionSets, categorizeInstructionSets } from '../data/instructionSets';
-import { findBenchmarkTables, findCPUInfoTable, findInstructionSetsRow, extractBenchmarkName } from './domUtils';
-import InstructionBadgeComponent from './InstructionBadge.svelte';
-import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
+import { mount } from 'svelte';
 import browser from 'webextension-polyfill';
-import {mount} from "svelte";
+import { categorizeInstructionSets, instructionSets } from '../data/instructionSets';
+import { extractBenchmarkName, findBenchmarkTables, findCPUInfoTable, findInstructionSetsRow, waitForElement } from './domUtils';
+import TableInstructionSetsComponent from './TableInstructionSets.svelte';
+import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 
 // Listen for messages from the background script
 browser.runtime.onMessage.addListener((message) => {
@@ -12,23 +12,30 @@ browser.runtime.onMessage.addListener((message) => {
     }
 });
 
-
-
 // Main function to annotate the Geekbench results
-function annotateGeekbenchResults() {
+async function annotateGeekbenchResults() {
+
+    if(document.getElementById('geeklens-info')) {
+        return; // page already annotated
+    }
+
     console.log('GeekLens: Starting annotation process');
 
     // Add a small info badge to show the extension is active
     const infoElement = document.createElement('div');
+    infoElement.id = 'geeklens-info'
     infoElement.classList.add('gb-extension-info');
     infoElement.textContent = 'GeekLens Active';
     document.body.appendChild(infoElement);
 
-    // Find all benchmark tables with a slight delay to ensure page is fully rendered
-    setTimeout(() => {
+    // Wait for benchmark tables to ensure page is fully rendered
+    try {
+        await waitForElement('table.benchmark-table');
         annotateBenchmarkTables();
         annotateSystemInstructionSets();
-    }, 500);
+    } catch (error) {
+        console.error('GeekLens: Failed to find benchmark tables', error);
+    }
 }
 
 // Function to annotate benchmark tables
@@ -66,7 +73,7 @@ function annotateBenchmarkTables() {
             benchmarkCell.appendChild(container);
 
             // Create and mount the Svelte component
-            mount(InstructionBadgeComponent, {
+            mount(TableInstructionSetsComponent, {
                 target: container,
                 props: {
                     instructions: instructionSets[benchmarkName]
@@ -103,6 +110,10 @@ function annotateSystemInstructionSets() {
         return;
     }
 
+    if (valueCell.querySelector('.gb-extension-enhanced')) {
+        return;
+    }
+
     const currentText = valueCell.textContent?.trim() || '';
 
     // Categorize instruction sets
@@ -115,7 +126,6 @@ function annotateSystemInstructionSets() {
     const container = document.createElement('div');
     valueCell.appendChild(container);
 
-    console.warn('GOT GROUPS', instructionGroups)
     // Create and mount the Svelte component
     mount(SystemInstructionSetsComponent, {
         target: container,
