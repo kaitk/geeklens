@@ -22,6 +22,10 @@
         return 'gb-instr-aes';
       case 'SHA':
         return 'gb-instr-sha';
+      case 'NEON':
+        return 'gb-instr-neon';
+      case 'SME':
+        return 'gb-instr-sme';
       default:
         return 'gb-instr-default';
     }
@@ -64,6 +68,16 @@
   .gb-instr-sha {
     background-color: #bbf7d0;
     color: #15803d;
+  }
+
+  .gb-instr-neon {
+    background-color: #fce7f3;
+    color: #831843;
+  }
+
+  .gb-instr-sme {
+    background-color: #e9d5ff;
+    color: #6b21a8;
   }
 
   .gb-instr-default {
