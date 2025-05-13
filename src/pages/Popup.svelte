@@ -11,6 +11,8 @@
   // Default settings
   let settings: Settings = defaultSettings;
 
+  const version = 'v0.1.3';
+
   // Instruction set explanations
   const instructionInfo = {
     'AVX-512': 'Advanced Vector Extensions 512-bit - SIMD instructions for heavy computation',
@@ -40,7 +42,7 @@
   <header>
     <div><img src="/icon2.svg" alt="GeekLens Logo" width="32" height="32"></div>
     <h1>GeekLens</h1>
-    <div class="version">v0.1.0</div>
+    <div class="version">{version}</div>
   </header>
 
   <nav class="tabs">
@@ -123,7 +125,7 @@
           <img src="/icon2.svg" alt="GeekLens Logo" width="64" height="64">
         </div>
 
-        <h2>GeekLens v0.1.0</h2>
+        <h2>GeekLens {version}</h2>
         <p>
           GeekLens enhances Geekbench CPU benchmark results by adding
           instruction set annotations, helping you understand which CPU
