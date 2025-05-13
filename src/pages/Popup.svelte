@@ -66,7 +66,7 @@
   <main>
     {#if activeTab === 'settings'}
       <div class="settings-panel">
-        <!-- TODO add when actually checked forgi -->
+        <!-- TODO add when actually checked for -->
         <!--div class="setting">
           <label>
             <input type="checkbox" bind:checked={settings.enabled}>
@@ -112,9 +112,7 @@
         <div class="resources">
           <h3>Learn More</h3>
           <ul>
-            <li><a href="https://en.wikipedia.org/wiki/Advanced_Vector_Extensions" target="_blank">AVX on Wikipedia</a></li>
-            <li><a href="https://en.wikipedia.org/wiki/AES_instruction_set" target="_blank">AES Instructions</a></li>
-            <li><a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank">Geekbench 6 Internals</a></li>
+            <li><a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank">Geekbench 6 Internals document</a></li>
           </ul>
         </div>
       </div>
@@ -133,8 +131,8 @@
         </p>
 
         <div class="links">
-          <a href="https://github.com/yourusername/geeklens" target="_blank">GitHub</a>
-          <a href="https://github.com/yourusername/geeklens/issues" target="_blank">Report Issues</a>
+          <a href="https://github.com/kaitk/geeklens" target="_blank">GitHub</a>
+          <a href="https://github.com/kaitk/geeklens/issues" target="_blank">Report Issues</a>
         </div>
 
         <div class="copyright">

@@ -57,6 +57,7 @@ If you have any questions or
 ### Prerequisites
 - Basic understanding of JavaScript, HTML, and CSS
 - Familiarity with browser extension development
+- Currently only tested with [bun.sh](https://bun.sh/package-manager) for package manager
 
 ### Setup
 1. Clone this repository
