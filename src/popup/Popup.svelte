@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { getBadgeStyle } from '../isa/badgeColors';
-  import { instructionCategories } from '../isa/categories';
+  import { getCategoryStyle } from '../isa/badgeColors';
+  import { instructionCategories } from './popupCategories';
   import { defaultSettings, loadSettings, saveSettings, type Settings } from '../settings/settings';
 
 
@@ -24,7 +24,7 @@
   }
 
   let showSavedMessage = false;
-  let activeTab = 'settings';
+  let activeTab = 'info';
 </script>
 
 <div class="popup-container">
@@ -82,11 +82,21 @@
     {:else if activeTab === 'info'}
       <div class="info-panel">
         <h2>CPU Instruction Set Extensions</h2>
-        <p class="description">
-          Geekbench utilizes various CPU instruction set extensions to optimize performance.
-          These extensions are grouped below by their primary function, though this categorization
-          is somewhat arbitrary as some instructions serve multiple purposes.
-        </p>
+        <div class="description">
+          <p>
+            Geekbench utilizes various CPU instruction set extensions to optimize performance in
+            <a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank">some subtests</a>.
+          </p>
+          <p>
+            GeekLens categorizes these extensions by their primary function, though this categorization is somewhat arbitrary. Some notes:
+          </p>
+          <ul>
+            <li>Main categories have different colors</li>
+            <li>Shades might differ by architectural generation.</li>
+            <li>Extensions sharing registers are still colored similarly</li>
+          </ul>
+        </div>
+
 
         {#each Object.entries(instructionCategories) as [categoryName, category]}
           <div class="category-section">
@@ -98,7 +108,7 @@
                 <div class="instruction-card">
                   <div class="instruction-header">
                     <span class="instruction-badge"
-                          style="background-color: {getBadgeStyle(instruction.type).backgroundColor}; color: {getBadgeStyle(instruction.type).color};">
+                          style="background-color: {getCategoryStyle(instruction.category).backgroundColor}; color: {getCategoryStyle(instruction.type).color};">
                       {key}
                     </span>
                     <span class="architecture-badge">{instruction.architecture}</span>
@@ -112,7 +122,7 @@
         {/each}
 
         <div class="resources">
-          <h3>Learn More</h3>
+          <h3>Links</h3>
           <ul>
             <li><a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank">Geekbench 6 Internals</a></li>
             <li><a href="https://blog.theldus.moe/posts/beware-with-geekbench-v6-results" target="_blank">Geekbench 6 ISA Caveats</a></li>
@@ -250,6 +260,17 @@
     margin-bottom: 1.5rem;
   }
 
+  .description ul {
+    padding-left: 1rem;
+    padding-bottom: 0;
+  }
+
+  .description a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+
   .category-section {
     margin-bottom: 2rem;
   }
@@ -316,8 +337,7 @@
   /* Default fallback is handled by badgeColors.ts */
 
   .resources {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    padding-top: 1rem;
     border-top: 1px solid #e5e7eb;
   }
 

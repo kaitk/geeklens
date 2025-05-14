@@ -1,9 +1,11 @@
 import { mount } from 'svelte';
 import browser from 'webextension-polyfill';
-import { categorizeInstructionSets, instructionSets, type InstructionType } from '../isa/instructionSets';
+import { BENCHMARKS_V6 } from '../isa/benchmarkMap';
+import { categorizeInstructionSets } from '../isa/categories';
+import { type Instruction, instructionsByName } from '../isa/instructions';
 import { extractBenchmarkName, findBenchmarkTables, waitForElement } from './domUtils';
-import TableInstructionSetsComponent from './TableInstructionSets.svelte';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
+import TableInstructionSetsComponent from './TableInstructionSets.svelte';
 
 // Listen for messages from the background script
 browser.runtime.onMessage.addListener((message) => {
@@ -103,14 +105,15 @@ function annotateBenchmarkTables(allSupportedInstructions: Set<string>) {
 
         rows.forEach(row => {
             const benchmarkName = extractBenchmarkName(row);
-            if (!benchmarkName || !instructionSets[benchmarkName]?.length) {
+            if (!benchmarkName || !BENCHMARKS_V6[benchmarkName].instructions?.length) {
                 return;
             }
 
-            const supportedInstructions = instructionSets[benchmarkName]
-                .filter(instruction => allSupportedInstructions.has(instruction?.name));
+            const supportedInstructions: Instruction[] = BENCHMARKS_V6[benchmarkName].instructions
+                .filter(instruction => allSupportedInstructions.has(instruction))
+                .filter(instruction => instructionsByName[instruction])
+                .map(instruction => instructionsByName[instruction])
 
-            console.warn(instructionSets[benchmarkName])
 
             if (supportedInstructions.length === 0) {
                 return;

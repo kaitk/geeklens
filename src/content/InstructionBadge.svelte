@@ -1,24 +1,20 @@
 <script lang="ts">
-  import { getBadgeStyle } from '../isa/badgeColors';
-  import type { InstructionType } from '../isa/instructionSets';
+  import { type BadgeStyle } from '../isa/badgeColors';
 
   interface Props {
     instruction: string;
-    colorBadges?: boolean;
-    type: InstructionType | string;
-    uppercase?: boolean;
+    color: BadgeStyle,
   }
 
-  const { instruction, type, colorBadges = true, uppercase = false }: Props = $props();
-  const { backgroundColor, color } = getBadgeStyle(type, colorBadges);
-
+  const { instruction, color }: Props = $props();
+  const { backgroundColor, color: textColor } = color;
 </script>
 
 <span
     class="gb-instruction-badge"
-    style="background-color: {backgroundColor}; color: {color};"
+    style="background-color: {backgroundColor}; color: {textColor};"
 >
-  {uppercase ? instruction.toUpperCase() : instruction}
+  {instruction}
 </span>
 
 <style>

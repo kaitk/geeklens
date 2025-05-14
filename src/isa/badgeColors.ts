@@ -1,4 +1,4 @@
-import type { InstructionType } from './instructionSets';
+import type { InstructionType, InstructionCategory } from './instructions';
 
 
 export interface BadgeStyle {
@@ -6,42 +6,44 @@ export interface BadgeStyle {
   color: string;
 }
 
-export const badgeColors: Record<InstructionType, BadgeStyle> = {
-  'AVX-512': {
-    backgroundColor: '#dbeafe',
-    color: '#1e40af',
+
+export const groupColors: Record<InstructionCategory, BadgeStyle> = {
+  // SIMD Vector Extensions
+  'SIMD_MODERN_WIDE': {
+    backgroundColor: '#bfdbfe', // blue-200
+    color: '#1e40af' // blue-800
   },
-  'AVX': {
+  'SIMD_MODERN': {
     backgroundColor: '#e0f2fe',
     color: '#0369a1',
   },
-  'SSE': {
+  'SIMD_LEGACY': {
     backgroundColor: '#ffedd5',
     color: '#9a3412',
   },
-  'AES': {
-    backgroundColor: '#dcfce7',
-    color: '#166534',
+  'SIMD_ML': {
+    backgroundColor: '#dbeafe',
+    color: '#1e40af',
   },
-  'SHA': {
-    backgroundColor: '#bbf7d0',
-    color: '#15803d',
+  // Matrix & AI (Ambers/Oranges)
+  'ML': {
+    backgroundColor: '#fbbf24', // amber-400
+    color: '#78350f' // amber-900
   },
-  'NEON': {
-    backgroundColor: '#fce7f3',
-    color: '#831843',
+  // Cryptographic (Greens)
+  'CRYPTO': {
+    backgroundColor: '#bbf7d0', // green-200
+    color: '#166534' // green-800
   },
-  'SME': {
-    backgroundColor: '#e9d5ff',
-    color: '#6b21a8',
-  },
+  // General Compute
   'OTHER': {
-    backgroundColor: '#f3f4f6',
-    color: '#374151',
+    backgroundColor: '#e5e7eb', // gray-200
+    color: '#374151' // gray-700
   },
 };
 
-export function getBadgeStyle(type: string, colorBadges = true): BadgeStyle {
-  if(!colorBadges) return badgeColors['OTHER'];
-  return badgeColors[type as InstructionType] || badgeColors['OTHER'];
+
+export function getCategoryStyle(type: string, colorBadges = true): BadgeStyle {
+  if(!colorBadges) return groupColors['OTHER'];
+  return groupColors[type as InstructionCategory] || groupColors['OTHER'];
 }

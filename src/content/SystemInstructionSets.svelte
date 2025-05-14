@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { InstructionType } from '../isa/instructionSets';
+  import { getCategoryStyle } from '../isa/badgeColors';
+  import type { InstructionCategory } from '../isa/instructions';
   import { getSettingsStore } from '../settings/settings-store.svelte';
   import InstructionBadge from './InstructionBadge.svelte';
 
   interface Props {
-    instructionGroups: Record<InstructionType, string[]>
+    instructionGroups: Record<InstructionCategory, string[]>
   }
 
   const { instructionGroups }: Props = $props();
@@ -14,7 +15,7 @@
   // Only show groups that have instructions
   let activeGroups = $derived(Object.entries(instructionGroups)
       .filter(([_, instructions]) => instructions.length > 0)
-      .map(([type]) => type as InstructionType)
+      .map(([type]) => type as InstructionCategory)
   );
 </script>
 
@@ -24,9 +25,7 @@
       {#each instructionGroups[groupType] as instruction}
         <InstructionBadge
             instruction={instruction}
-            type={groupType}
-            colorBadges={settingsStore.value.coloredBadges}
-            uppercase={true}
+            color={getCategoryStyle(groupType, settingsStore.value.coloredBadges)}
         />
       {/each}
     </div>
