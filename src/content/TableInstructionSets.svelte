@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Instruction } from '../data/instructionSets';
+  import type { Instruction } from '../isa/instructionSets';
   import { getSettingsStore } from '../settings/settings-store.svelte';
   import InstructionBadge from './InstructionBadge.svelte';
 

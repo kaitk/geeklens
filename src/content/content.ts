@@ -1,6 +1,6 @@
 import { mount } from 'svelte';
 import browser from 'webextension-polyfill';
-import { categorizeInstructionSets, instructionSets, type InstructionType } from '../data/instructionSets';
+import { categorizeInstructionSets, instructionSets, type InstructionType } from '../isa/instructionSets';
 import { extractBenchmarkName, findBenchmarkTables, waitForElement } from './domUtils';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';

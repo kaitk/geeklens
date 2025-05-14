@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { InstructionType } from '../data/instructionSets';
+  import { getBadgeStyle } from '../isa/badgeColors';
+  import type { InstructionType } from '../isa/instructionSets';
 
   interface Props {
     instruction: string;
@@ -9,30 +10,14 @@
   }
 
   const { instruction, type, colorBadges = true, uppercase = false }: Props = $props();
+  const { backgroundColor, color } = getBadgeStyle(type, colorBadges);
 
-  function getBadgeClass(instructionType: InstructionType | string): string {
-    switch (instructionType) {
-      case 'AVX-512':
-        return 'gb-instr-avx512';
-      case 'AVX':
-        return 'gb-instr-avx';
-      case 'SSE':
-        return 'gb-instr-sse';
-      case 'AES':
-        return 'gb-instr-aes';
-      case 'SHA':
-        return 'gb-instr-sha';
-      case 'NEON':
-        return 'gb-instr-neon';
-      case 'SME':
-        return 'gb-instr-sme';
-      default:
-        return 'gb-instr-default';
-    }
-  }
 </script>
 
-<span class="gb-instruction-badge {colorBadges ? getBadgeClass(type) : 'gb-instr-default'}">
+<span
+    class="gb-instruction-badge"
+    style="background-color: {backgroundColor}; color: {color};"
+>
   {uppercase ? instruction.toUpperCase() : instruction}
 </span>
 
@@ -43,45 +28,5 @@
     border-radius: 4px;
     font-size: 10px;
     font-weight: 500;
-  }
-
-  .gb-instr-avx512 {
-    background-color: #dbeafe;
-    color: #1e40af;
-  }
-
-  .gb-instr-avx {
-    background-color: #e0f2fe;
-    color: #0369a1;
-  }
-
-  .gb-instr-sse {
-    background-color: #ffedd5;
-    color: #9a3412;
-  }
-
-  .gb-instr-aes {
-    background-color: #dcfce7;
-    color: #166534;
-  }
-
-  .gb-instr-sha {
-    background-color: #bbf7d0;
-    color: #15803d;
-  }
-
-  .gb-instr-neon {
-    background-color: #fce7f3;
-    color: #831843;
-  }
-
-  .gb-instr-sme {
-    background-color: #e9d5ff;
-    color: #6b21a8;
-  }
-
-  .gb-instr-default {
-    background-color: #f3f4f6;
-    color: #374151;
   }
 </style>
