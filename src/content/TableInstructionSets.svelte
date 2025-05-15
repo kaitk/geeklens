@@ -18,6 +18,7 @@
     <InstructionBadge
         instruction={instruction.name}
         color={getCategoryStyle(instruction.category, settingsStore.value.coloredBadges)}
+        description={ settingsStore.value.tooltips ? instruction?.description : undefined}
     />
   {/each}
 </div>

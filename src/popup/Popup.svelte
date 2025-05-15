@@ -24,7 +24,7 @@
   }
 
   let showSavedMessage = false;
-  let activeTab = 'info';
+  let activeTab = 'settings';
 </script>
 
 <div class="popup-container">
@@ -67,6 +67,13 @@
           <label>
             <input type="checkbox" bind:checked={settings.coloredBadges}>
             Color instruction set badges
+          </label>
+        </div>
+
+        <div class="setting">
+          <label>
+            <input type="checkbox" bind:checked={settings.tooltips}>
+            Show description tooltips on hover
           </label>
         </div>
 

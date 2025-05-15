@@ -3,11 +3,13 @@ import browser from "webextension-polyfill";
 export interface Settings {
     enabled: boolean,
     coloredBadges: boolean,
+    tooltips: boolean,
 }
 
 export let defaultSettings: Settings = {
     enabled: true,
     coloredBadges: true,
+    tooltips: false,
 };
 
 
