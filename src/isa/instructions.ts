@@ -66,7 +66,7 @@ const instructionDefinitions: Instruction[] = [
   {
     name: 'AVX2',
     fullName: 'Advanced Vector Extensions 2',
-    description: 'Generic 256-bit SIMD instruction set',
+    description: 'Generic 256-bit SIMD instruction set extending AVX with integer operations and new instructions',
     category: 'SIMD_MODERN',
     architecture: 'x86',
     type: 'AVX',
