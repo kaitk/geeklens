@@ -1,0 +1,21 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark blue border as a filled shape -->
+  <rect x="16" y="16" width="96" height="96" rx="16" fill="#1e40af" />
+
+  <!-- White background inside the border -->
+  <rect x="19" y="19" width="90" height="90" rx="13" fill="#ffffff" />
+
+  <!-- Text "GL" - centered and adjusted for 96x96 area -->
+  <text x="64" y="70" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#1e40af">GL</text>
+
+  <!-- Instruction set badges - repositioned for 96x96 area -->
+  <g transform="translate(32, 82)">
+    <!-- AVX badge -->
+    <rect x="0" y="0" width="30" height="18" rx="5" fill="#dbeafe" />
+    <text x="15" y="13" font-family="Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#1e40af">AVX</text>
+
+    <!-- AES badge -->
+    <rect x="34" y="0" width="30" height="18" rx="5" fill="#dcfce7" />
+    <text x="49" y="13" font-family="Arial, sans-serif" font-size="10" font-weight="bold" text-anchor="middle" fill="#166534">AES</text>
+  </g>
+</svg>

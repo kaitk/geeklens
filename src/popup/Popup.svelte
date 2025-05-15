@@ -10,7 +10,7 @@
 
 <div class="popup-container">
   <header>
-    <div><img src="/icon2.svg" alt="GeekLens Logo" width="32" height="32"></div>
+    <div><img src="/icon/icon.svg" alt="GeekLens Logo" width="32" height="32"></div>
     <h1>GeekLens</h1>
     <div class="version">{version}</div>
   </header>

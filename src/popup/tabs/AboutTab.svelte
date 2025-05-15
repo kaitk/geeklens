@@ -6,7 +6,7 @@
 
 <div class="about-panel">
   <div class="logo">
-    <img src="/icon2.svg" alt="GeekLens Logo" width="64" height="64">
+    <img src="/icon/icon.svg" alt="GeekLens Logo" width="64" height="64">
   </div>
 
   <h2>GeekLens {version}</h2>
