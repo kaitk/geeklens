@@ -14,7 +14,6 @@ function generateManifest() {
 }
 
 const browser = process.env.TARGET || "chrome";
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [

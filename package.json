@@ -9,9 +9,9 @@
     "build:chrome": "TARGET=chrome vite build",
     "build:firefox": "TARGET=firefox vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "zip": "npm run build && node scripts/zip.ts",
-    "release:chrome": "npm run build:chrome && bun scripts/zip.ts chrome",
-    "release:firefox": "npm run build:firefox && bun scripts/zip.ts firefox"
+    "zip": "bun build && bun scripts/zip.ts",
+    "release:chrome": "bun build:chrome && bun scripts/zip.ts chrome",
+    "release:firefox": "bun build:firefox && bun scripts/zip.ts firefox"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
