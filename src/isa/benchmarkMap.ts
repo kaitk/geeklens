@@ -9,7 +9,7 @@ export interface Benchmark {
   name: string;
   category: string;
   description: string;
-  instructions: string[]; // References to INSTRUCTIONS keys
+  instructions: string[];
 }
 
 export const BENCHMARKS_V6: Record<string, Benchmark> = {
@@ -17,7 +17,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "File Compression",
     category: "Cryptographic",
     description: "Compresses and encrypts files",
-    instructions: ['AES-NI', 'VAES', 'SHA-NI', 'ARMv8 AES', 'ARMv8 SHA1']
+    instructions: ['AESNI', 'VAES', 'SHANI', 'ARMv8 AES', 'ARMv8 SHA1']
   },
   "Navigation": {
     name: "Navigation",
@@ -41,7 +41,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "Photo Library",
     category: "AI/ML",
     description: "Photo organization with ML-based features",
-    instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX', 'DOTPROD', 'I8MM', 'SME']
+    instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX', 'NEON-DOTPROD', 'I8MM', 'SME', 'SME2']
   },
   "Clang": {
     name: "Clang",
@@ -53,7 +53,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "Text Processing",
     category: "Cryptographic",
     description: "Text manipulation with encryption",
-    instructions: ['AES-NI', 'VAES', 'ARMv8 AES']
+    instructions: ['AESNI', 'VAES', 'ARMv8 AES']
   },
   "Asset Compression": {
     name: "Asset Compression",
@@ -65,13 +65,13 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "Object Detection",
     category: "AI/ML",
     description: "ML-based object detection",
-    instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX', 'DOTPROD', 'I8MM', 'SME']
+    instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX', 'NEON-DOTPROD', 'I8MM', 'SME', 'SME2']
   },
   "Background Blur": {
     name: "Background Blur",
     category: "Image Processing",
     description: "Image processing with blur effects",
-    instructions: ['AVX', 'AVX2', 'AVX-512', 'NEON', 'SME']
+    instructions: ['AVX', 'AVX2', 'AVX-512', 'NEON', 'SME', 'SME2']
   },
   "Horizon Detection": {
     name: "Horizon Detection",
@@ -111,15 +111,30 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
   }
 };
 
-
-/**
- * Get instructions for a benchmark
- */
-export function getBenchmarkInstructions(benchmarkName: string): Instruction[] {
+export function getV6SupportedInstructions(
+    benchmarkName: string,
+    supportedInstructions: Set<string>
+): Instruction[] {
   const benchmark = BENCHMARKS_V6[benchmarkName];
-  if (!benchmark) return [];
+  if (!benchmark || !benchmark.instructions?.length) {
+    return [];
+  }
 
-  return benchmark.instructions
-      .map(instrName => instructionsByName[instrName])
+  const instructions = benchmark.instructions
+      .filter(instruction => supportedInstructions.has(instruction))
+      .map(instruction => instructionsByName[instruction])
       .filter(Boolean);
+
+  // ADD SME and AES matches
+  const supportedArray = Array.from(supportedInstructions);
+
+  if (benchmark.instructions.includes('SME') &&
+      supportedArray.some(inst => inst === 'SME2' || inst.startsWith('SME-'))) {
+    const smeInst = instructionsByName['SME'];
+    if (smeInst && !instructions.includes(smeInst)) {
+      instructions.push(smeInst);
+    }
+  }
+
+  return instructions;
 }

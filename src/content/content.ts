@@ -1,8 +1,7 @@
 import { mount } from 'svelte';
 import browser from 'webextension-polyfill';
-import { BENCHMARKS_V6 } from '../isa/benchmarkMap';
+import { BENCHMARKS_V6, getV6SupportedInstructions } from '../isa/benchmarkMap';
 import { categorizeInstructionSets } from '../isa/categories';
-import { type Instruction, instructionsByName } from '../isa/instructions';
 import { extractBenchmarkName, findBenchmarkTables, waitForElement } from './domUtils';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
@@ -88,11 +87,7 @@ function findAndAnnotateSystemInstructionSets() {
     return instructionGroups;
 }
 
-
-// Function to annotate benchmark tables
 function annotateBenchmarkTables(allSupportedInstructions: Set<string>) {
-
-    console.warn('GOT HERE with', allSupportedInstructions)
     const benchmarkTables = findBenchmarkTables();
 
     if (benchmarkTables.length === 0) {
@@ -109,11 +104,8 @@ function annotateBenchmarkTables(allSupportedInstructions: Set<string>) {
                 return;
             }
 
-            const supportedInstructions: Instruction[] = BENCHMARKS_V6[benchmarkName].instructions
-                .filter(instruction => allSupportedInstructions.has(instruction))
-                .filter(instruction => instructionsByName[instruction])
-                .map(instruction => instructionsByName[instruction])
-
+            console.log('allSupportedInstructions', allSupportedInstructions);
+            const supportedInstructions = getV6SupportedInstructions(benchmarkName, allSupportedInstructions);
 
             if (supportedInstructions.length === 0) {
                 return;
@@ -140,7 +132,6 @@ function annotateBenchmarkTables(allSupportedInstructions: Set<string>) {
         });
     });
 }
-
 
 // Start the annotation process when the page is loaded
 if (document.readyState === 'loading') {

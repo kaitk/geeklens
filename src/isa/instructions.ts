@@ -3,11 +3,6 @@
 export type InstructionCategory = 'SIMD_MODERN_WIDE' | 'SIMD_MODERN' | 'SIMD_LEGACY' | 'CRYPTO' | 'ML' | 'SIMD_ML' | 'OTHER';
 export type InstructionArchitecture = 'x86' | 'ARM' | 'RISC-V';
 
-export interface Instruction {
-  name: string;
-  type: InstructionType;
-}
-
 export type InstructionType =
     // Vector & SIMD Extensions
     | 'SSE'        // Legacy x86 SIMD
@@ -87,7 +82,7 @@ const instructionDefinitions: Instruction[] = [
     name: 'AVX-VNNI',
     fullName: 'AVX Vector Neural Network Instructions',
     description: 'x86 AI/ML acceleration (for 128 and 256 bit vectors) Accelerates quantized machine learning workloads',
-    category: 'ML',
+    category: 'SIMD_ML',
     architecture: 'x86',
     type: 'VNNI',
   },
@@ -95,7 +90,7 @@ const instructionDefinitions: Instruction[] = [
     name: 'AVX512-VNNI',
     fullName: 'AVX-512 Vector Neural Network Instructions',
     description: 'x86 AI/ML acceleration (part of AVX-512) Accelerates quantized machine learning workloads',
-    category: 'ML',
+    category: 'SIMD_ML',
     architecture: 'x86',
     type: 'VNNI',
   },
@@ -127,6 +122,14 @@ const instructionDefinitions: Instruction[] = [
     architecture: 'ARM',
     type: 'SME',
   },
+  {
+    name: 'SME2',
+    fullName: 'Scalable Matrix Extension 2',
+    description: 'ARM enhanced matrix processing instructions',
+    category: 'ML',
+    architecture: 'ARM',
+    type: 'SME',
+  },
 
   // Matrix Extensions - AMX Type
   {
@@ -140,10 +143,10 @@ const instructionDefinitions: Instruction[] = [
 
   // AI Extensions - DOTPROD Type
   {
-    name: 'DOTPROD',
+    name: 'NEON-DOTPROD',
     fullName: 'Dot Product',
     description: 'ARM dot product operations for ML',
-    category: 'ML',
+    category: 'SIMD_ML',
     architecture: 'ARM',
     type: 'DOTPROD',
   },
@@ -160,7 +163,7 @@ const instructionDefinitions: Instruction[] = [
 
   // Cryptographic Extensions - AES Type
   {
-    name: 'AES-NI',
+    name: 'AESNI',
     fullName: 'AES New Instructions',
     description: 'Accelerates AES encryption and decryption functions',
     category: 'CRYPTO',
@@ -176,7 +179,7 @@ const instructionDefinitions: Instruction[] = [
     type: 'AES',
   },
   {
-    name: 'ARMv8 AES',
+    name: 'AES',
     fullName: 'ARMv8 AES',
     description: 'Accelerates AES encryption and decryption functions',
     category: 'CRYPTO',
@@ -186,7 +189,7 @@ const instructionDefinitions: Instruction[] = [
 
   // Cryptographic Extensions - SHA Type
   {
-    name: 'SHA-NI',
+    name: 'SHANI',
     fullName: 'SHA New Instructions',
     description: 'Accelerates SHA1 cryptographic hash functions',
     category: 'CRYPTO',
@@ -194,7 +197,7 @@ const instructionDefinitions: Instruction[] = [
     type: 'SHA',
   },
   {
-    name: 'ARMv8 SHA1',
+    name: 'SHA1',
     fullName: 'ARMv8 SHA1',
     description: 'Accelerates SHA1 cryptographic hash functions',
     category: 'CRYPTO',
@@ -211,7 +214,6 @@ const instructionDefinitions: Instruction[] = [
     architecture: 'x86',
     type: 'PCLMUL',
   },
-
 ];
 
 export const instructionsByName: Record<string, Instruction> = {};

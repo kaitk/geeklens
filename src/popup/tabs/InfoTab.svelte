@@ -30,7 +30,7 @@
           <div class="instruction-card">
             <div class="instruction-header">
               <span class="instruction-badge"
-                    style="background-color: {getCategoryStyle(instruction.category).backgroundColor}; color: {getCategoryStyle(instruction.type).color};">
+                    style="background-color: {getCategoryStyle(instruction.category).backgroundColor}; color: {getCategoryStyle(instruction.category).color};">
                 {key}
               </span>
               <span class="architecture-badge">{instruction.architecture}</span>
