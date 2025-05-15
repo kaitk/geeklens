@@ -30,6 +30,6 @@ export default defineConfig({
   ],
   build: {
     outDir: `dist/${browser}`,
-    emptyOutDir: true
+    emptyOutDir: true,
   }
 });
