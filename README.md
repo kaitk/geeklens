@@ -41,19 +41,21 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 
 ## Data Sources
 
-The instruction set data is currently based on the Geekbench 6 benchmark internals documentation which can be found here: https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf
-If you have any good sources for instruction set data, particularly for RISC-V please submit a pull request!
+* The instruction set data is currently based on the Geekbench 6 benchmark internals documentation which can be found here: https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf
+* If you have any good sources for instruction set data, **particularly for RISC-V** please submit a pull request!
 
 ## Development
 
 ### Prerequisites
-- Basic understanding of JavaScript, HTML, and CSS
-- Familiarity with browser extension development
-- Currently only tested with [bun.sh](https://bun.sh/package-manager) for package manager
+- Node.js Runtime environment and package manager:
+    - [Bun](https://bun.sh/) (recommended)
+    - OR [Node.js](https://nodejs.org/) LTS (v22 or newer) with npm, [pnpm](https://pnpm.io/) or [yarn](https://yarnpkg.com/)
+- A modern web browser (currently Chrome or Firefox have been tested)
+
 
 ### Setup
 1. Clone this repository
-2. Install dependencies (bun is preferred but npm/pnpm should work too)
+2. Install dependencies (bun is preferred but any other package manager should work too)
    ```
    bun install
    ```
@@ -87,6 +89,9 @@ If you have any good sources for instruction set data, particularly for RISC-V p
       - Click "Load Temporary Add-on"
       - Select `manifest.json` file in the `dist/firefox` directory
 
+### Technical Details
+- This project uses [vite-plugin-web-extension](https://github.com/samrum/vite-plugin-web-extension) for building browser extensions with Vite
+- The Chromium build uses Manifest V3, while the Firefox build uses Manifest V2 for now
 
 ## Contributing
 

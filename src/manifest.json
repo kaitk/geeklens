@@ -39,5 +39,6 @@
       "matches": ["*://browser.geekbench.com/v6/cpu/compare/*"],
       "js": ["src/content/comparisonPage.ts"]
     }
+
   ]
 }
