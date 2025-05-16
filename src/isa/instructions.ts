@@ -1,7 +1,5 @@
 // instructions.ts
 
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
-
 export type InstructionCategory = 'SIMD_MODERN_WIDE' | 'SIMD_MODERN' | 'SIMD_LEGACY' | 'CRYPTO' | 'ML' | 'SIMD_ML' | 'OTHER';
 export type InstructionArchitecture = 'x86' | 'ARM' | 'RISC-V';
 
