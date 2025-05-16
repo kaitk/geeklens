@@ -2,7 +2,7 @@
 
 A browser extension that enhances Geekbench CPU benchmark results formatting by annotating tests with instruction set architecture (ISA) information.
 
-![GeekLens Screenshot](screenshots/screenshot.png)
+![GeekLens Screenshot](screenshots/screenshot4.png)
 
 ## Features
 
@@ -41,16 +41,8 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 
 ## Data Sources
 
-The instruction set data is based on the Geekbench 6 benchmark internals documentation which can be found here: https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf
-If you have any questions or 
-
-## Roadmap
-
-- Support for Geekbench 5 results
-- Enhanced tooltips with more detailed information about each instruction set
-- More visualization options
-- Additional benchmark metadata annotations
-- User-customizable display options
+The instruction set data is currently based on the Geekbench 6 benchmark internals documentation which can be found here: https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf
+If you have any good sources for instruction set data, particularly for RISC-V please submit a pull request!
 
 ## Development
 
@@ -61,9 +53,40 @@ If you have any questions or
 
 ### Setup
 1. Clone this repository
-2. Make your changes
-3. Test locally in your browser
-4. Submit pull requests
+2. Install dependencies (bun is preferred but npm/pnpm should work too)
+   ```
+   bun install
+   ```
+3. Development mode:
+   - `bun dev` or `npm run dev`
+4. Build for production:
+   - For Chrome:
+     ```
+     bun run build:chrome
+     ```
+   - For Firefox:
+     ```
+     bun run build:firefox
+     ```
+5. Create distribution zip files:
+   - For Chrome:
+     ```
+     bun run release:chrome
+     ```
+   - For Firefox:
+     ```
+     bun run release:firefox
+     ```
+6. Load the extension:
+   - Chrome:
+      - Navigate to `chrome://extensions/`
+      - Enable "Developer mode"
+      - Click "Load unpacked" and select the `dist/chrome` directory
+   - Firefox:
+      - Navigate to `about:debugging#/runtime/this-firefox`
+      - Click "Load Temporary Add-on"
+      - Select `manifest.json` file in the `dist/firefox` directory
+
 
 ## Contributing
 
@@ -73,14 +96,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## Links
 
 - [Geekbench](https://www.geekbench.com/) for their excellent benchmarking tool
-- Discussion on [Anandtech forums](https://forums.anandtech.com/threads/geekbench-6-released-and-calibrated-against-core-i7-12700.2610597/page-33#post-41389812) regarding instruction set usage in benchmarks
-
-## Contact
-
-Project Link: [github.com/kaitk/geekbench-annotator](github.com/kaitk/geekbench-annotator)
 
 ---
 
