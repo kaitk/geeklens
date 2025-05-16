@@ -3,8 +3,6 @@
 import type { Instruction } from './instructions';
 import { instructionsByName } from './instructions';
 
-export type BenchmarkName = keyof typeof BENCHMARKS_V6;
-
 export interface Benchmark {
   name: string;
   category: string;
@@ -17,7 +15,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "File Compression",
     category: "Cryptographic",
     description: "Compresses and encrypts files",
-    instructions: ['AESNI', 'VAES', 'SHANI', 'ARMv8 AES', 'ARMv8 SHA1']
+    instructions: ['AESNI', 'VAES', 'SHANI', 'AES', 'SHA1']
   },
   "Navigation": {
     name: "Navigation",
@@ -53,7 +51,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "Text Processing",
     category: "Cryptographic",
     description: "Text manipulation with encryption",
-    instructions: ['AESNI', 'VAES', 'ARMv8 AES']
+    instructions: ['AESNI', 'VAES', 'AES']
   },
   "Asset Compression": {
     name: "Asset Compression",

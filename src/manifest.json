@@ -32,7 +32,12 @@
   "content_scripts": [
     {
       "matches": ["*://browser.geekbench.com/v6/cpu/*"],
-      "js": ["src/content/content.ts"]
+      "exclude_matches": ["*://browser.geekbench.com/v6/cpu/compare/*"],
+      "js": ["src/content/singleResultPage.ts"]
+    },
+    {
+      "matches": ["*://browser.geekbench.com/v6/cpu/compare/*"],
+      "js": ["src/content/comparisonPage.ts"]
     }
   ]
 }

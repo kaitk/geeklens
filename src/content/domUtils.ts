@@ -20,15 +20,9 @@ export function waitForElement(selector: string, timeout = 5000): Promise<Elemen
   });
 }
 
-/**
- * Finds benchmark tables on the Geekbench results page
- *
- * The actual structure of the Geekbench page has tables for:
- * - Single-Core Score with benchmark rows
- * - Multi-Core Score with benchmark rows
- */
-export function findBenchmarkTables(): HTMLTableElement[] {
-  return Array.from(document.querySelectorAll('table.benchmark-table')) as HTMLTableElement[];
+
+export function findBenchmarkTables(selector = 'table.benchmark-table'): HTMLTableElement[] {
+  return Array.from(document.querySelectorAll(selector)) as HTMLTableElement[];
 }
 
 
