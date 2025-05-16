@@ -69,7 +69,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
     name: "Background Blur",
     category: "Image Processing",
     description: "Image processing with blur effects",
-    instructions: ['AVX', 'AVX2', 'AVX-512', 'NEON', 'SME', 'SME2']
+    instructions: ['AVX', 'AVX2', 'AVX512', 'NEON', 'SME', 'SME2']
   },
   "Horizon Detection": {
     name: "Horizon Detection",
@@ -129,9 +129,13 @@ export function getV6SupportedInstructions(
   if (benchmark.instructions.includes('SME') &&
       supportedArray.some(inst => inst === 'SME2' || inst.startsWith('SME-'))) {
     const smeInst = instructionsByName['SME'];
-    if (smeInst && !instructions.includes(smeInst)) {
-      instructions.push(smeInst);
-    }
+    instructions.push(instructionsByName['SME']);
+  }
+
+  console.log('Instructions:', supportedArray);
+  if (benchmark.instructions.includes('AVX512') &&
+      supportedArray.some(inst => !inst.includes('VNNI') && (inst.startsWith('AVX512') || inst.startsWith('AVX-512')))) {
+    instructions.push(instructionsByName['AVX-512']);
   }
 
   return instructions;

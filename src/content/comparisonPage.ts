@@ -35,15 +35,99 @@ function extractResultIds(): { baseline?: string; primary?: string } {
   return { baseline, primary };
 }
 
+function showRedirectMessage(redirectUrl: string): void {
+  const existingMessage = document.getElementById('geeklens-redirect');
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+
+  // FIXME ugly hacks in a row, make the whole info badge into a svelte component later
+  const redirectElement = document.createElement('div');
+  redirectElement.id = 'geeklens-redirect';
+  redirectElement.classList.add('gb-extension-info', 'gb-extension-redirect');
+
+  // Create container for better formatting
+  const container = document.createElement('div');
+  container.style.maxWidth = '300px';
+  redirectElement.appendChild(container);
+
+  // Header text
+  const header = document.createElement('p');
+  header.textContent = 'Geekbench API redirect loop detected! To fix:';
+  header.style.fontWeight = 'bold';
+  header.style.marginBottom = '6px';
+  container.appendChild(header);
+
+  // Steps list
+  const instructions = document.createElement('ol');
+  instructions.style.margin = '0';
+  instructions.style.paddingLeft = '20px';
+  container.appendChild(instructions);
+
+  // Step 1 with inline link
+  const step1 = document.createElement('li');
+  step1.style.marginBottom = '4px';
+
+  const step1Text = document.createTextNode('Visit ');
+  step1.appendChild(step1Text);
+
+  const link = document.createElement('a');
+  link.href = redirectUrl;
+  link.textContent = 'this comparison link';
+  link.style.color = 'white';
+  link.style.textDecoration = 'underline';
+  step1.appendChild(link);
+
+  step1.appendChild(document.createTextNode(' (without baseline param)'));
+  instructions.appendChild(step1);
+
+  // Step 2
+  const step2 = document.createElement('li');
+  step2.textContent = 'Press "Back" to return to this page';
+  instructions.appendChild(step2);
+  // Step 3
+  const step3 = document.createElement('li');
+  step3.textContent = 'Refresh this page';
+  instructions.appendChild(step3);
+
+
+  document.body.appendChild(redirectElement);
+}
+
 // Fetch instruction sets from Geekbench API
 async function fetchInstructionSets(resultId: string): Promise<string | null> {
   try {
     const response = await fetch(`https://browser.geekbench.com/v6/cpu/${resultId}.gb6`, {
       cache: 'default',
-      headers: { 'Cache-Control': 'max-age=2592000' } // cache for a month
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'max-age=2592000' // cache for a month
+      },
+      redirect: 'manual',
     });
+
+    console.warn('GOT response', response.statusText, response.status ,response.headers.get('Location'))
+    // Check for redirect (302 Found)
+    if ([301, 302, 307, 308].includes(response.status)) {
+      const redirectUrl = response.headers.get('Location');
+      if (redirectUrl) {
+        console.warn('GeekLens: Geekbench API request demands a redirect to', redirectUrl, '. Adding clickable link.');
+        showRedirectMessage(redirectUrl);
+        return null;
+      }
+    }
+
+    if(response.status === 0) {
+      // FIXME a hack when fetch still follows the redirect so just the comparison url without the searchParam, that
+      // https://browser.geekbench.com/v6/cpu/compare/ID1?baseline=ID2 ->  https://browser.geekbench.com/v6/cpu/compare/ID1
+      // This is an ugly hack but fixes the issue of "redirect loop"
+      const redirectUrl = window.location.href.split('?')[0]
+      showRedirectMessage(redirectUrl);
+    }
+
+    // Handle non-redirect responses
     if (!response.ok) {
-      console.error(`GeekLens: Failed to fetch data for result ${resultId}`);
+      console.error(`GeekLens: Failed to fetch data for result ${resultId}, status: ${response.status}`);
       return null;
     }
 
@@ -64,8 +148,10 @@ async function fetchInstructionSets(resultId: string): Promise<string | null> {
 
 // Main function to annotate the comparison page
 async function annotateGeekbenchComparisonPage() {
-  if (document.getElementById('geeklens-info')) {
-    return; // page already annotated
+  // Check if already annotated (but allow redirect messages to be shown)
+  const alreadyAnnotated = document.getElementById('geeklens-info');
+  if (alreadyAnnotated && !document.getElementById('geeklens-redirect')) {
+    return; // page already annotated and not showing a redirect
   }
 
   console.log('GeekLens: Starting comparison annotation process');
@@ -78,11 +164,14 @@ async function annotateGeekbenchComparisonPage() {
   }
 
   // Add info badge
-  const infoElement = document.createElement('div');
-  infoElement.id = 'geeklens-info';
-  infoElement.classList.add('gb-extension-info');
-  infoElement.textContent = 'GeekLens Active';
-  document.body.appendChild(infoElement);
+  const existingInfo = document.getElementById('geeklens-info');
+  if (!existingInfo) {
+    const infoElement = document.createElement('div');
+    infoElement.id = 'geeklens-info';
+    infoElement.classList.add('gb-extension-info');
+    infoElement.textContent = 'GeekLens Active';
+    document.body.appendChild(infoElement);
+  }
 
   // Wait for benchmark tables to ensure page is fully rendered
   try {
@@ -101,12 +190,21 @@ async function annotateGeekbenchComparisonPage() {
       waitForElement('table.comparison-benchmark-table')
     ]);
 
-    annotateSystemInstructionSets(primaryInstructions, baselineInstructions);
+    // Only continue with annotation if we have valid instruction sets
+    if (primaryInstructions && baselineInstructions) {
+      // Clear any redirect messages if we now have valid data
+      const redirectMessage = document.getElementById('geeklens-redirect');
+      if (redirectMessage) {
+        redirectMessage.remove();
+      }
 
-    const primaryInstructionSet = extractIndividualInstructions(primaryInstructions);
-    const baselineInstructionSet = extractIndividualInstructions(baselineInstructions);
-    // Annotate benchmark tables with instruction sets for each CPU
-    annotateBenchmarkTables(primaryInstructionSet, baselineInstructionSet);
+      annotateSystemInstructionSets(primaryInstructions, baselineInstructions);
+
+      const primaryInstructionSet = extractIndividualInstructions(primaryInstructions);
+      const baselineInstructionSet = extractIndividualInstructions(baselineInstructions);
+      // Annotate benchmark tables with instruction sets for each CPU
+      annotateBenchmarkTables(primaryInstructionSet, baselineInstructionSet);
+    }
 
   } catch (error) {
     console.error('GeekLens: Failed to annotate comparison page', error);
@@ -120,7 +218,7 @@ function annotateSystemInstructionSets(primaryInstructions: string | null, basel
   }
 
   const primaryGroups = categorizeInstructionSets(primaryInstructions);
-  const baselineGroups =categorizeInstructionSets(baselineInstructions);
+  const baselineGroups = categorizeInstructionSets(baselineInstructions);
 
   const table = document.querySelector('table.system-information') as HTMLTableElement;
   if(!table) {
@@ -240,7 +338,6 @@ function addInstructionBadges(cell: Element, instructions: Instruction[]) {
   const container = document.createElement('div');
   cell.appendChild(container);
 
-  console.warn('GeekLens: Adding instruction badges', instructions.map(i => i.name));
   // Create and mount the Svelte component
   mount(TableInstructionSetsComponent, {
     target: container,
@@ -251,6 +348,12 @@ function addInstructionBadges(cell: Element, instructions: Instruction[]) {
 }
 
 function showLoginRequiredMessage() {
+  // Remove any existing messages
+  const existingMessage = document.getElementById('geeklens-info');
+  if (existingMessage) {
+    existingMessage.remove();
+  }
+
   const infoElement = document.createElement('div');
   infoElement.id = 'geeklens-info';
   infoElement.classList.add('gb-extension-info', 'gb-extension-warning');
@@ -266,7 +369,7 @@ if (document.readyState === 'loading') {
   annotateGeekbenchComparisonPage();
 }
 
-// Add styles for the info badge
+// Add styles for the info badge and redirect link
 const style = document.createElement('style');
 style.textContent = `
   .gb-extension-info {
@@ -283,6 +386,22 @@ style.textContent = `
   
   .gb-extension-warning {
     background-color: rgba(255, 152, 0, 0.8);
+  }
+  
+  .gb-extension-redirect {
+    background-color: rgba(33, 150, 243, 0.9);
+    cursor: pointer;
+    padding: 8px 12px;
+    bottom: 40px;
+  }
+  
+  .gb-extension-redirect a {
+    color: white;
+    text-decoration: underline;
+  }
+  
+  .gb-extension-redirect a:hover {
+    text-decoration: none;
   }
 `;
 
