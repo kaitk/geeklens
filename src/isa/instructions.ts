@@ -1,10 +1,12 @@
 // instructions.ts
 
+import { c } from 'vite/dist/node/types.d-aGj9QkWt';
+
 export type InstructionCategory = 'SIMD_MODERN_WIDE' | 'SIMD_MODERN' | 'SIMD_LEGACY' | 'CRYPTO' | 'ML' | 'SIMD_ML' | 'OTHER';
 export type InstructionArchitecture = 'x86' | 'ARM' | 'RISC-V';
 
 export type InstructionType =
-    // Vector & SIMD Extensions
+// Vector & SIMD Extensions
     | 'SSE'        // Legacy x86 SIMD
     | 'AVX'        // Modern x86 SIMD
     | 'AVX-512'    // Wide x86 SIMD
@@ -24,7 +26,6 @@ export type InstructionType =
     | 'PCLMUL'     // Carry-less multiplication
     // Other
     | 'OTHER';
-
 
 
 // used in CPU Information
@@ -113,6 +114,25 @@ const instructionDefinitions: Instruction[] = [
     type: 'NEON',
   },
 
+  // SVE
+  {
+    name: 'SVE',
+    fullName: 'Scalable Vector Extension',
+    description: 'Vector length-agnostic SIMD instruction set for ARMv8-A',
+    category: 'SIMD_MODERN',
+    architecture: 'ARM',
+    type: 'SVE',
+  },
+
+  {
+    name: 'SVE2',
+    fullName: 'Scalable Vector Extension 2',
+    description: 'Enhanced vector processing capabilities for ARMv9-A',
+    category: 'SIMD_MODERN',
+    architecture: 'ARM',
+    type: 'SVE',
+  },
+
   // Matrix Extensions - SME Type
   {
     name: 'SME',
@@ -173,7 +193,7 @@ const instructionDefinitions: Instruction[] = [
   {
     name: 'VAES',
     fullName: 'Vectorized AES',
-    description: 'Accelerates AES encryption and decryption functions',
+    description: 'Vectorized AES processing multiple blocks in parallel',
     category: 'CRYPTO',
     architecture: 'x86',
     type: 'AES',
@@ -181,7 +201,7 @@ const instructionDefinitions: Instruction[] = [
   {
     name: 'AES',
     fullName: 'ARMv8 AES',
-    description: 'Accelerates AES encryption and decryption functions',
+    description: 'ARM hardware AES acceleration equivalent to x86 AES-NI',
     category: 'CRYPTO',
     architecture: 'ARM',
     type: 'AES',
@@ -191,7 +211,7 @@ const instructionDefinitions: Instruction[] = [
   {
     name: 'SHANI',
     fullName: 'SHA New Instructions',
-    description: 'Accelerates SHA1 cryptographic hash functions',
+    description: 'Hardware acceleration for SHA1/SHA256 cryptographic hash functions',
     category: 'CRYPTO',
     architecture: 'x86',
     type: 'SHA',
@@ -199,7 +219,7 @@ const instructionDefinitions: Instruction[] = [
   {
     name: 'SHA1',
     fullName: 'ARMv8 SHA1',
-    description: 'Accelerates SHA1 cryptographic hash functions',
+    description: 'ARM hardware SHA1 acceleration for cryptographic hashing',
     category: 'CRYPTO',
     architecture: 'ARM',
     type: 'SHA',
@@ -209,7 +229,7 @@ const instructionDefinitions: Instruction[] = [
   {
     name: 'PCLMUL',
     fullName: 'Carry-less Multiplication',
-    description: 'Used for AES-GCM mode encryption',
+    description: 'Polynomial multiplication for GCM mode and CRC calculations',
     category: 'CRYPTO',
     architecture: 'x86',
     type: 'PCLMUL',
@@ -220,3 +240,22 @@ export const instructionsByName: Record<string, Instruction> = {};
 instructionDefinitions.forEach(instruction => {
   instructionsByName[instruction.name] = instruction;
 });
+
+export function instructionsByCategory(category: InstructionCategory) {
+  const instructions: Record<string, Instruction> = {}
+  instructionDefinitions
+      .filter(i => i.category === category)
+      .forEach(instruction => {
+    instructionsByName[instruction.name] = instruction;
+  });
+  return instructions
+}
+
+
+export function extractIndividualInstructions(instructionSetString: string | null): Set<string> {
+  return new Set(
+      instructionSetString?.split(' ')
+          .filter(x => x.trim() !== '')
+          .map(x => x.toUpperCase().trim())
+  );
+}

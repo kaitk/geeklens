@@ -104,7 +104,6 @@ function annotateBenchmarkTables(allSupportedInstructions: Set<string>) {
                 return;
             }
 
-            console.log('allSupportedInstructions', allSupportedInstructions);
             const supportedInstructions = getV6SupportedInstructions(benchmarkName, allSupportedInstructions);
 
             if (supportedInstructions.length === 0) {
