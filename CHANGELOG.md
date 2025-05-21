@@ -1,13 +1,13 @@
 # Changelog
 
-## [v0.1.6] - 2025-05-16
+## [v0.2.0] - 2025-05-21
 
 ### Added
 - Added support for comparison pages
 
-### Requirements
-- Users must be logged in to their Geekbench account for annotations to work on comparison pages, 
- since ISA information on those pages is only available via Geekbench's API, which requires authentication.
+### Notes
+- As ISA information on those pages is not available fetches to base bases are needed
+- Added IndexedDB cache for ISA info to minimize load on Geekbench servers
 
 
 ## [v0.1.5] - Initial Release

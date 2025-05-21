@@ -160,7 +160,7 @@ async function annotateGeekbenchComparisonPage() {
 
     // Get Geekbench versions
     const { primary: primaryVersion, baseline: baselineVersion } = getGeekbenchVersions();
-    
+
     const primaryFromCache = await instructionSetCache.getInstructionSet(primary);
     const baselineFromCache = await instructionSetCache.getInstructionSet(baseline);
 
