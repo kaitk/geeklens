@@ -18,7 +18,7 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 ## Installation
 
 ### Chrome
-1. Install from the [Chrome Web Store](#) (coming soon)
+1. Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/geeklens/mkhncioijfcdjhaanpfodcaloniodabf)
 2. Or install manually:
    - Download this repository
    - Go to `chrome://extensions/`
@@ -26,7 +26,7 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
    - Click "Load unpacked" and select the repository folder
 
 ### Firefox
-1. Install from [Firefox Add-ons](#) (coming soon)
+1. Install from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/geeklens/)
 2. Or install manually:
    - Download this repository
    - Go to `about:debugging#/runtime/this-firefox`
