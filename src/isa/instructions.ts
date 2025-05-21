@@ -243,9 +243,7 @@ export function instructionsByCategory(category: InstructionCategory) {
   const instructions: Record<string, Instruction> = {}
   instructionDefinitions
       .filter(i => i.category === category)
-      .forEach(instruction => {
-    instructionsByName[instruction.name] = instruction;
-  });
+      .forEach(instruction => instructions[instruction.name] = instruction);
   return instructions
 }
 
