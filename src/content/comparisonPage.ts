@@ -6,6 +6,7 @@ import {extractIndividualInstructions, type Instruction} from '../isa/instructio
 import {extractBenchmarkName, findBenchmarkTables, waitForElement} from './domUtils';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
+import {instructionSetCache} from "../isa/IsaCache";
 
 // Listen for messages from the background script
 browser.runtime.onMessage.addListener((message) => {
@@ -32,11 +33,19 @@ function extractResultIds(): { baseline?: string; primary?: string } {
 // currently not using API due to redirect issues
 async function fetchInstructionSets(resultId: string): Promise<string | null> {
   try {
-    // Fetch the HTML page instead of JSON, use the compare page to avoid redirect loop for setting the baseline
+    // Try to get from cache first
+    const cachedInstructions = await instructionSetCache.getInstructionSet(resultId);
+    if (cachedInstructions) {
+      console.log(`GeekLens: Using cached instruction set for ${resultId}`);
+      return cachedInstructions;
+    }
+
+    // If not in cache, fetch from web
+    console.log(`GeekLens: Fetching instruction set for ${resultId}`);
     const response = await fetch(`https://browser.geekbench.com/v6/cpu/compare/${resultId}/`, {
       cache: 'default',
       headers: {
-        'Cache-Control': 'max-age=2592000' // cache for a month
+        'Cache-Control': 'max-age=2592000' // HTTP cache for a month just in case
       }
     });
 
@@ -58,8 +67,15 @@ async function fetchInstructionSets(resultId: string): Promise<string | null> {
       const valueCell = instructionSetRows[0].nextElementSibling as HTMLElement;
 
       if (valueCell && valueCell.classList.contains('value')) {
-        console.warn('GOT HERE', valueCell.textContent)
-        return valueCell.textContent?.trim() || '';
+        const instructionSet = valueCell.textContent?.trim() || '';
+
+        // Store in cache
+        if (instructionSet) {
+          instructionSetCache.storeInstructionSet(resultId, instructionSet)
+              .catch(err => console.error('Failed to store instruction set:', err));
+        }
+
+        return instructionSet;
       }
     }
 
