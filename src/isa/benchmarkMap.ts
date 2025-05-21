@@ -132,7 +132,6 @@ export function getV6SupportedInstructions(
     instructions.push(instructionsByName['SME']);
   }
 
-  console.log('Instructions:', supportedArray);
   if (benchmark.instructions.includes('AVX512') &&
       supportedArray.some(inst => !inst.includes('VNNI') && (inst.startsWith('AVX512') || inst.startsWith('AVX-512')))) {
     instructions.push(instructionsByName['AVX-512']);
