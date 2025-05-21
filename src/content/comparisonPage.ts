@@ -15,6 +15,39 @@ browser.runtime.onMessage.addListener((message) => {
   }
 });
 
+// Needed as only 6.4.0 and newer actually has ISA info
+function getGeekbenchVersions(): { primary: string | null; baseline: string | null } {
+  const versionRows = document.querySelectorAll('tr.version');
+  if (!versionRows || versionRows.length === 0) {
+    return { primary: null, baseline: null };
+  }
+
+  // Find version cells
+  const versionRow = versionRows[0]; // Take the first one if multiple exist
+  const primaryVersionCell = versionRow.querySelector('td.document-version');
+  const baselineVersionCell = primaryVersionCell?.nextElementSibling;
+
+  const primaryVersion = primaryVersionCell?.textContent?.trim() || null;
+  const baselineVersion = baselineVersionCell?.textContent?.trim() || null;
+
+  return {
+    primary: primaryVersion,
+    baseline: baselineVersion
+  };
+}
+
+function versionSupportsInstructionSets(version: string | null): boolean {
+  if (!version) return false;
+
+  // Extract version number (e.g., "Geekbench 6.4.0" -> "6.4.0")
+  const match = version.match(/(\d+\.\d+\.\d+)/);
+  if (!match) return false;
+
+  const versionNumber = match[1];
+  const [major, minor] = versionNumber.split('.').map(Number);
+  return major > 6 || major === 6 && minor >= 4;
+}
+
 
 // Extract result IDs from the URL
 function extractResultIds(): { baseline?: string; primary?: string } {
@@ -31,8 +64,14 @@ function extractResultIds(): { baseline?: string; primary?: string } {
 
 // Fetch instruction sets from Geekbench
 // currently not using API due to redirect issues
-async function fetchInstructionSets(resultId: string): Promise<string | null> {
+async function fetchInstructionSets(resultId: string, version: string | null): Promise<string | null> {
   try {
+    // Check if version supports instruction sets
+    if (version && !versionSupportsInstructionSets(version)) {
+      console.log(`GeekLens: Skipping fetch for ${resultId}, version ${version} doesn't support instruction sets`);
+      return null;
+    }
+
     // Try to get from cache first
     const cachedInstructions = await instructionSetCache.getInstructionSet(resultId);
     if (cachedInstructions) {
@@ -40,12 +79,16 @@ async function fetchInstructionSets(resultId: string): Promise<string | null> {
       return cachedInstructions;
     }
 
-    // If not in cache, fetch from web
+    // If not in cache, fetch from the page
     console.log(`GeekLens: Fetching instruction set for ${resultId}`);
+    // Using the exact compare url without a baseline as:
+    // 1. API requires logging in
+    // 2. Any other url redirects back to this page (that has no ISA info)
+    // This allows getting the data, but the baseline has to be reapplied later
     const response = await fetch(`https://browser.geekbench.com/v6/cpu/compare/${resultId}/`, {
       cache: 'default',
       headers: {
-        'Cache-Control': 'max-age=2592000' // HTTP cache for a month just in case
+        'Cache-Control': 'max-age=2592000' // HTTP cache for a month
       }
     });
 
@@ -105,7 +148,7 @@ async function annotateGeekbenchComparisonPage() {
 
   console.log('GeekLens: Starting comparison annotation process');
   showInfoMessage('GeekLens Fetching Data', 'warning');
-  // Wait for benchmark tables to ensure page is fully rendered
+
   try {
     // Extract result IDs from URL
     const { baseline, primary } = extractResultIds();
@@ -115,41 +158,58 @@ async function annotateGeekbenchComparisonPage() {
       return;
     }
 
-    // Fetch instruction sets for both results
+    // Get Geekbench versions
+    const { primary: primaryVersion, baseline: baselineVersion } = getGeekbenchVersions();
+    
+    const primaryFromCache = await instructionSetCache.getInstructionSet(primary);
+    const baselineFromCache = await instructionSetCache.getInstructionSet(baseline);
+
+    // Fetch instruction sets for both results, passing version info
     const [primaryInstructions, baselineInstructions] = await Promise.all([
-      fetchInstructionSets(primary),
-      fetchInstructionSets(baseline),
+      primaryFromCache || fetchInstructionSets(primary, primaryVersion),
+      baselineFromCache || fetchInstructionSets(baseline, baselineVersion),
       waitForElement('table.comparison-benchmark-table')
     ]);
 
-    // non-blocking baseline reapply
-    reapplyBaseline(baseline)
 
-    // Only continue with annotation if we have valid instruction sets
-    if (primaryInstructions && baselineInstructions) {
-      annotateSystemInstructionSets(primaryInstructions, baselineInstructions);
-
-      const primaryInstructionSet = extractIndividualInstructions(primaryInstructions);
-      const baselineInstructionSet = extractIndividualInstructions(baselineInstructions);
-      // Annotate benchmark tables with instruction sets for each CPU
-      annotateBenchmarkTables(primaryInstructionSet, baselineInstructionSet);
+    if(!primaryFromCache && primaryInstructions || !baselineFromCache && baselineFromCache) {
+      console.log('GeekLens: At least one actual fetch made, reapplying baseline')
+      // non-blocking baseline reapply if needed
+      reapplyBaseline(baseline);
     }
 
-    showInfoMessage('GeekLens Active')
+    // If at least one CPU has instruction sets, we can proceed
+    if (primaryInstructions || baselineInstructions) {
+      annotateSystemInstructionSets(primaryInstructions, baselineInstructions);
 
+      const primaryInstructionSet = primaryInstructions ?
+          extractIndividualInstructions(primaryInstructions) : new Set<string>();
+      const baselineInstructionSet = baselineInstructions ?
+          extractIndividualInstructions(baselineInstructions) : new Set<string>();
+
+      // Annotate benchmark tables with instruction sets for each CPU
+      annotateBenchmarkTables(primaryInstructionSet, baselineInstructionSet);
+
+      showInfoMessage('GeekLens Active');
+    } else {
+      showInfoMessage('GeekLens: No instruction data available');
+    }
   } catch (error) {
     console.error('GeekLens: Failed to annotate comparison page', error);
+    showInfoMessage('GeekLens Error', 'warning');
   }
 }
 
 function annotateSystemInstructionSets(primaryInstructions: string | null, baselineInstructions: string | null) {
-  if(!primaryInstructions || !baselineInstructions) {
-    console.error('GeekLens: Failed to fetch instruction sets');
+  if(!primaryInstructions && !baselineInstructions) {
+    console.error('GeekLens: No instruction sets available');
     return;
   }
 
-  const primaryGroups = categorizeInstructionSets(primaryInstructions);
-  const baselineGroups = categorizeInstructionSets(baselineInstructions);
+  const primaryGroups = primaryInstructions ?
+      categorizeInstructionSets(primaryInstructions) : null;
+  const baselineGroups = baselineInstructions ?
+      categorizeInstructionSets(baselineInstructions) : null;
 
   const table = document.querySelector('table.system-information') as HTMLTableElement;
   if(!table) {
@@ -179,8 +239,8 @@ function annotateSystemInstructionSets(primaryInstructions: string | null, basel
   const tbody = table.querySelector('tbody') || table;
   tbody.appendChild(newRow);
 
-  // Mount the primary instruction sets component
-  if(primaryInstructions) {
+  // Mount the primary instruction sets component if available
+  if(primaryGroups) {
     const primaryContainer = document.createElement('div');
     primaryCell.appendChild(primaryContainer);
 
@@ -190,10 +250,12 @@ function annotateSystemInstructionSets(primaryInstructions: string | null, basel
         instructionGroups: primaryGroups
       }
     });
+  } else {
+    primaryCell.textContent = 'Not available';
   }
 
-  // Mount the baseline instruction sets component
-  if(baselineInstructions) {
+  // Mount the baseline instruction sets component if available
+  if(baselineGroups) {
     const baselineContainer = document.createElement('div');
     baselineCell.appendChild(baselineContainer);
 
@@ -203,6 +265,8 @@ function annotateSystemInstructionSets(primaryInstructions: string | null, basel
         instructionGroups: baselineGroups
       }
     });
+  } else {
+    baselineCell.textContent = 'Not available';
   }
 }
 
