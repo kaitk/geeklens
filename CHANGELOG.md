@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.2.1] - 2025-05-22
+
+## Fixed
+- Only enable the extension on paths: `https://browser.geekbench.com/v6/cpu/*` 
+- The popups Extensions tab now properly lists extensions under correct groups
+
 ## [v0.2.0] - 2025-05-21
 
 ### Added
