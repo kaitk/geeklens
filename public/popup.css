@@ -10,204 +10,94 @@ body {
 }
 
 .popup-container {
-  width: 320px;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #333;
+  width: 400px;
+  max-height: 600px;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
 header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid #eaeaea;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 h1 {
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
+  flex: 1;
 }
 
 .version {
-  font-size: 12px;
-  color: #666;
+  font-size: 0.75rem;
+  color: #6b7280;
 }
 
 .tabs {
   display: flex;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .tabs button {
   flex: 1;
+  padding: 0.75rem;
   background: none;
   border: none;
-  padding: 10px;
-  font-size: 14px;
   cursor: pointer;
+  font-size: 0.875rem;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+}
+
+.tabs button:hover {
+  color: #374151;
 }
 
 .tabs button.active {
-  font-weight: 600;
-  border-bottom: 2px solid #1e40af;
-  color: #1e40af;
+  color: #1f2937;
+  border-bottom-color: #3b82f6;
 }
 
 main {
-  padding: 16px;
+  padding: 1rem;
+  max-height: 480px;
+  overflow-y: auto;
 }
-
-.setting {
-  margin-bottom: 12px;
-}
-
-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.save-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #1e40af;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 12px;
-}
-
-.save-button:hover {
-  background-color: #1c3992;
-}
-
-.saved-message {
-  text-align: center;
-  margin-top: 8px;
-  color: #16a34a;
-  font-size: 14px;
-}
-
-.instruction-list {
-  margin-top: 12px;
-}
-
-.instruction-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.instruction-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-right: 8px;
-  min-width: 70px;
-  text-align: center;
-}
-
-.avx512 {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-
-.avx {
-  background-color: #e0f2fe;
-  color: #0369a1;
-}
-
-.sse {
-  background-color: #ffedd5;
-  color: #9a3412;
-}
-
-.aes {
-  background-color: #dcfce7;
-  color: #166534;
-}
-
-.sha {
-  background-color: #bbf7d0;
-  color: #15803d;
-}
-
-.instruction-desc {
-  font-size: 12px;
-  flex: 1;
-}
-
-.description {
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 16px;
-}
-
-.resources {
-  margin-top: 16px;
-}
-
-.resources h3 {
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.resources ul {
-  padding-left: 16px;
-  font-size: 13px;
-}
-
-.resources a {
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.resources a:hover {
-  text-decoration: underline;
-}
-
 .about-panel {
   text-align: center;
+  padding: 2rem 0;
 }
 
 .logo {
-  margin-bottom: 12px;
+  margin-bottom: 1rem;
 }
 
 .about-panel h2 {
-  font-size: 16px;
-  margin-bottom: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 .about-panel p {
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 16px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
 }
 
 .links {
-  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .links a {
-  display: inline-block;
-  margin: 0 8px;
-  color: #2563eb;
+  color: #3b82f6;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 0.875rem;
 }
 
 .links a:hover {
@@ -215,6 +105,155 @@ select {
 }
 
 .copyright {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.info-panel {
+  padding: 0.5rem 0;
+}
+
+.description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.description ul {
+  padding-left: 1rem;
+  padding-bottom: 0;
+}
+
+.description a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.category-section {
+  margin-bottom: 2rem;
+}
+
+.category-section h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+.category-description {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.instruction-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.instruction-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.75rem;
+}
+
+.instruction-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.instruction-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
   font-size: 12px;
-  color: #666;
+  font-weight: 600;
+}
+
+.architecture-badge {
+  font-size: 11px;
+  color: #6b7280;
+  background: #e5e7eb;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.instruction-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.instruction-description {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.resources {
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.resources h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.resources ul {
+  list-style: none;
+  padding: 0;
+}
+
+.resources li {
+  margin-bottom: 0.5rem;
+}
+
+.resources a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.resources a:hover {
+  text-decoration: underline;
+}
+
+.settings-panel {
+  padding: 0.5rem 0;
+}
+
+.setting {
+  margin-bottom: 1rem;
+}
+
+.setting label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.save-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.save-button:hover {
+  background: #2563eb;
+}
+
+.saved-message {
+  margin-top: 0.5rem;
+  color: #059669;
+  font-size: 0.875rem;
 }
