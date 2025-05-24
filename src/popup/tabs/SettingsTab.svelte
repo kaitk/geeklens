@@ -11,8 +11,13 @@
     settings = await loadSettings()
   });
 
+  async function delay(ms = 50) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // Save settings
   async function onSaveSettings() {
+    await delay()
     await saveSettings(settings)
     showSavedMessage = true;
     setTimeout(() => showSavedMessage = false, 2000);
@@ -30,21 +35,17 @@
 
   <div class="setting">
     <label>
-      <input type="checkbox" bind:checked={settings.coloredBadges}>
+      <input type="checkbox" bind:checked={settings.coloredBadges} onchange={onSaveSettings}>
       Color instruction set badges
     </label>
   </div>
 
   <div class="setting">
     <label>
-      <input type="checkbox" bind:checked={settings.tooltips}>
+      <input type="checkbox" bind:checked={settings.tooltips} onchange={onSaveSettings}>
       Show description tooltips on hover
     </label>
   </div>
-
-  <button class="save-button" onclick={onSaveSettings}>
-    Save Settings
-  </button>
 
   {#if showSavedMessage}
     <div class="saved-message">Settings saved!</div>

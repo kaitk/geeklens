@@ -43,7 +43,7 @@ export const BENCHMARKS_V6: Record<string, Benchmark> = {
         name: "Photo Library",
         category: "AI/ML",
         description: "Photo organization with ML-based features",
-        instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX-INT8', 'NEON-DOTPROD', 'I8MM', 'SME', 'SME2']
+        instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX', 'NEON-DOTPROD', 'I8MM', 'SME', 'SME2']
     },
     "Clang": {
         name: "Clang",

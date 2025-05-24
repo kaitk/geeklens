@@ -11,13 +11,14 @@
   const { instructions }: Props = $props();
 
   let settingsStore = getSettingsStore();
+
 </script>
 
 <div class="gb-instruction-container">
   {#each instructions as instruction}
     <InstructionBadge
         instruction={instruction.name}
-        color={getCategoryStyle(instruction.category, settingsStore.value.coloredBadges)}
+        groupType={instruction.category}
         description={ settingsStore.value.tooltips ? instruction?.description : undefined}
     />
   {/each}

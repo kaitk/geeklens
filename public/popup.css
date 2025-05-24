@@ -19,7 +19,7 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -43,7 +43,7 @@ h1 {
 
 .tabs button {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -62,7 +62,7 @@ h1 {
 }
 
 main {
-  padding: 1rem;
+  padding: 0 1rem;
   max-height: 460px;
   overflow-y: auto;
 }
@@ -110,7 +110,7 @@ main {
 }
 
 .info-panel {
-  padding: 0.5rem 0;
+  padding: 0;
 }
 
 .description {
@@ -236,20 +236,6 @@ main {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-}
-
-.save-button {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.save-button:hover {
-  background: #2563eb;
 }
 
 .saved-message {

@@ -1,19 +1,24 @@
 <script lang="ts">
-import { type BadgeStyle } from '../isa/badgeColors';
+    import {type BadgeStyle, getCategoryStyle} from '../isa/badgeColors';
+import type {InstructionCategory} from "../isa/instructions";
+    import {getSettingsStore} from "../settings/settings-store.svelte";
 
 interface Props {
     instruction: string;
-    color: BadgeStyle,
+    groupType: InstructionCategory,
     description?: string
 }
 
-const { instruction, color, description }: Props = $props();
-const { backgroundColor, color: textColor } = color;
+const { instruction, groupType, description }: Props = $props();
+let settingsStore = getSettingsStore();
+
+const { backgroundColor, color } = $derived(getCategoryStyle(groupType, settingsStore.value.coloredBadges))
+
 </script>
 
 <span
     class="gb-instruction-badge"
-    style="background-color: {backgroundColor}; color: {textColor}; cursor: {description ? 'help' : 'default'}"
+    style="background-color: {backgroundColor}; color: {color}; cursor: {description ? 'help' : 'default'}"
 >
   {instruction}
   {#if description}
