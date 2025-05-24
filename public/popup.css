@@ -19,7 +19,7 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -63,7 +63,7 @@ h1 {
 
 main {
   padding: 1rem;
-  max-height: 480px;
+  max-height: 460px;
   overflow-y: auto;
 }
 .about-panel {

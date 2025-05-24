@@ -9,7 +9,7 @@ export interface Settings {
 export let defaultSettings: Settings = {
     enabled: true,
     coloredBadges: true,
-    tooltips: false,
+    tooltips: true,
 };
 
 

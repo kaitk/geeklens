@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getCategoryStyle } from '../isa/badgeColors';
-  import type { InstructionCategory } from '../isa/instructions';
+  import {findDetailedDescription, findInstructionByName, type InstructionCategory} from '../isa/instructions';
   import { getSettingsStore } from '../settings/settings-store.svelte';
   import InstructionBadge from './InstructionBadge.svelte';
 
@@ -26,6 +26,7 @@
         <InstructionBadge
             instruction={instruction}
             color={getCategoryStyle(groupType, settingsStore.value.coloredBadges)}
+            description={findDetailedDescription(instruction)}
         />
       {/each}
     </div>

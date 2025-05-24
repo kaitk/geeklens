@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.2.2] - 2025-05-25
+
+## Fixed
+- Properly list AMX support for Photo Library and Object Detection for CPUs that support it
+
+## Changed
+- Tooltips added to top  badges as well (with more info) and enabled by default
+
 ## [v0.2.1] - 2025-05-22
 
 ## Fixed
