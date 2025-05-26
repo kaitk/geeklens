@@ -8,6 +8,7 @@
 ## Fixed
 - Properly fix reporting AMX support for Photo Library
 - Fixed issues with disabling color or removing tooltips not working properly
+- Fix cell name overflow with really long names, [like here](https://browser.geekbench.com/v6/cpu/compare/10177252)
 
 ## Changed
 - Removed save button from settings, now changes are applied immediately
