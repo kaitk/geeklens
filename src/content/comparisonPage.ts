@@ -368,9 +368,14 @@ if (document.readyState === 'loading') {
   annotateGeekbenchComparisonPage();
 }
 
-// Add styles for the info badge
+// Add styles for the info badge and fix overflow issue in RISC-V tables
 const style = document.createElement('style');
 style.textContent = `
+  table.system-information td {
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+
   .gb-extension-info {
     position: fixed;
     bottom: 10px;
