@@ -6,7 +6,7 @@ import {extractIndividualInstructions, type Instruction} from '../isa/instructio
 import {extractBenchmarkName, findBenchmarkTables, waitForElement} from './domUtils';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
-import {instructionSetCache} from "../isa/IsaCache";
+import {resultsCache} from "../cache/ResultsCache";
 
 // Listen for messages from the background script
 browser.runtime.onMessage.addListener((message) => {
@@ -73,7 +73,7 @@ async function fetchInstructionSets(resultId: string, version: string | null): P
     }
 
     // Try to get from cache first
-    const cachedInstructions = await instructionSetCache.getInstructionSet(resultId);
+    const cachedInstructions = await resultsCache.getInstructionSet(resultId);
     if (cachedInstructions) {
       console.log(`GeekLens: Using cached instruction set for ${resultId}`);
       return cachedInstructions;
@@ -114,7 +114,7 @@ async function fetchInstructionSets(resultId: string, version: string | null): P
 
         // Store in cache
         if (instructionSet) {
-          instructionSetCache.storeInstructionSet(resultId, instructionSet)
+          resultsCache.storeInstructionSet(resultId, instructionSet)
               .catch(err => console.error('Failed to store instruction set:', err));
         }
 
@@ -161,8 +161,8 @@ async function annotateGeekbenchComparisonPage() {
     // Get Geekbench versions
     const { primary: primaryVersion, baseline: baselineVersion } = getGeekbenchVersions();
 
-    const primaryFromCache = await instructionSetCache.getInstructionSet(primary);
-    const baselineFromCache = await instructionSetCache.getInstructionSet(baseline);
+    const primaryFromCache = await resultsCache.getInstructionSet(primary);
+    const baselineFromCache = await resultsCache.getInstructionSet(baseline);
 
     // Fetch instruction sets for both results, passing version info
     const [primaryInstructions, baselineInstructions] = await Promise.all([

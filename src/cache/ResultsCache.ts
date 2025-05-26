@@ -3,13 +3,14 @@ const DB_NAME = 'GeekLensCache';
 const STORE_NAME = 'instructionSets';
 const DB_VERSION = 1;
 
-interface InstructionSetRecord {
+// Currently only ISA info is saved, but more might be added in the future
+interface BenchmarkResultRecord {
     resultId: string;
     instructionSet: string;
     timestamp: number;
 }
 
-export class InstructionSetCache {
+export class ResultsCache {
     private dbPromise: Promise<IDBDatabase>;
 
     constructor() {
@@ -46,7 +47,7 @@ export class InstructionSetCache {
             const transaction = db.transaction(STORE_NAME, 'readwrite');
             const store = transaction.objectStore(STORE_NAME);
 
-            const record: InstructionSetRecord = {
+            const record: BenchmarkResultRecord = {
                 resultId,
                 instructionSet,
                 timestamp: Date.now()
@@ -76,7 +77,7 @@ export class InstructionSetCache {
                 const request = store.get(resultId);
 
                 request.onsuccess = (event) => {
-                    const result = (event.target as IDBRequest).result as InstructionSetRecord | undefined;
+                    const result = (event.target as IDBRequest).result as BenchmarkResultRecord | undefined;
                     resolve(result?.instructionSet || null);
                 };
 
@@ -94,4 +95,4 @@ export class InstructionSetCache {
 }
 
 // Export singleton instance
-export const instructionSetCache = new InstructionSetCache();
+export const resultsCache = new ResultsCache();

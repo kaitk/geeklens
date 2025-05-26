@@ -8,29 +8,8 @@ export type InstructionCategory =
     | 'ML'
     | 'SIMD_ML'
     | 'OTHER';
-export type InstructionArchitecture = 'x86' | 'ARM' | 'RISC-V';
 
-export type InstructionType =
-// Vector & SIMD Extensions
-    | 'SSE'        // Legacy x86 SIMD
-    | 'AVX'        // Modern x86 SIMD
-    | 'AVX-512'    // Wide x86 SIMD
-    | 'NEON'       // ARM SIMD
-    | 'SVE'        // ARM Scalable Vector (future)
-    | 'AMX'        // x86 Matrix
-    | 'FMA'        // Fused multiply-add (computational enhancement, not specifically SIMD)
-    // ML instructions sharing Vector registers
-    | 'VNNI'       // x86 Neural Network
-    | 'DOTPROD'    // ARM ML
-    // Matrix & AI Extensions
-    | 'SME'        // ARM Matrix
-    | 'I8MM'       // ARM ML
-    // Cryptographic
-    | 'AES'        // Encryption
-    | 'SHA'        // Hashing
-    | 'PCLMUL'     // Carry-less multiplication
-    // Other
-    | 'OTHER';
+export type InstructionArchitecture = 'x86' | 'ARM' | 'RISC-V';
 
 
 // used in CPU Information
@@ -38,7 +17,6 @@ export interface Instruction {
     name: string;
     fullName: string;
     description: string;
-    type: InstructionType;
     category: InstructionCategory;
     architecture: InstructionArchitecture;
 }
@@ -52,7 +30,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Legacy x86 vector instructions (128-bit)',
         category: 'SIMD_LEGACY',
         architecture: 'x86',
-        type: 'SSE',
     },
 
     // Vector Extensions - AVX Type
@@ -62,7 +39,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Generic floating-point 256-bit SIMD instruction set',
         category: 'SIMD_MODERN',
         architecture: 'x86',
-        type: 'AVX',
     },
     {
         name: 'AVX2',
@@ -70,7 +46,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Generic 256-bit SIMD instruction set extending AVX with integer operations and new instructions',
         category: 'SIMD_MODERN',
         architecture: 'x86',
-        type: 'AVX',
     },
 
     // Vector Extensions - AVX-512 Type
@@ -80,7 +55,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Wide Generic 512-bit SIMD instruction set',
         category: 'SIMD_MODERN_WIDE',
         architecture: 'x86',
-        type: 'AVX-512',
     },
 
     // AI Extensions - VNNI Type
@@ -90,7 +64,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'x86 AI/ML acceleration (for 128 and 256 bit vectors) Accelerates quantized machine learning workloads',
         category: 'SIMD_ML',
         architecture: 'x86',
-        type: 'VNNI',
     },
     {
         name: 'AVX512-VNNI',
@@ -98,7 +71,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'x86 AI/ML acceleration (part of AVX-512) Accelerates quantized machine learning workloads',
         category: 'SIMD_ML',
         architecture: 'x86',
-        type: 'VNNI',
     },
 
     // Vector Extensions - NEON Type
@@ -108,7 +80,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Generic 128-bit SIMD instruction set',
         category: 'SIMD_MODERN',
         architecture: 'ARM',
-        type: 'NEON',
     },
     {
         name: 'NEON-FP16',
@@ -116,7 +87,21 @@ const instructionDefinitions: Instruction[] = [
         description: 'Generic 128-bit SIMD instruction set with support for 16-bit floats',
         category: 'SIMD_MODERN',
         architecture: 'ARM',
-        type: 'NEON',
+    },
+    // RISC-V
+    {
+        name: 'RVV',
+        fullName: 'RISC-V Vector Extension',
+        description: 'Vector length-agnostic SIMD instruction set supporting variable vector lengths from 128 to 65,536 bits',
+        category: 'SIMD_MODERN',
+        architecture: 'RISC-V',
+    },
+    {
+        name: 'ZVFH',
+        fullName: 'Vector Extension for Half-Precision Floating-Point',
+        description: 'RISC-V vector extension adding IEEE 754-2008 16-bit half-precision floating-point operations',
+        category: 'SIMD_MODERN',
+        architecture: 'RISC-V',
     },
 
     // SVE
@@ -126,7 +111,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Vector length-agnostic SIMD instruction set for ARMv8-A',
         category: 'SIMD_MODERN',
         architecture: 'ARM',
-        type: 'SVE',
     },
 
     {
@@ -135,7 +119,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Enhanced vector processing capabilities for ARMv9-A',
         category: 'SIMD_MODERN',
         architecture: 'ARM',
-        type: 'SVE',
     },
 
     // Matrix Extensions - SME Type
@@ -145,7 +128,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'ARM matrix processing instructions',
         category: 'ML',
         architecture: 'ARM',
-        type: 'SME',
     },
     {
         name: 'SME2',
@@ -153,7 +135,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'ARM enhanced matrix processing instructions',
         category: 'ML',
         architecture: 'ARM',
-        type: 'SME',
     },
 
     // Matrix Extensions - AMX Type
@@ -163,7 +144,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Intel matrix processing for AI/ML workloads. Accelerates machine learning on quantized networks',
         category: 'ML',
         architecture: 'x86',
-        type: 'AMX',
     },
 
     // AI Extensions - DOTPROD Type
@@ -173,7 +153,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'ARM dot product operations for ML',
         category: 'SIMD_ML',
         architecture: 'ARM',
-        type: 'DOTPROD',
     },
 
     // AI Extensions - I8MM Type
@@ -183,7 +162,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'ARM 8-bit integer matrix operations',
         category: 'ML',
         architecture: 'ARM',
-        type: 'I8MM',
     },
 
     // Cryptographic Extensions - AES Type
@@ -193,7 +171,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Accelerates AES encryption and decryption functions',
         category: 'CRYPTO',
         architecture: 'x86',
-        type: 'AES',
     },
     {
         name: 'VAES',
@@ -201,7 +178,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Vectorized AES processing multiple blocks in parallel',
         category: 'CRYPTO',
         architecture: 'x86',
-        type: 'AES',
     },
     {
         name: 'AES',
@@ -209,7 +185,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'ARM hardware AES acceleration equivalent to x86 AES-NI',
         category: 'CRYPTO',
         architecture: 'ARM',
-        type: 'AES',
     },
 
     // Cryptographic Extensions - SHA Type
@@ -219,7 +194,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Hardware acceleration for SHA1/SHA256 cryptographic hash functions',
         category: 'CRYPTO',
         architecture: 'x86',
-        type: 'SHA',
     },
     {
         name: 'SHA1',
@@ -227,7 +201,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'ARM hardware SHA1 acceleration for cryptographic hashing',
         category: 'CRYPTO',
         architecture: 'ARM',
-        type: 'SHA',
     },
 
     // Cryptographic Extensions - PCLMUL Type
@@ -237,7 +210,6 @@ const instructionDefinitions: Instruction[] = [
         description: 'Polynomial multiplication for GCM mode and CRC calculations',
         category: 'CRYPTO',
         architecture: 'x86',
-        type: 'PCLMUL',
     },
 ];
 
@@ -315,7 +287,12 @@ const detailedDescriptions: Record<string, string> = {
     // ARM Cryptographic Extensions
     "AES": "ARMv8 AES - ARM hardware AES acceleration equivalent to x86 AES-NI, providing efficient symmetric encryption and decryption operations.",
 
-    "SHA1": "ARMv8 SHA1 - ARM hardware SHA1 acceleration for cryptographic hashing, optimized for secure hash computation in embedded and server applications."
+    "SHA1": "ARMv8 SHA1 - ARM hardware SHA1 acceleration for cryptographic hashing, optimized for secure hash computation in embedded and server applications.",
+
+    // RISC-V Vector Extensions
+    "RVV": "RISC-V Vector Extension - Vector length-agnostic SIMD instruction set for RISC-V processors. Supports variable vector lengths from 128 to 65,536 bits, enabling portable vector code across different implementations.",
+
+    "ZVFH": "Vector Extension for Half-Precision Floating-Point - RISC-V vector extension adding IEEE 754-2008 16-bit half-precision floating-point operations to the vector instruction set for improved ML and AI performance."
 };
 
 export const instructionsByName: Record<string, Instruction> = {};

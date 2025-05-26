@@ -1,4 +1,4 @@
-import type { InstructionType, InstructionCategory } from './instructions';
+import type { InstructionCategory } from './instructions';
 
 
 export interface BadgeStyle {

@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.3.0] - 2025-05-25
+
+### Added
+- Added Initial support for RISK-V
+
+## Fixed
+- Properly fix reporting AMX support for Photo Library
+- Fixed issues with disabling color or removing tooltips not working properly
+
+## Changed
+- Removed save button from settings, now changes are applied immediately
+
 ## [v0.2.2] - 2025-05-25
 
 ## Fixed

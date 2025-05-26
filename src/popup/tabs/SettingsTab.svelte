@@ -11,13 +11,9 @@
     settings = await loadSettings()
   });
 
-  async function delay(ms = 50) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-  }
 
   // Save settings
   async function onSaveSettings() {
-    await delay()
     await saveSettings(settings)
     showSavedMessage = true;
     setTimeout(() => showSavedMessage = false, 2000);

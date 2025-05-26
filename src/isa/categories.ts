@@ -48,6 +48,12 @@ export function categorizeInstructionSets(instructionSetString = ''): Record<Ins
     } else if (instr.includes('NEON')) {
       groups['SIMD_MODERN'].push(instr);
     }
+
+    //RISC_V
+    else if (instr.includes('RVV') || instr.includes('ZVFH')) {
+      groups['SIMD_MODERN'].push(instr);
+    }
+
     // Cryptographic instructions (both x86 and ARM)
     else if (instr.includes('AES') || instr.includes('SHA') || instr.includes('PCLMUL')) {
       groups['CRYPTO'].push(instr);

@@ -13,6 +13,8 @@ export interface Benchmark {
 /**
  *  Based on: https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf
  *  AMX support confirmed here: http://support.primatelabs.com/discussions/geekbench/85341-does-geekbench-take-advantage-of-intels-amx-instructions
+ *
+ *  RISC-V dibits https://www.reddit.com/r/RISCV/comments/1ic58jw/geekbench_64_released_with_support_for_riscv_rvv/
  */
 export const BENCHMARKS_V6: Record<string, Benchmark> = {
     "File Compression": {

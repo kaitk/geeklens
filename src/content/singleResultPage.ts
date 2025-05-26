@@ -5,7 +5,7 @@ import { categorizeInstructionSets } from '../isa/categories';
 import { extractBenchmarkName, findBenchmarkTables, waitForElement } from './domUtils';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
-import {instructionSetCache} from "../isa/IsaCache";
+import {resultsCache} from "../cache/ResultsCache";
 
 // Listen for messages from the background script
 browser.runtime.onMessage.addListener((message) => {
@@ -69,7 +69,7 @@ function findAndAnnotateSystemInstructionSets() {
 
     // Store in IndexedDB
     if (resultId && currentText) {
-        instructionSetCache.storeInstructionSet(resultId, currentText)
+        resultsCache.storeInstructionSet(resultId, currentText)
             .catch(err => console.error('Failed to store instruction set:', err));
     }
 
