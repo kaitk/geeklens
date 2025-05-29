@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.3.0] - 2025-05-25
+## [v0.3.0] - 2025-05-26
 
 ### Added
 - Added Initial support for RISK-V
