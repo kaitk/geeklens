@@ -1,7 +1,5 @@
 <script lang="ts">
-  import manifest from '../../manifest.json';
-
-  const version = `v${manifest.version}`;
+  import { extensionVersion } from '../version';
 </script>
 
 <div class="about-panel">
@@ -9,7 +7,7 @@
     <img src="/icon/icon.svg" alt="GeekLens Logo" width="64" height="64" />
   </div>
 
-  <h2>GeekLens {version}</h2>
+  <h2>GeekLens {extensionVersion}</h2>
   <p>
     GeekLens enhances Geekbench CPU benchmark results by adding instruction set annotations, helping
     you understand which CPU features are being utilized in each test.

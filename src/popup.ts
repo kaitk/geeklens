@@ -1,3 +1,4 @@
+import './popup.css';
 import Popup from './popup/Popup.svelte';
 import { mount } from 'svelte';
 

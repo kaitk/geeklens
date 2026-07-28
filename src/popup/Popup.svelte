@@ -1,10 +1,9 @@
 <script lang="ts">
-  import manifest from '../manifest.json';
   import AboutTab from './tabs/AboutTab.svelte';
   import InfoTab from './tabs/InfoTab.svelte';
   import SettingsTab from './tabs/SettingsTab.svelte';
+  import { extensionVersion } from './version';
 
-  const version = `v${manifest.version}`;
   let activeTab = 'settings';
 </script>
 
@@ -12,7 +11,7 @@
   <header>
     <div><img src="/icon/icon.svg" alt="GeekLens Logo" width="32" height="32" /></div>
     <h1>GeekLens</h1>
-    <div class="version">{version}</div>
+    <div class="version">{extensionVersion}</div>
   </header>
 
   <nav class="tabs">

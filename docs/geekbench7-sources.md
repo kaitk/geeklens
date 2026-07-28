@@ -214,6 +214,11 @@ Library documentation alone is insufficient because a library may be built with
 features disabled, use a different code path, or contribute too little work to
 justify labeling the entire workload.
 
+A concrete plan for obtaining criterion 2, along with the source review that
+ruled out cheaper options, is in
+[tasks/geekbench7-sde-instruction-trace.md](tasks/geekbench7-sde-instruction-trace.md).
+It is blocked on a go/no-go decision.
+
 ## Known unknowns
 
 - Whether metric `20000` means detected, enabled, or actually used instruction

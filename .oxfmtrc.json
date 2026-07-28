@@ -4,5 +4,12 @@
   "svelte": {
     "sortOrder": "options-scripts-markup-styles"
   },
-  "ignorePatterns": ["dist/**", "node_modules/**", "GeekLens-*.zip", "bun.lock", "screenshots/**"]
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "GeekLens-*.zip",
+    "bun.lock",
+    "screenshots/**",
+    ".claude/**"
+  ]
 }
