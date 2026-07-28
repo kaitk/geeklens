@@ -1,10 +1,10 @@
-import { defineConfig } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
-import webExtension, { readJsonFile } from "vite-plugin-web-extension";
+import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import webExtension, { readJsonFile } from 'vite-plugin-web-extension';
 
 function generateManifest() {
-  const manifest = readJsonFile("src/manifest.json");
-  const pkg = readJsonFile("package.json");
+  const manifest = readJsonFile('src/manifest.json');
+  const pkg = readJsonFile('package.json');
   return {
     name: pkg.name,
     description: pkg.description,
@@ -13,23 +13,23 @@ function generateManifest() {
   };
 }
 
-const browser = process.env.TARGET || "firefox";
+const browser = process.env.TARGET || 'firefox';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     svelte(),
     webExtension({
       manifest: generateManifest,
-      watchFilePaths: ["package.json", "src/manifest.json"],
+      watchFilePaths: ['package.json', 'src/manifest.json'],
       browser: browser,
       webExtConfig: {
-        target: browser === "firefox" ? "firefox-desktop" : "chromium",
-        startUrl: ["https://browser.geekbench.com/v6/cpu/11907485"]
-      }
+        target: browser === 'firefox' ? 'firefox-desktop' : 'chromium',
+        startUrl: ['https://browser.geekbench.com/v7/cpu/1248'],
+      },
     }),
   ],
   build: {
     outDir: `dist/${browser}`,
     emptyOutDir: true,
-  }
+  },
 });

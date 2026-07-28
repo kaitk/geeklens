@@ -8,9 +8,8 @@ browser.runtime.onInstalled.addListener((details) => {
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
-    if (tab.url.includes('browser.geekbench.com/v6/cpu/')) {
+    if (/browser\.geekbench\.com\/v[67]\/cpu\//.test(tab.url)) {
       browser.action.enable(tabId);
-      browser.tabs.sendMessage(tabId, { action: 'annotate' });
     } else {
       browser.action.disable(tabId);
     }

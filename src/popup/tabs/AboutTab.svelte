@@ -6,14 +6,13 @@
 
 <div class="about-panel">
   <div class="logo">
-    <img src="/icon/icon.svg" alt="GeekLens Logo" width="64" height="64">
+    <img src="/icon/icon.svg" alt="GeekLens Logo" width="64" height="64" />
   </div>
 
   <h2>GeekLens {version}</h2>
   <p>
-    GeekLens enhances Geekbench CPU benchmark results by adding
-    instruction set annotations, helping you understand which CPU
-    features are being utilized in each test.
+    GeekLens enhances Geekbench CPU benchmark results by adding instruction set annotations, helping
+    you understand which CPU features are being utilized in each test.
   </p>
 
   <div class="links">

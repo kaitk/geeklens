@@ -8,10 +8,13 @@
   <div class="description">
     <p>
       Geekbench utilizes various CPU instruction set extensions to optimize performance in
-      <a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank">some subtests</a>.
+      <a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank"
+        >some subtests</a
+      >.
     </p>
     <p>
-      GeekLens categorizes these extensions by their primary function, though this categorization is somewhat arbitrary. Some notes:
+      GeekLens categorizes these extensions by their primary function, though this categorization is
+      somewhat arbitrary. Some notes:
     </p>
     <ul>
       <li>Main categories have different colors</li>
@@ -29,13 +32,16 @@
         {#each Object.entries(category.instructions) as [key, instruction]}
           <div class="instruction-card">
             <div class="instruction-header">
-              <span class="instruction-badge"
-                    style="background-color: {getCategoryStyle(instruction.category).backgroundColor}; color: {getCategoryStyle(instruction.category).color};">
+              <span
+                class="instruction-badge"
+                style="background-color: {getCategoryStyle(instruction.category)
+                  .backgroundColor}; color: {getCategoryStyle(instruction.category).color};"
+              >
                 {key}
               </span>
               <span class="architecture-badge">{instruction.architecture}</span>
             </div>
-            <div class="instruction-name">{instruction.name}</div>
+            <div class="instruction-name">{instruction.fullName}</div>
             <div class="instruction-description">{instruction.description}</div>
           </div>
         {/each}
@@ -46,8 +52,21 @@
   <div class="resources">
     <h3>Links</h3>
     <ul>
-      <li><a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank">Geekbench 6 Internals</a></li>
-      <li><a href="https://blog.theldus.moe/posts/beware-with-geekbench-v6-results" target="_blank">Geekbench 6 ISA Caveats</a></li>
+      <li>
+        <a href="https://www.geekbench.com/doc/geekbench7-cpu-workloads.pdf" target="_blank"
+          >Geekbench 7 CPU Workloads</a
+        >
+      </li>
+      <li>
+        <a href="https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf" target="_blank"
+          >Geekbench 6 Internals</a
+        >
+      </li>
+      <li>
+        <a href="https://blog.theldus.moe/posts/beware-with-geekbench-v6-results" target="_blank"
+          >Geekbench 6 ISA Caveats</a
+        >
+      </li>
     </ul>
   </div>
 </div>

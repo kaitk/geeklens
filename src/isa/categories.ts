@@ -1,25 +1,26 @@
-import type { InstructionCategory } from "./instructions";
+import type { InstructionCategory } from './instructions';
 
 /**
  * Helper function to categorize instruction set strings by type
  * This converts a space-separated list of instruction sets into categorized groups
  */
-export function categorizeInstructionSets(instructionSetString = ''): Record<InstructionCategory, string[]> {
-  // Split by space and filter out empty strings
-  const instructionSets = instructionSetString.split(' ').filter(x => x.trim() !== '');
+export function categorizeInstructionSets(
+  instructionSetString = '',
+): Record<InstructionCategory, string[]> {
+  const instructionSets = instructionSetString.split(/\s+/).filter(Boolean);
 
   const groups: Record<InstructionCategory, string[]> = {
-    'SIMD_MODERN_WIDE': [],
-    'SIMD_ML': [],
-    'SIMD_MODERN': [],
-    'SIMD_LEGACY': [],
-    'ML': [],
-    'CRYPTO': [],
-    'OTHER': []
+    SIMD_MODERN_WIDE: [],
+    SIMD_ML: [],
+    SIMD_MODERN: [],
+    SIMD_LEGACY: [],
+    ML: [],
+    CRYPTO: [],
+    OTHER: [],
   };
 
   // Process each instruction individually
-  instructionSets.forEach(name => {
+  instructionSets.forEach((name) => {
     // Clean up the instruction name
     const instr = name.toUpperCase().trim();
 
@@ -29,13 +30,15 @@ export function categorizeInstructionSets(instructionSetString = ''): Record<Ins
     }
     // ARM dot product and matrix
     else if (instr.includes('DOTPROD') || instr.includes('I8MM') || instr.includes('VNNI')) {
-      groups['SIMD_ML'].push(instr);  // These are NEON extensions
+      groups['SIMD_ML'].push(instr); // These are NEON extensions
     }
 
     // x86 instructions
     else if (instr.includes('AVX512') || instr.includes('AVX-512')) {
       groups['SIMD_MODERN_WIDE'].push(instr);
     } else if (instr.includes('AVX')) {
+      groups['SIMD_MODERN'].push(instr);
+    } else if (instr === 'F16C') {
       groups['SIMD_MODERN'].push(instr);
     } else if (instr.includes('SSE')) {
       groups['SIMD_LEGACY'].push(instr);

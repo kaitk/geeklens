@@ -9,15 +9,16 @@ A browser extension that enhances Geekbench CPU benchmark results formatting by 
 - 🔍 Automatically annotates Geekbench CPU result pages with instruction set information
 - 🎨 Color-codes instruction sets by type (AVX, AVX-512, SSE, AES, SHA)
 - 📊 Shows which instruction sets are utilized by each benchmark test
-- ⚡ Works with Geekbench 6 CPU results
+- ⚡ Works with Geekbench 6 and Geekbench 7 CPU results
 
 ## Why GeekLens?
 
-Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruction sets are being used in each test. GeekLens fills this gap by overlaying this  information directly on benchmark result pages, helping users understand which CPU features are being tested and why certain CPUs might perform better on specific tests.
+Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruction sets are being used in each test. GeekLens fills this gap by overlaying this information directly on benchmark result pages, helping users understand which CPU features are being tested and why certain CPUs might perform better on specific tests.
 
 ## Installation
 
 ### Chrome
+
 1. Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/geeklens/mkhncioijfcdjhaanpfodcaloniodabf)
 2. Or install manually:
    - Download this repository
@@ -26,6 +27,7 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
    - Click "Load unpacked" and select the repository folder
 
 ### Firefox
+
 1. Install from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/geeklens/)
 2. Or install manually:
    - Download this repository
@@ -36,31 +38,33 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 ## Usage
 
 1. Install the extension
-2. Visit any Geekbench 6 CPU result page (e.g., https://browser.geekbench.com/v6/cpu/11907485)
+2. Visit a supported CPU result page (for example, https://browser.geekbench.com/v7/cpu/1248)
 3. GeekLens will automatically enhance the page with instruction set annotations
 
 ## Data Sources
 
-* The instruction set data is currently based on the Geekbench 6 benchmark internals documentation which can be found here: https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf
-* If you have any good sources for instruction set data, **particularly for RISC-V** please submit a pull request!
+- Geekbench 6 workload mappings are based on the [Geekbench 6 benchmark internals documentation](https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf).
+- Geekbench 7 system instruction sets are read from the result payload. Per-workload Geekbench 7 mappings marked with an amber warning are inferred from equivalent Geekbench 6 workloads because no Geekbench 7 benchmark internals document is currently available.
+- See [Geekbench 7 data sources and confidence](docs/geekbench7-sources.md) for mapping provenance, known unknowns, and research requirements.
+- If you have any good sources for instruction set data, **particularly for RISC-V** please submit a pull request!
 
 ## Development
 
 ### Prerequisites
-- Node.js Runtime environment and package manager:
-    - [Bun](https://bun.sh/) (recommended)
-    - OR [Node.js](https://nodejs.org/) 24.18 or newer with npm, [pnpm](https://pnpm.io/) or [yarn](https://yarnpkg.com/)
+
+- [Bun](https://bun.sh/) 1.3.14 or newer
+- [Node.js](https://nodejs.org/) 24.18 or newer
 - A modern web browser (currently Chrome or Firefox have been tested)
 
-
 ### Setup
+
 1. Clone this repository
-2. Install dependencies (bun is preferred but any other package manager should work too)
+2. Install dependencies:
    ```
    bun install
    ```
 3. Development mode:
-   - `bun dev` or `npm run dev`
+   - `bun dev`
 4. Build for production:
    - For Chrome:
      ```
@@ -70,7 +74,17 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
      ```
      bun run build:firefox
      ```
-5. Create distribution zip files:
+5. Run tests:
+   ```
+   bun test
+   ```
+   Other quality checks:
+   ```
+   bun run lint
+   bun run format:check
+   bun run check
+   ```
+6. Create distribution zip files:
    - For Chrome:
      ```
      bun run release:chrome
@@ -79,17 +93,18 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
      ```
      bun run release:firefox
      ```
-6. Load the extension:
+7. Load the extension:
    - Chrome:
-      - Navigate to `chrome://extensions/`
-      - Enable "Developer mode"
-      - Click "Load unpacked" and select the `dist/chrome` directory
+     - Navigate to `chrome://extensions/`
+     - Enable "Developer mode"
+     - Click "Load unpacked" and select the `dist/chrome` directory
    - Firefox:
-      - Navigate to `about:debugging#/runtime/this-firefox`
-      - Click "Load Temporary Add-on"
-      - Select `manifest.json` file in the `dist/firefox` directory
+     - Navigate to `about:debugging#/runtime/this-firefox`
+     - Click "Load Temporary Add-on"
+     - Select `manifest.json` file in the `dist/firefox` directory
 
 ### Technical Details
+
 - This project uses [vite-plugin-web-extension](https://github.com/samrum/vite-plugin-web-extension) for building browser extensions with Vite
 - The Chromium build uses Manifest V3, while the Firefox build uses Manifest V2 for now
 
@@ -107,4 +122,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-*GeekLens is not affiliated with Primate Labs Inc. or Geekbench. All trademarks are the property of their respective owners.*
+_GeekLens is not affiliated with Primate Labs Inc. or Geekbench. All trademarks are the property of their respective owners._

@@ -10,25 +10,19 @@
 
 <div class="popup-container">
   <header>
-    <div><img src="/icon/icon.svg" alt="GeekLens Logo" width="32" height="32"></div>
+    <div><img src="/icon/icon.svg" alt="GeekLens Logo" width="32" height="32" /></div>
     <h1>GeekLens</h1>
     <div class="version">{version}</div>
   </header>
 
   <nav class="tabs">
-    <button
-        class:active={activeTab === 'settings'}
-        onclick={() => activeTab = 'settings'}>
+    <button class:active={activeTab === 'settings'} onclick={() => (activeTab = 'settings')}>
       Settings
     </button>
-    <button
-        class:active={activeTab === 'info'}
-        onclick={() => activeTab = 'info'}>
+    <button class:active={activeTab === 'info'} onclick={() => (activeTab = 'info')}>
       Extensions
     </button>
-    <button
-        class:active={activeTab === 'about'}
-        onclick={() => activeTab = 'about'}>
+    <button class:active={activeTab === 'about'} onclick={() => (activeTab = 'about')}>
       About
     </button>
   </nav>

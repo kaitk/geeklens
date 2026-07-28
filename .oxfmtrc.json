@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "svelte": {
+    "sortOrder": "options-scripts-markup-styles"
+  },
+  "ignorePatterns": ["dist/**", "node_modules/**", "GeekLens-*.zip", "bun.lock", "screenshots/**"]
+}

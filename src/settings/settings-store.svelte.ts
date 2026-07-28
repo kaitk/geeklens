@@ -5,14 +5,14 @@ let initialized = false;
 let settings = $state(defaultSettings);
 
 // Initialize settings store
-init()
+init();
 
 function init() {
   if (initialized) return;
   initialized = true;
 
   // Load initial settings
-  loadSettings().then(initialSettings => {
+  loadSettings().then((initialSettings) => {
     settings = initialSettings;
   });
 
@@ -24,14 +24,10 @@ function init() {
   });
 }
 
-
-
 export function getSettingsStore() {
   return {
     get value() {
       return settings;
-    }
-  }
-
+    },
+  };
 }
-

@@ -20,11 +20,12 @@ export function waitForElement(selector: string, timeout = 5000): Promise<Elemen
   });
 }
 
-
-export function findBenchmarkTables(selector = 'table.benchmark-table'): HTMLTableElement[] {
-  return Array.from(document.querySelectorAll(selector)) as HTMLTableElement[];
+export function findBenchmarkTables(
+  selector = 'table.benchmark-table',
+  root: ParentNode = document,
+): HTMLTableElement[] {
+  return Array.from(root.querySelectorAll(selector)) as HTMLTableElement[];
 }
-
 
 /**
  * Extracts the benchmark name from a benchmark row
@@ -41,4 +42,48 @@ export function extractBenchmarkName(row: HTMLTableRowElement): string | null {
   const benchmarkName = text.split('\n')[0]?.trim();
 
   return benchmarkName || null;
+}
+
+export function findInstructionSetValueCell(root: ParentNode = document): Element | null {
+  const cells = root.querySelectorAll('table.system-table tbody tr td.name');
+  return (
+    Array.from(cells).find((cell) => cell.textContent?.trim() === 'Instruction Sets')
+      ?.nextElementSibling ?? null
+  );
+}
+
+export function findSystemTableByHeading(
+  heading: string,
+  root: ParentNode = document,
+): HTMLTableElement | null {
+  return (
+    Array.from(root.querySelectorAll<HTMLTableElement>('table.system-table')).find(
+      (table) => table.querySelector('th')?.textContent?.trim() === heading,
+    ) ?? null
+  );
+}
+
+export function getComparisonVersions(root: ParentNode = document): {
+  primary: string | null;
+  baseline: string | null;
+} {
+  const versionRow = root.querySelector('tr.version');
+  const primaryCell = versionRow?.querySelector('td.document-version');
+  const baselineCell = primaryCell?.nextElementSibling;
+
+  return {
+    primary: primaryCell?.textContent?.trim() || null,
+    baseline: baselineCell?.textContent?.trim() || null,
+  };
+}
+
+export function findComparisonScoreRow(
+  graphRow: Element,
+  isBaseline: boolean,
+): HTMLTableRowElement | null {
+  let scoreRow = graphRow.previousElementSibling as HTMLTableRowElement | null;
+  if (isBaseline) {
+    scoreRow = scoreRow?.previousElementSibling as HTMLTableRowElement | null;
+  }
+  return scoreRow?.classList.contains('scores') ? scoreRow : null;
 }

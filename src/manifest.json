@@ -31,14 +31,8 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://browser.geekbench.com/v6/cpu/*"],
-      "exclude_matches": ["*://browser.geekbench.com/v6/cpu/compare/*"],
-      "js": ["src/content/singleResultPage.ts"]
-    },
-    {
-      "matches": ["*://browser.geekbench.com/v6/cpu/compare/*"],
-      "js": ["src/content/comparisonPage.ts"]
+      "matches": ["*://browser.geekbench.com/v6/cpu/*", "*://browser.geekbench.com/v7/cpu/*"],
+      "js": ["src/content/contentScript.ts"]
     }
-
   ]
 }
