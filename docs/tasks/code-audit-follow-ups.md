@@ -80,11 +80,6 @@ None of these are covered by automated tests.
   action where it previously did not, and lookalike paths on other hosts no
   longer match. Confirm the action enables and disables correctly across result,
   comparison, and unrelated pages, in both browsers.
-- **Firefox add-on identity.** The build now emits `browser_specific_settings`
-  for Firefox, which it silently dropped before. Confirm the gecko ID
-  `{95d308b0-f099-46c4-a8e0-2299f3245b6d}` matches the published AMO listing
-  **before** the next Firefox release, or the upload will be treated as a
-  different add-on.
 - **Payload HTTP caching.** The `.gb6` request no longer sends a month-long
   `Cache-Control`. Successful lookups are still cached in IndexedDB. Confirm
   repeat visits do not become noticeably slower.
