@@ -49,7 +49,7 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 ### Prerequisites
 - Node.js Runtime environment and package manager:
     - [Bun](https://bun.sh/) (recommended)
-    - OR [Node.js](https://nodejs.org/) LTS (v22 or newer) with npm, [pnpm](https://pnpm.io/) or [yarn](https://yarnpkg.com/)
+    - OR [Node.js](https://nodejs.org/) 24.18 or newer with npm, [pnpm](https://pnpm.io/) or [yarn](https://yarnpkg.com/)
 - A modern web browser (currently Chrome or Firefox have been tested)
 
 

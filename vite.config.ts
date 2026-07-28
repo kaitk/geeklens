@@ -13,7 +13,7 @@ function generateManifest() {
   };
 }
 
-const browser = process.env.TARGET || "chrome";
+const browser = process.env.TARGET || "firefox";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [

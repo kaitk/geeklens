@@ -3,8 +3,12 @@
   "private": true,
   "version": "0.3.0",
   "type": "module",
+  "engines": {
+    "node": ">=24.18.0"
+  },
   "scripts": {
     "dev": "vite",
+    "dev:watch": "vite build --watch --mode development",
     "build": "vite build",
     "build:chrome": "TARGET=chrome vite build",
     "build:firefox": "TARGET=firefox vite build",
@@ -14,16 +18,16 @@
     "release:firefox": "npm run build:firefox && tsx scripts/zip.ts firefox"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^4.0.0",
-    "@tsconfig/svelte": "^5.0.4",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@tsconfig/svelte": "^5.0.8",
     "@types/webextension-polyfill": "^0.10.0",
-    "svelte": "^5.0.0",
-    "svelte-check": "^4.0.0",
+    "svelte": "^5.56.8",
+    "svelte-check": "^4.7.4",
     "tslib": "^2.6.3",
     "tsx": "^4.19.4",
     "typescript": "~5.6.3",
-    "vite": "^5.4.4",
-    "vite-plugin-web-extension": "^4.1.6",
+    "vite": "^8.1.5",
+    "vite-plugin-web-extension": "^4.5.1",
     "webextension-polyfill": "^0.10.0",
     "zip-a-folder": "^3.1.9"
   }
