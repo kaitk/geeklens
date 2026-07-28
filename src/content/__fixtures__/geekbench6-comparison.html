@@ -1,0 +1,158 @@
+<!doctype html>
+<!--
+  Sanitized structural excerpt captured from a logged-out public Geekbench 6
+  CPU comparison page on 2026-07-28. Repeated workloads, graphs, and identifying
+  system data were removed; selector-relevant structure and classes are unchanged.
+
+  Note two things this page shape proves:
+  1. Geekbench 6 comparison pages do NOT carry an Instruction Sets row, which is
+     why the comparison adapter fetches each result separately.
+  2. Geekbench exposes an explicit /v6/cpu/remove_baseline/<id> control, kept
+     here as evidence of the real baseline session state the adapter works around.
+-->
+<html>
+  <body class="rosedale">
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark">
+      <div class="container">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto right">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAccount" role="button"
+                >Account</a
+              >
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownAccount">
+                <a class="dropdown-item" href="/user/new">Sign Up</a>
+                <a class="dropdown-item" href="/session/new">Log In</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="secondary clearfix col-lg-3">
+      <a class="secondary-button" href="/v6/cpu/remove_baseline/18845365">Remove Baseline</a>
+    </div>
+
+    <div class="table-wrapper table-overflow">
+      <table class="table comparison-benchmark-table section-performance">
+        <thead>
+          <tr>
+            <th class="workload"></th>
+            <th class="document-title">Primary System</th>
+            <th class="document-title">Baseline System</th>
+            <th>Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="name">Single-Core Score</th>
+            <th class="score">4161</th>
+            <th class="score">3582</th>
+            <th class="delta"><span class="faster">116.2%</span></th>
+          </tr>
+          <tr class="document-graph">
+            <th>Primary System</th>
+            <th colspan="3"><div class="benchmark-bar">&nbsp;</div></th>
+          </tr>
+          <tr class="baseline-graph">
+            <th>Baseline System</th>
+            <th colspan="3"><div class="baseline-bar">&nbsp;</div></th>
+          </tr>
+          <tr class="version">
+            <td></td>
+            <td class="document-version">Geekbench 6.7.1</td>
+            <td class="document-version">Geekbench 6.5.0</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrapper table-overflow">
+      <table class="table comparison-benchmark-table system-information">
+        <thead>
+          <tr>
+            <th class="workload"></th>
+            <th class="document-title">Primary System</th>
+            <th class="document-title">Baseline System</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="name">
+            <td>Operating System</td>
+            <td class="value">Primary OS</td>
+            <td class="value">Baseline OS</td>
+          </tr>
+          <tr>
+            <td>Processor</td>
+            <td>Primary CPU<br />1 Processor, 18 Cores</td>
+            <td>Baseline CPU<br />1 Processor, 16 Cores, 32 Threads</td>
+          </tr>
+          <tr>
+            <td>L1 Instruction Cache</td>
+            <td>128 KB</td>
+            <td>32.0 KB x 16</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrapper table-overflow">
+      <table class="table comparison-benchmark-table section-performance">
+        <thead>
+          <tr>
+            <th class="workload"></th>
+            <th class="document-title">Primary System</th>
+            <th class="document-title">Baseline System</th>
+            <th>Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="name">Multi-Core Score</th>
+            <th class="score">21697</th>
+            <th class="score">19825</th>
+            <th class="delta"><span class="faster">109.4%</span></th>
+          </tr>
+          <tr class="document-graph">
+            <th>Primary System</th>
+            <th colspan="3"><div class="benchmark-bar">&nbsp;</div></th>
+          </tr>
+          <tr class="baseline-graph">
+            <th>Baseline System</th>
+            <th colspan="3"><div class="baseline-bar">&nbsp;</div></th>
+          </tr>
+          <tr class="scores">
+            <td class="name">File Compression</td>
+            <td class="score">3401</td>
+            <td class="score">3418</td>
+            <td class="delta"><span class="equal">99.5%</span></td>
+          </tr>
+          <tr class="document-graph">
+            <td>Primary System</td>
+            <td colspan="3"><div class="benchmark-bar">&nbsp;</div></td>
+          </tr>
+          <tr class="baseline-graph">
+            <td>Baseline System</td>
+            <td colspan="3"><div class="baseline-bar">&nbsp;</div></td>
+          </tr>
+          <tr class="scores">
+            <td class="name">Photo Library</td>
+            <td class="score">3211</td>
+            <td class="score">2984</td>
+            <td class="delta"><span class="faster">107.6%</span></td>
+          </tr>
+          <tr class="document-graph">
+            <td>Primary System</td>
+            <td colspan="3"><div class="benchmark-bar">&nbsp;</div></td>
+          </tr>
+          <tr class="baseline-graph">
+            <td>Baseline System</td>
+            <td colspan="3"><div class="baseline-bar">&nbsp;</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

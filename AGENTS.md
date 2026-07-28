@@ -7,6 +7,8 @@ result and comparison pages with the instruction sets used by each workload.
 
 - Read [docs/architecture.md](docs/architecture.md) before changing page parsing,
   benchmark metadata, caching, or browser manifests.
+- Check [docs/follow-ups.md](docs/follow-ups.md) for known open questions that
+  need a live Geekbench session to settle. Add to it rather than guessing.
 - Treat Geekbench HTML, URLs, benchmark names, and version-specific metadata as
   external interfaces. Keep version-specific assumptions explicit.
 - Make source changes under `src/`. `dist/` and `GeekLens-*.zip` are generated.

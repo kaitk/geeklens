@@ -5,7 +5,7 @@ export interface BadgeStyle {
   color: string;
 }
 
-export const groupColors: Record<InstructionCategory, BadgeStyle> = {
+const groupColors: Record<InstructionCategory, BadgeStyle> = {
   // SIMD Vector Extensions
   SIMD_MODERN_WIDE: {
     backgroundColor: '#bfdbfe', // blue-200
@@ -40,7 +40,7 @@ export const groupColors: Record<InstructionCategory, BadgeStyle> = {
   },
 };
 
-export function getCategoryStyle(type: string, colorBadges = true): BadgeStyle {
+export function getCategoryStyle(type: InstructionCategory, colorBadges = true): BadgeStyle {
   if (!colorBadges) return groupColors['OTHER'];
-  return groupColors[type as InstructionCategory] || groupColors['OTHER'];
+  return groupColors[type] || groupColors['OTHER'];
 }

@@ -18,8 +18,6 @@ export interface Geekbench7Benchmark extends Benchmark {
  */
 export const BENCHMARKS_V7: Record<string, Geekbench7Benchmark> = {
   'File Compression': {
-    name: 'File Compression',
-    category: 'Productivity',
     description: 'Compresses LZ4, zlib, and Zstandard archives and verifies them with SHA1',
     instructions: ['SHANI', 'SHA1'],
     confidence: 'inferred',
@@ -27,8 +25,6 @@ export const BENCHMARKS_V7: Record<string, Geekbench7Benchmark> = {
       'Inferred: Geekbench 7 documents SHA1 verification, but does not confirm hardware SHA dispatch.',
   },
   'Photo Library': {
-    name: 'Photo Library',
-    category: 'Productivity',
     description: 'Imports and tags photos using a MobileNetV1 SSD model',
     instructions: ['AVX-VNNI', 'AVX512-VNNI', 'AMX', 'NEON-DOTPROD', 'I8MM', 'SME', 'SME2'],
     confidence: 'inferred',
@@ -36,8 +32,6 @@ export const BENCHMARKS_V7: Record<string, Geekbench7Benchmark> = {
       'Inferred: Geekbench 7 retains MobileNetV1 SSD, but does not document model quantization or ISA dispatch.',
   },
   'Structure from Motion': {
-    name: 'Structure from Motion',
-    category: 'Image Synthesis',
     description: 'Constructs 3D geometry from nine 2D images',
     instructions: ['AVX2', 'NEON', 'NEON-FP16'],
     confidence: 'inferred',

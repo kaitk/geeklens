@@ -324,11 +324,20 @@ export function instructionsByCategory(category: InstructionCategory) {
   return instructions;
 }
 
-export function extractIndividualInstructions(instructionSetString: string | null): Set<string> {
-  return new Set(
+/**
+ * Splits Geekbench's space-separated instruction-set string into normalized
+ * names. Geekbench renders these lowercase in page HTML and in metric 20000,
+ * so uppercasing here is what lets the rest of the app compare them by name.
+ */
+export function tokenizeInstructionSets(instructionSetString: string | null = ''): string[] {
+  return (
     instructionSetString
       ?.split(/\s+/)
       .filter(Boolean)
-      .map((x) => x.toUpperCase().trim()),
+      .map((name) => name.toUpperCase()) ?? []
   );
+}
+
+export function extractIndividualInstructions(instructionSetString: string | null): Set<string> {
+  return new Set(tokenizeInstructionSets(instructionSetString));
 }

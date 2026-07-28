@@ -1,4 +1,4 @@
-import type { InstructionCategory } from './instructions';
+import { tokenizeInstructionSets, type InstructionCategory } from './instructions';
 
 /**
  * Helper function to categorize instruction set strings by type
@@ -7,8 +7,6 @@ import type { InstructionCategory } from './instructions';
 export function categorizeInstructionSets(
   instructionSetString = '',
 ): Record<InstructionCategory, string[]> {
-  const instructionSets = instructionSetString.split(/\s+/).filter(Boolean);
-
   const groups: Record<InstructionCategory, string[]> = {
     SIMD_MODERN_WIDE: [],
     SIMD_ML: [],
@@ -20,10 +18,7 @@ export function categorizeInstructionSets(
   };
 
   // Process each instruction individually
-  instructionSets.forEach((name) => {
-    // Clean up the instruction name
-    const instr = name.toUpperCase().trim();
-
+  tokenizeInstructionSets(instructionSetString).forEach((instr) => {
     // dot product NN and matrix
     if (instr.includes('SME') || instr.includes('AMX')) {
       groups['ML'].push(instr);
@@ -63,7 +58,7 @@ export function categorizeInstructionSets(
     }
 
     // Anything else
-    else if (instr.trim() !== '') {
+    else {
       groups['OTHER'].push(instr);
     }
   });

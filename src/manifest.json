@@ -19,7 +19,7 @@
   "{{firefox}}.browser_action": {
     "default_popup": "src/popup.html"
   },
-  "{{firefox}}browser_specific_settings": {
+  "{{firefox}}.browser_specific_settings": {
     "gecko": {
       "id": "{95d308b0-f099-46c4-a8e0-2299f3245b6d}",
       "strict_min_version": "120.0"

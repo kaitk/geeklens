@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type BadgeStyle, getCategoryStyle } from '../isa/badgeColors';
+  import { getCategoryStyle } from '../isa/badgeColors';
   import type { InstructionCategory } from '../isa/instructions';
   import { getSettingsStore } from '../settings/settings-store.svelte';
 

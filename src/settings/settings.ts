@@ -5,25 +5,29 @@ export interface Settings {
   tooltips: boolean;
 }
 
-export let defaultSettings: Settings = {
+export const defaultSettings: Readonly<Settings> = {
   coloredBadges: true,
   tooltips: true,
 };
 
-export async function loadSettings() {
+/**
+ * Always returns a fresh object. The popup binds checkboxes straight to the
+ * result, so handing back the shared `defaultSettings` would let a click
+ * rewrite the defaults for every other consumer in the page.
+ */
+export async function loadSettings(): Promise<Settings> {
   try {
     const result = (await browser.storage.sync.get('geekLensSettings')) as {
-      geekLensSettings: Settings;
+      geekLensSettings?: Settings;
     };
     if (result?.geekLensSettings) {
-      return result.geekLensSettings;
+      return { ...defaultSettings, ...result.geekLensSettings };
     }
     console.debug('Failed to load geekLensSettings, returning default');
-    return defaultSettings;
   } catch (e) {
     console.error('Failed to load settings:', e);
-    return defaultSettings;
   }
+  return { ...defaultSettings };
 }
 
 // Save settings

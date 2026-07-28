@@ -29,7 +29,14 @@ adds an Instruction Sets row to the rendered system information.
 
 Shared selectors and benchmark-name extraction live in
 `src/content/domUtils.ts`. Svelte components in `src/content/` render badges;
-they should not contain Geekbench page-parsing logic.
+they should not contain Geekbench page-parsing logic. Both adapters share
+`src/content/statusBanner.ts` (the status pill, which also serves as the
+"already annotated" guard) and `src/content/mountBadges.ts` (component
+mounting), so neither adapter creates DOM containers itself.
+
+Geekbench Browser URL shapes live in `src/geekbench/urls.ts`, and the
+authenticated `.gb6` payload fetch in `src/geekbench/resultPayloadClient.ts`.
+Keep both generations' URL literals there rather than at the call sites.
 
 ## Data flow
 
@@ -40,6 +47,11 @@ Geekbench's space-separated instruction-set string is:
 3. intersected with each workload's known accelerators in
    `src/isa/benchmarkMap.ts`; and
 4. rendered as instruction badges.
+
+`src/isa/workloadInstructions.ts` is the only place that chooses between the
+Geekbench 6 and Geekbench 7 benchmark maps. It returns a `confidenceNote` for
+inferred mappings and omits it for documented ones, so callers cannot render an
+inferred Geekbench 7 mapping without its warning.
 
 `src/cache/ResultsCache.ts` stores raw instruction-set strings in IndexedDB.
 Cache keys include the Geekbench generation and result ID
@@ -57,8 +69,12 @@ evidence and open questions.
 Keep generation-specific concerns together instead of silently widening v6
 logic:
 
-- Add the new URL matches to the manifest and action-enable logic in
-  `src/background.ts`.
+- Add the generation to `SUPPORTED_GENERATIONS` in
+  `src/geekbench/generation.ts`. That covers URL parsing, content-script
+  routing, and the `src/background.ts` action toggle.
+- Add the new URL matches to `src/manifest.json` by hand. It is static JSON and
+  cannot read the constant above, so it is the one place that must be kept in
+  sync manually.
 - Verify single-result and comparison URL shapes independently.
 - Capture selectors and benchmark-name extraction for representative pages.
 - Add a generation-specific benchmark map based on an authoritative benchmark
@@ -80,10 +96,25 @@ public result is available.
 - Exact benchmark display names are keys in the benchmark map.
 - Comparison parsing depends on row classes and relative row ordering.
 - Fetching a comparison URL without a baseline can alter Geekbench's selected
-  baseline; the current adapter reapplies it afterward.
-- Geekbench 7 `.gb6` payloads are fetched only after clearing the comparison
-  baseline. Fetch primary and baseline payloads sequentially before reapplying
-  the baseline because selection is shared session state.
+  baseline. Every path that may disturb it runs inside `restoringBaseline`,
+  which reapplies the baseline in a `finally` and awaits the result. Restoring
+  must not be made conditional on a fetch succeeding: the common signed-out
+  Geekbench 7 case fails every fetch, and skipping the restore there silently
+  discards the user's selected baseline.
+- Geekbench 7 `.gb6` payloads are fetched only after explicitly clearing the
+  comparison baseline (`withClearedBaseline`). Fetch primary and baseline
+  payloads sequentially because selection is shared session state. Geekbench 6
+  needs no explicit clear because its HTML fetches clear the baseline as a side
+  effect, but it still needs the restore.
+- Geekbench 7 instruction data requires being signed in; logged-out pages carry
+  none at all. The comparison adapter therefore skips fetching entirely for a
+  signed-out Geekbench 7 visitor rather than disturbing the baseline for a
+  request that cannot succeed. Recheck this whenever a new Geekbench version
+  ships: if logged-out pages start exposing instruction sets again — either as a
+  rendered Instruction Sets row or in a payload readable while signed out — then
+  the skip becomes a silent regression that hides data GeekLens could show.
+  Re-verify against a logged-out single result and comparison page, and prefer
+  reading the row directly over fetching, as Geekbench 6 does.
 - The popup settings use synchronized browser storage, while result metadata uses
   page-origin IndexedDB.
 - Settings are consumed by badge components.

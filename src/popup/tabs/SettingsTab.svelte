@@ -7,8 +7,8 @@
     type Settings,
   } from '../../settings/settings';
 
-  // Default settings
-  let settings: Settings = defaultSettings;
+  // Copied, not aliased: these checkboxes bind directly into this object.
+  let settings: Settings = { ...defaultSettings };
   let showSavedMessage = false;
 
   // Load settings on mount

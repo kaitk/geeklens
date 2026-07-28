@@ -1,15 +1,13 @@
-import { mount } from 'svelte';
-import { getV6SupportedInstructions } from '../isa/benchmarkMap';
-import { getV7SupportedInstructions } from '../isa/benchmarkMapV7';
 import { categorizeInstructionSets } from '../isa/categories';
 import { parseGeekbenchGeneration, type GeekbenchGeneration } from '../geekbench/generation';
-import { extractInstructionSetsFromPayload } from '../geekbench/resultPayload';
+import { fetchInstructionSetsFromPayload } from '../geekbench/resultPayloadClient';
 import {
   initialInstructionStatus,
   singleResultInstructionStatus,
 } from '../geekbench/instructionDataStatus';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
 import { extractIndividualInstructions } from '../isa/instructions';
+import { workloadInstructions } from '../isa/workloadInstructions';
 import {
   extractBenchmarkName,
   findBenchmarkTables,
@@ -17,13 +15,13 @@ import {
   findSystemTableByHeading,
   waitForElement,
 } from './domUtils';
-import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
-import TableInstructionSetsComponent from './TableInstructionSets.svelte';
+import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
+import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache } from '../cache/ResultsCache';
 
 // Main function to annotate the Geekbench results
 export async function annotateGeekbenchResults() {
-  if (document.getElementById('geeklens-info')) {
+  if (isPageAnnotated()) {
     return; // page already annotated
   }
 
@@ -32,29 +30,21 @@ export async function annotateGeekbenchResults() {
   const resultId = window.location.pathname.split('/').filter(Boolean).at(-1);
   if (!generation || !resultId) return;
 
-  // Add a small info badge to show the extension is active
-  const infoElement = document.createElement('div');
-  infoElement.id = 'geeklens-info';
-  infoElement.classList.add('gb-extension-info');
-  const initialStatus = initialInstructionStatus(generation, isGeekbenchSignedOut());
-  infoElement.textContent = initialStatus.text;
-  infoElement.classList.toggle('gb-extension-warning', initialStatus.type === 'warning');
-  document.body.appendChild(infoElement);
+  const signedOut = isGeekbenchSignedOut();
+  showStatus(initialInstructionStatus(generation, signedOut));
 
   // Wait for benchmark tables to ensure page is fully rendered
   try {
     await waitForElement('table.benchmark-table');
     const instructionSets = await getInstructionSets(generation, resultId);
     if (!instructionSets) {
-      const status = singleResultInstructionStatus(generation, false);
-      showInfoMessage(status.text, status.type);
+      showStatus(singleResultInstructionStatus(generation, false));
       return;
     }
 
     annotateSystemInstructionSets(generation, instructionSets);
     annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets));
-    const status = singleResultInstructionStatus(generation, true);
-    showInfoMessage(status.text, status.type);
+    showStatus(singleResultInstructionStatus(generation, true));
   } catch (error) {
     console.error('GeekLens: Failed to find benchmark tables', error);
   }
@@ -67,12 +57,12 @@ async function getInstructionSets(
   const cached = await resultsCache.getInstructionSet(generation, resultId);
   if (cached) return cached;
 
-  let instructionSets: string | null;
-  if (generation === 6) {
-    instructionSets = findInstructionSetValueCell()?.textContent?.trim() || null;
-  } else {
-    instructionSets = await fetchGeekbench7InstructionSets(resultId);
-  }
+  // Geekbench 6 renders the instruction sets into the page; Geekbench 7 omits
+  // the row entirely and only exposes them in the authenticated JSON payload.
+  const instructionSets =
+    generation === 6
+      ? findInstructionSetValueCell()?.textContent?.trim() || null
+      : await fetchInstructionSetsFromPayload(generation, resultId);
 
   if (instructionSets) {
     await resultsCache.storeInstructionSet(generation, resultId, instructionSets);
@@ -80,35 +70,13 @@ async function getInstructionSets(
   return instructionSets;
 }
 
-async function fetchGeekbench7InstructionSets(resultId: string): Promise<string | null> {
-  const response = await fetch(
-    `https://browser.geekbench.com/v7/cpu/${encodeURIComponent(resultId)}.gb6`,
-    { credentials: 'same-origin' },
-  );
-  if (!response.ok) {
-    console.error(`GeekLens: Failed to fetch Geekbench 7 result ${resultId}`);
-    return null;
-  }
-
-  return extractInstructionSetsFromPayload(await response.json(), 7);
-}
-
 function annotateSystemInstructionSets(generation: GeekbenchGeneration, instructionSets: string) {
   const valueCell =
     generation === 6 ? findInstructionSetValueCell() : insertGeekbench7InstructionSetRow();
   if (!valueCell || valueCell.querySelector('.gb-system-info-container')) return;
 
-  const instructionGroups = categorizeInstructionSets(instructionSets);
-
   valueCell.textContent = '';
-  const container = document.createElement('div');
-  valueCell.appendChild(container);
-  mount(SystemInstructionSetsComponent, {
-    target: container,
-    props: {
-      instructionGroups,
-    },
-  });
+  mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets));
 }
 
 function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
@@ -150,18 +118,12 @@ function annotateBenchmarkTables(
       const benchmarkName = extractBenchmarkName(row);
       if (!benchmarkName) return;
 
-      const v7Match =
-        generation === 7
-          ? getV7SupportedInstructions(benchmarkName, allSupportedInstructions)
-          : null;
-      const supportedInstructions =
-        generation === 6
-          ? getV6SupportedInstructions(benchmarkName, allSupportedInstructions)
-          : (v7Match?.instructions ?? []);
-
-      if (supportedInstructions.length === 0) {
-        return;
-      }
+      const { instructions, confidenceNote } = workloadInstructions(
+        generation,
+        benchmarkName,
+        allSupportedInstructions,
+      );
+      if (instructions.length === 0) return;
 
       // Get the cell where we'll add the instruction set badges
       const benchmarkCell = row.querySelector('td:first-child');
@@ -170,25 +132,7 @@ function annotateBenchmarkTables(
         return;
       }
 
-      // Create a container for the Svelte component
-      const container = document.createElement('div');
-      benchmarkCell.appendChild(container);
-
-      // Create and mount the Svelte component
-      mount(TableInstructionSetsComponent, {
-        target: container,
-        props: {
-          instructions: supportedInstructions,
-          confidenceNote: v7Match?.confidenceNote,
-        },
-      });
+      mountWorkloadBadges(benchmarkCell, instructions, confidenceNote);
     });
   });
-}
-
-function showInfoMessage(text: string, type: 'info' | 'warning' = 'info') {
-  const infoElement = document.getElementById('geeklens-info');
-  if (!infoElement) return;
-  infoElement.textContent = text;
-  infoElement.classList.toggle('gb-extension-warning', type === 'warning');
 }

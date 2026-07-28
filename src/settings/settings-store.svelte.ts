@@ -2,7 +2,7 @@ import browser from 'webextension-polyfill';
 import { defaultSettings, loadSettings } from './settings';
 
 let initialized = false;
-let settings = $state(defaultSettings);
+let settings = $state({ ...defaultSettings });
 
 // Initialize settings store
 init();
