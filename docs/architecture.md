@@ -32,7 +32,9 @@ Shared selectors and benchmark-name extraction live in
 they should not contain Geekbench page-parsing logic. Both adapters share
 `src/content/statusBanner.ts` (the status pill, which also serves as the
 "already annotated" guard) and `src/content/mountBadges.ts` (component
-mounting), so neither adapter creates DOM containers itself.
+mounting), so neither adapter creates DOM containers itself. Mount containers
+carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
+guards must use those markers rather than Svelte component CSS classes.
 
 Geekbench Browser URL shapes live in `src/geekbench/urls.ts`, and the
 authenticated `.gb6` payload fetch in `src/geekbench/resultPayloadClient.ts`.
@@ -74,7 +76,7 @@ logic:
   routing, and the `src/background.ts` action toggle.
 - Add the new URL matches to `src/manifest.json` by hand. It is static JSON and
   cannot read the constant above, so it is the one place that must be kept in
-  sync manually.
+  sync manually. `generation.test.ts` fails if the lists drift.
 - Verify single-result and comparison URL shapes independently.
 - Capture selectors and benchmark-name extraction for representative pages.
 - Add a generation-specific benchmark map based on an authoritative benchmark
@@ -95,17 +97,10 @@ public result is available.
 
 - Exact benchmark display names are keys in the benchmark map.
 - Comparison parsing depends on row classes and relative row ordering.
-- Fetching a comparison URL without a baseline can alter Geekbench's selected
-  baseline. Every path that may disturb it runs inside `restoringBaseline`,
-  which reapplies the baseline in a `finally` and awaits the result. Restoring
-  must not be made conditional on a fetch succeeding: the common signed-out
-  Geekbench 7 case fails every fetch, and skipping the restore there silently
-  discards the user's selected baseline.
-- Geekbench 7 `.gb6` payloads are fetched only after explicitly clearing the
-  comparison baseline (`withClearedBaseline`). Fetch primary and baseline
-  payloads sequentially because selection is shared session state. Geekbench 6
-  needs no explicit clear because its HTML fetches clear the baseline as a side
-  effect, but it still needs the restore.
+- Geekbench rejects both GB6 comparison HTML requests and GB7 `.gb6` payload
+  requests while a comparison baseline is selected. The comparison adapter
+  therefore clears the baseline once, fetches missing primary and baseline data
+  in parallel, then restores the baseline once in a `finally`.
 - Geekbench 7 instruction data requires being signed in; logged-out pages carry
   none at all. The comparison adapter therefore skips fetching entirely for a
   signed-out Geekbench 7 visitor rather than disturbing the baseline for a

@@ -13,8 +13,6 @@ describe('Geekbench Browser URLs', () => {
   });
 
   test('keeps the payload endpoint distinct from the comparison endpoint', () => {
-    // Fetching the comparison URL clears the session baseline; the payload URL
-    // must never be built from it by accident.
     expect(resultPayloadUrl(7, '1')).not.toContain('/compare/');
   });
 

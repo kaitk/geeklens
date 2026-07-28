@@ -56,4 +56,32 @@ describe('comparisonInstructionStatus', () => {
   test('guides users to sign in when neither Geekbench 7 result is available', () => {
     expect(comparisonInstructionStatus(7, false, false).text).toContain('Sign in');
   });
+
+  test('identifies a Geekbench 6 result that predates instruction data', () => {
+    expect(
+      comparisonInstructionStatus(6, true, false, {
+        primary: false,
+        baseline: true,
+      }),
+    ).toEqual({
+      text: 'GeekLens: Partial data — baseline result predates Geekbench 6.4',
+      type: 'warning',
+    });
+
+    expect(
+      comparisonInstructionStatus(6, false, true, {
+        primary: true,
+        baseline: false,
+      }).text,
+    ).toContain('primary result predates Geekbench 6.4');
+  });
+
+  test('identifies when both Geekbench 6 results predate instruction data', () => {
+    expect(
+      comparisonInstructionStatus(6, false, false, {
+        primary: true,
+        baseline: true,
+      }).text,
+    ).toBe('GeekLens: No instruction data — both results predate Geekbench 6.4');
+  });
 });

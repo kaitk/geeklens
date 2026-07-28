@@ -9,8 +9,9 @@ import TableInstructionSetsComponent from './TableInstructionSets.svelte';
  * rather than directly into a Geekbench cell, so mounting never clobbers
  * markup the page owns.
  */
-function containerIn(cell: Element): HTMLElement {
+function containerIn(cell: Element, marker: string): HTMLElement {
   const container = document.createElement('div');
+  container.setAttribute(marker, '');
   cell.appendChild(container);
   return container;
 }
@@ -20,7 +21,7 @@ export function mountSystemInstructionSets(
   instructionGroups: Record<InstructionCategory, string[]>,
 ) {
   mount(SystemInstructionSetsComponent, {
-    target: containerIn(cell),
+    target: containerIn(cell, 'data-geeklens-system-info'),
     props: { instructionGroups },
   });
 }
@@ -31,7 +32,7 @@ export function mountWorkloadBadges(
   confidenceNote?: string,
 ) {
   mount(TableInstructionSetsComponent, {
-    target: containerIn(cell),
+    target: containerIn(cell, 'data-geeklens-instructions'),
     props: { instructions, confidenceNote },
   });
 }

@@ -31,8 +31,9 @@ detecting the failure and reporting it, or clearing and restoring only after an
 initial attempt has already failed.
 
 **If it succeeds:** the endpoint is not baseline-sensitive on single-result
-pages. Record that in `docs/geekbench7-sources.md`, since it also weakens the
-justification for the comparison adapter's explicit clear (item 3).
+pages. Record that in `docs/geekbench7-sources.md`; comparison pages may still
+need their clear/restore flow because Geekbench's selected-baseline state is
+coupled to those pages.
 
 ## 2. "Sign in" is shown to users who may already be signed in
 
@@ -54,54 +55,23 @@ signed-in signal, not from `!isGeekbenchSignedOut()`.
 
 ## 3. `remove_baseline` is a real endpoint and is not being used
 
-**Where:** `clearBaseline` in `src/content/comparisonPage.ts`.
+**Where:** comparison loading in `src/content/comparisonPage.ts`.
 
-`clearBaseline` clears the baseline by fetching the comparison URL purely for
-its side effect. The captured logged-out Geekbench 6 comparison page exposes an
-explicit control instead:
+Live validation confirmed that both GB6 comparison HTML requests and GB7
+`.gb6` requests fail while a baseline is selected. GeekLens therefore clears
+the baseline with a baseline-free comparison request before fetching both
+results. The captured logged-out Geekbench 6 comparison page exposes a more
+explicit removal control:
 
 ```
 /v6/cpu/remove_baseline/<primary-id>
 ```
 
-Using it would make the intent obvious and stop a data fetch and a state
-mutation from being the same request.
+**How to check:** confirm `remove_baseline` behaves identically on both
+generations, signed in and signed out, and does not require a CSRF token. If so,
+it can replace the comparison request used purely for its clearing side effect.
 
-**How to check:** confirm the endpoint exists and behaves identically on both
-`/v6/` and `/v7/`, signed in and signed out, and that it does not redirect or
-require a CSRF token. Only then add it to `src/geekbench/urls.ts`.
-
-**Why it was deferred:** the current side-effect approach was arrived at after
-significant trial and error. It works. Swapping it needs evidence, not tidiness.
-
-## 4. Awaited baseline restore adds latency before badges appear
-
-**Where:** `restoringBaseline` in `src/content/comparisonPage.ts`.
-
-The restore is now awaited so a page unload cannot cancel it. That inserts one
-request between fetching instruction data and rendering badges. This is the
-intended trade — a lost baseline is worse than a slower badge — but the delay
-has not been measured on a real page.
-
-**How to check:** load a Geekbench 7 comparison signed in with a cold IndexedDB
-cache and time from DOM ready to first badge. If it is disruptive, render badges
-first and restore afterwards, keeping the restore awaited within the same task.
-
-## 5. Geekbench 6 restores the baseline even when it never fetched
-
-**Where:** the `generation === 6` branch in `annotateGeekbenchComparisonPage`.
-
-When `versionSupportsInstructionSets` rejects both results (pre-6.4 results),
-`loadInstructionSets` returns without fetching, but the surrounding
-`restoringBaseline` still reapplies the baseline. Re-selecting the baseline that
-is already selected should be a no-op, so this is one wasted request in a rare
-path, accepted in exchange for never reasoning about whether a clear happened.
-
-**How to check:** load a comparison of two pre-6.4 results and confirm the
-baseline is unchanged afterwards. If reapplying turns out not to be idempotent,
-move the fetch decision above `restoringBaseline`.
-
-## 6. Behaviour changes from the audit that only manual testing can confirm
+## 4. Behaviour changes from the audit that only manual testing can confirm
 
 None of these are covered by automated tests.
 
@@ -119,48 +89,32 @@ None of these are covered by automated tests.
   `Cache-Control`. Successful lookups are still cached in IndexedDB. Confirm
   repeat visits do not become noticeably slower.
 
-## 7. Coverage gaps
+## 5. Coverage gaps
 
 The fixture tests cover selectors and row ordering for both generations. Nothing
 automated covers:
 
 - `src/cache/ResultsCache.ts` (IndexedDB) at all.
-- The baseline clear/restore lifecycle — the highest-risk logic in the codebase.
+- The comparison endpoints' actual session side effects and concurrent request
+  behavior.
 - Svelte mounting: `mountBadges.ts`, the system-information row insertion, and
   the already-annotated guards.
-- Manifest generation, the popup, and settings persistence beyond
-  `loadSettings`.
+- Browser-specific manifest generation beyond the supported-generation match
+  assertion, the popup, and settings persistence beyond `loadSettings`.
 
 Stored fixtures are all **logged-out** captures. There is no logged-in Geekbench
 7 fixture, so the only page shape that actually yields instruction data is
 exercised solely by hand.
 
-**Worth doing first:** a fixture-driven test for the baseline lifecycle using an
-injectable `fetch`, asserting that a restore follows any attempt that could have
-cleared, and that Geekbench 6 never issues an explicit clear.
+The remaining baseline coverage requires a live session or a higher-level
+browser test; unit coverage cannot establish the undocumented endpoint effects.
 
-## 8. Page parsing depends on Svelte-generated class names
-
-**Where:** the already-annotated guards in `singleResultPage.ts`
-(`.gb-system-info-container`) and `comparisonPage.ts`
-(`.gb-instruction-container`).
-
-Both query for classes declared inside the scoped `<style>` blocks of
-`SystemInstructionSets.svelte` and `TableInstructionSets.svelte`. Svelte 5 keeps
-the authored class and appends a scope hash, so this works today and is verified
-in the build output — but it is the one place where page parsing depends on
-component internals, which `docs/architecture.md` otherwise forbids.
-
-**Fix when convenient:** mark the containers created in
-`src/content/mountBadges.ts` with an explicit `data-geeklens-*` attribute and
-query that instead, leaving the CSS classes purely presentational.
-
-## 9. The manifest duplicates the supported-generation list
+## 6. The manifest duplicates the supported-generation list
 
 `SUPPORTED_GENERATIONS` in `src/geekbench/generation.ts` drives URL parsing,
 content-script routing, and the background action toggle.
 `src/manifest.json` cannot read it and must be edited by hand.
 
-**Fix when convenient:** generate the `content_scripts.matches` entries in
-`generateManifest` in `vite.config.ts`, which already builds the manifest
-object, or add a test asserting the manifest matches the constant.
+`generation.test.ts` asserts that the manifest matches this constant, so drift
+fails the test suite. Generating the entries in `vite.config.ts` remains an
+optional way to remove the duplication entirely.

@@ -6,7 +6,7 @@ import {
   type GeekbenchGeneration,
 } from '../geekbench/generation';
 import { fetchInstructionSetsFromPayload } from '../geekbench/resultPayloadClient';
-import { baselineUrl, comparisonUrl } from '../geekbench/urls';
+import { comparisonUrl } from '../geekbench/urls';
 import {
   comparisonInstructionStatus,
   initialInstructionStatus,
@@ -24,6 +24,7 @@ import {
 import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
 import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache } from '../cache/ResultsCache';
+import { withClearedComparisonBaseline } from './comparisonBaseline';
 
 // Extract result IDs from the URL
 function extractResultIds(): { baseline: string | null; primary: string | null } {
@@ -43,8 +44,6 @@ function extractResultIds(): { baseline: string | null; primary: string | null }
  * Using the exact compare url without a baseline as:
  * 1. API requires logging in
  * 2. Any other url redirects back to this page (that has no ISA info)
- * Requesting it clears the selected baseline as a side effect, so callers must
- * run this inside `restoringBaseline`.
  */
 async function fetchInstructionSetsFromHtml(
   generation: GeekbenchGeneration,
@@ -111,61 +110,6 @@ async function loadInstructionSets(
   }
 }
 
-async function clearBaseline(generation: GeekbenchGeneration, primary: string) {
-  const result = await fetch(comparisonUrl(generation, primary), { credentials: 'same-origin' });
-  if (!result.ok) {
-    console.warn('GeekLens: clearing baseline failed', result.statusText);
-  }
-}
-
-async function reapplyBaseline(generation: GeekbenchGeneration, baseline: string) {
-  const result = await fetch(baselineUrl(generation, baseline), { credentials: 'same-origin' });
-  if (!result.ok) {
-    console.warn(`GeekLens: reapplying baseline failed`, result.statusText);
-  }
-  console.log('GeekLens: ReapplyBaseline done');
-}
-
-/**
- * Runs `fetchResults`, then always restores Geekbench's selected baseline.
- *
- * Baseline selection is shared server-side session state, not a URL parameter,
- * so it must be restored even when every fetch fails — which is the normal
- * outcome for signed-out visitors. The restore is awaited so a page unload
- * cannot cancel it and strand the user without their baseline.
- */
-async function restoringBaseline<T>(
-  generation: GeekbenchGeneration,
-  baseline: string,
-  fetchResults: () => Promise<T>,
-): Promise<T> {
-  try {
-    return await fetchResults();
-  } finally {
-    await reapplyBaseline(generation, baseline).catch((error) =>
-      console.error('GeekLens: could not restore comparison baseline', error),
-    );
-  }
-}
-
-/**
- * Geekbench 7 only: the `.gb6` payload endpoint appears to require that no
- * baseline is selected, so clear it up front rather than relying on a fetch
- * side effect. Geekbench 6 does not need this because its HTML fetches clear
- * the baseline themselves.
- */
-function withClearedBaseline<T>(
-  generation: GeekbenchGeneration,
-  primary: string,
-  baseline: string,
-  fetchResults: () => Promise<T>,
-): Promise<T> {
-  return restoringBaseline(generation, baseline, async () => {
-    await clearBaseline(generation, primary);
-    return fetchResults();
-  });
-}
-
 // Main function to annotate the comparison page
 export async function annotateGeekbenchComparisonPage() {
   if (isPageAnnotated()) {
@@ -194,36 +138,36 @@ export async function annotateGeekbenchComparisonPage() {
     // Get Geekbench versions
     const { primary: primaryVersion, baseline: baselineVersion } = getComparisonVersions();
 
-    let primaryInstructions = await resultsCache.getInstructionSet(generation, primary);
-    let baselineInstructions = await resultsCache.getInstructionSet(generation, baseline);
+    const primaryCached = await resultsCache.getInstructionSet(generation, primary);
+    const baselineCached = await resultsCache.getInstructionSet(generation, baseline);
     await waitForElement('table.comparison-benchmark-table');
 
-    const needsFetch = !primaryInstructions || !baselineInstructions;
-    // Geekbench 7 payloads require an authenticated session, so fetching while
-    // signed out cannot succeed and would disturb the baseline for nothing.
-    // Revisit if a newer Geekbench exposes instruction sets to logged-out
-    // visitors again — see "Known coupling and pitfalls" in docs/architecture.md.
-    const cannotFetch = generation === 7 && signedOut;
-    if (cannotFetch && needsFetch) {
+    if (generation === 7 && signedOut && (!primaryCached || !baselineCached)) {
       console.log('GeekLens: Signed out of Geekbench 7, skipping payload fetch');
     }
 
+    let primaryInstructions = primaryCached;
+    let baselineInstructions = baselineCached;
+    const needsPrimaryFetch =
+      !primaryInstructions &&
+      (primaryVersion === null || versionSupportsInstructionSets(primaryVersion));
+    const needsBaselineFetch =
+      !baselineInstructions &&
+      (baselineVersion === null || versionSupportsInstructionSets(baselineVersion));
+    const needsFetch = needsPrimaryFetch || needsBaselineFetch;
+    const cannotFetch = generation === 7 && signedOut;
+
     if (needsFetch && !cannotFetch) {
-      if (generation === 7) {
-        // Requests are sequential because baseline selection is shared session
-        // state; overlapping them would race on it.
-        await withClearedBaseline(generation, primary, baseline, async () => {
-          primaryInstructions ||= await loadInstructionSets(generation, primary, primaryVersion);
-          baselineInstructions ||= await loadInstructionSets(generation, baseline, baselineVersion);
-        });
-      } else {
-        await restoringBaseline(generation, baseline, async () => {
-          [primaryInstructions, baselineInstructions] = await Promise.all([
-            primaryInstructions || loadInstructionSets(generation, primary, primaryVersion),
-            baselineInstructions || loadInstructionSets(generation, baseline, baselineVersion),
-          ]);
-        });
-      }
+      await withClearedComparisonBaseline(generation, primary, baseline, async () => {
+        [primaryInstructions, baselineInstructions] = await Promise.all([
+          needsPrimaryFetch
+            ? loadInstructionSets(generation, primary, primaryVersion)
+            : primaryInstructions,
+          needsBaselineFetch
+            ? loadInstructionSets(generation, baseline, baselineVersion)
+            : baselineInstructions,
+        ]);
+      });
     }
 
     // If at least one CPU has instruction sets, we can proceed
@@ -243,6 +187,16 @@ export async function annotateGeekbenchComparisonPage() {
         generation,
         Boolean(primaryInstructions),
         Boolean(baselineInstructions),
+        {
+          primary:
+            generation === 6 &&
+            primaryVersion !== null &&
+            !versionSupportsInstructionSets(primaryVersion),
+          baseline:
+            generation === 6 &&
+            baselineVersion !== null &&
+            !versionSupportsInstructionSets(baselineVersion),
+        },
       ),
     );
   } catch (error) {
@@ -348,7 +302,7 @@ function annotateGraphRow(
   }
 
   // Check if already annotated
-  if (cpuCell.querySelector('.gb-instruction-container')) {
+  if (cpuCell.querySelector('[data-geeklens-instructions]')) {
     console.warn(`Already annotated`);
     return;
   }

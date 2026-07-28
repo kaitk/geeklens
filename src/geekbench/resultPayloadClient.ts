@@ -5,10 +5,9 @@ import { resultPayloadUrl } from './urls';
 /**
  * Fetches a result's `.gb6` payload and returns its instruction-set string.
  *
- * The endpoint requires an authenticated session, and appears to require that
- * no comparison baseline is selected — callers on comparison pages must wrap
- * this in `withClearedBaseline`. Signed-out visitors get a login response,
- * which surfaces here as a non-OK status or a payload without metric 20000.
+ * The endpoint requires an authenticated session and fails while a comparison
+ * baseline is selected. Signed-out visitors get a login response, which
+ * surfaces here as a non-OK status or a payload without metric 20000.
  *
  * Deliberately sends no long-lived `Cache-Control`: successful lookups are
  * already cached in IndexedDB by result ID, whereas HTTP-caching this URL

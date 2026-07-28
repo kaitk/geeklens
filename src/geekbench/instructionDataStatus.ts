@@ -45,12 +45,32 @@ export function comparisonInstructionStatus(
   generation: GeekbenchGeneration,
   hasPrimaryInstructions: boolean,
   hasBaselineInstructions: boolean,
+  predatesInstructionData: { primary: boolean; baseline: boolean } = {
+    primary: false,
+    baseline: false,
+  },
 ): InstructionDataStatus {
   if (hasPrimaryInstructions && hasBaselineInstructions) {
     return { text: 'GeekLens Active', type: 'info' };
   }
 
   if (hasPrimaryInstructions || hasBaselineInstructions) {
+    if (generation === 6) {
+      const unavailableResult =
+        !hasPrimaryInstructions && predatesInstructionData.primary
+          ? 'primary'
+          : !hasBaselineInstructions && predatesInstructionData.baseline
+            ? 'baseline'
+            : null;
+
+      if (unavailableResult) {
+        return {
+          text: `GeekLens: Partial data — ${unavailableResult} result predates Geekbench 6.4`,
+          type: 'warning',
+        };
+      }
+    }
+
     return generation === 7
       ? {
           text: 'GeekLens: Partial data — sign in and reload',
@@ -60,6 +80,13 @@ export function comparisonInstructionStatus(
           text: 'GeekLens: Partial instruction data',
           type: 'warning',
         };
+  }
+
+  if (generation === 6 && predatesInstructionData.primary && predatesInstructionData.baseline) {
+    return {
+      text: 'GeekLens: No instruction data — both results predate Geekbench 6.4',
+      type: 'warning',
+    };
   }
 
   return singleResultInstructionStatus(generation, false);

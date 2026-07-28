@@ -24,8 +24,7 @@ export function resultPayloadUrl(generation: GeekbenchGeneration, resultId: stri
 
 /**
  * Comparison page for a single result. Requesting it without a baseline clears
- * the session's selected baseline as a side effect, which is how
- * `withClearedBaseline` clears it.
+ * the session's selected baseline.
  */
 export function comparisonUrl(generation: GeekbenchGeneration, resultId: string): string {
   return `${BROWSER_ORIGIN}/v${generation}/cpu/compare/${encodeURIComponent(resultId)}/`;

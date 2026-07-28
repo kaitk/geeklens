@@ -1,10 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 import {
+  SUPPORTED_GENERATIONS,
   isComparisonPath,
   parseGeekbenchGeneration,
   resultCacheKey,
   versionSupportsInstructionSets,
 } from './generation';
+import { BROWSER_HOST } from './urls';
 
 describe('parseGeekbenchGeneration', () => {
   test('recognizes supported CPU result paths', () => {
@@ -47,4 +49,14 @@ describe('versionSupportsInstructionSets', () => {
 
 test('resultCacheKey namespaces result IDs by generation', () => {
   expect(resultCacheKey(6, '1248')).not.toBe(resultCacheKey(7, '1248'));
+});
+
+test('manifest URL matches stay synchronized with supported generations', async () => {
+  const manifest = await Bun.file(new URL('../manifest.json', import.meta.url)).json();
+  const expectedMatches = SUPPORTED_GENERATIONS.map(
+    (generation) => `*://${BROWSER_HOST}/v${generation}/cpu/*`,
+  );
+
+  expect(manifest.content_scripts).toHaveLength(1);
+  expect(manifest.content_scripts[0].matches).toEqual(expectedMatches);
 });

@@ -73,7 +73,7 @@ async function getInstructionSets(
 function annotateSystemInstructionSets(generation: GeekbenchGeneration, instructionSets: string) {
   const valueCell =
     generation === 6 ? findInstructionSetValueCell() : insertGeekbench7InstructionSetRow();
-  if (!valueCell || valueCell.querySelector('.gb-system-info-container')) return;
+  if (!valueCell || valueCell.querySelector('[data-geeklens-system-info]')) return;
 
   valueCell.textContent = '';
   mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets));
