@@ -1,52 +1,52 @@
 # GeekLens Privacy Policy
 
-Last Updated: 2025-05-15
+Last Updated: 2026-07-28
 
 ## Overview
 
-GeekLens is a browser extension that enhances Geekbench CPU benchmark results with instruction set information. We are committed to protecting your privacy and being transparent about our data practices.
+GeekLens is a browser extension that enhances Geekbench CPU benchmark results
+with instruction-set information. This policy explains the information that the
+extension processes locally to provide that feature.
 
 ## Data Collection
 
-GeekLens collects and processes minimal data necessary for its functionality:
+GeekLens does not collect or transmit user data to the developer, analytics
+providers, advertisers, or other third parties. It contains no analytics,
+telemetry, advertising, or tracking.
 
-### Data We Collect:
+## Local Processing and Storage
 
-- **Extension Settings**: User preferences and configuration options stored locally in your browser
-- **Cached CPU Information**: Processed instruction set data from Geekbench pages to improve performance
-- **Page URLs**: Only Geekbench result page URLs are accessed to determine when to activate the extension
+GeekLens processes and stores only what is necessary for its user-facing
+functionality:
 
-### Data We DO NOT Collect:
+- **Extension settings:** Badge color and tooltip preferences are stored using
+  browser synchronized storage. The browser vendor may synchronize these
+  settings when browser sync is enabled; the developer cannot access them.
+- **Cached CPU information:** Public Geekbench result IDs and instruction-set
+  metadata are cached in page-origin IndexedDB to avoid repeated requests.
+- **Geekbench page content:** The current Geekbench CPU result or comparison
+  page is read locally to identify results and add annotations. GeekLens does
+  not record general browsing history or access unrelated websites.
+- **Geekbench requests:** When necessary, the extension requests result metadata
+  directly from `browser.geekbench.com` using the user's existing Geekbench
+  session. GeekLens does not read or store the user's credentials.
 
-- Personal identification information
-- Browsing history outside of Geekbench
-- User credentials or passwords
-- Analytics or tracking data
-- Data from other websites or tabs
-
-## How We Use Data
-
-The data collected is used exclusively for:
-
-- Providing enhanced CPU information on Geekbench result pages
-- Storing user preferences locally
-- Caching processed data for improved performance
-
-## Data Storage
-
-All data is stored locally on your device using Chrome's storage API. No data is transmitted to external servers or third parties.
+No personally identifiable information, health information, financial
+information, authentication information, personal communications, location,
+web history, or user-activity data is collected.
 
 ## Data Sharing
 
-GeekLens does not share, sell, or transfer any user data to third parties. All processing occurs locally within your browser.
+GeekLens does not sell, share, or transfer user data.
 
 ## User Rights
 
 You can:
 
-- Clear all stored data by uninstalling the extension
-- Modify or delete stored preferences through the extension settings
-- View what data is stored using browser developer tools
+- Clear stored data by uninstalling the extension or clearing site data for
+  `browser.geekbench.com`.
+- Modify stored preferences through the extension settings.
+- Inspect locally stored information using browser developer tools.
 
 ## Changes to This Policy
 
@@ -58,4 +58,5 @@ For questions about this privacy policy or GeekLens, please contact: kaitkasak@g
 
 ## Compliance
 
-This extension complies with the Chrome Web Store Developer Program Policies.
+GeekLens is intended to comply with the extension policies of the Chrome Web
+Store, Microsoft Edge Add-ons, and Firefox Add-ons.

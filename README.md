@@ -26,6 +26,15 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
    - Enable "Developer mode"
    - Click "Load unpacked" and select the repository folder
 
+### Edge
+
+1. Install from [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/geeklens/llppfcakgcedojgfjfemijfekjnpekma)
+2. Or install manually:
+   - Download this repository
+   - Go to `edge://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked" and select the `dist/chrome` directory
+
 ### Firefox
 
 1. Install from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/geeklens/)
