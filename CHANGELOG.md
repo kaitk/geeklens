@@ -1,12 +1,18 @@
 # Changelog
 
-## Unreleased
+## [v0.4.0] - 2026-07-28
 
 ### Added
 
-- Added Geekbench 7 CPU result and comparison support.
-- Read Geekbench 7 instruction sets from metric `20000` in result payloads.
-- Added amber warnings for provisional Geekbench 7 per-workload ISA mappings.
+- Added initial support for Geekbench 7 CPU result and comparison pages.
+
+### Notes
+
+- Geekbench 7 instruction data requires signing in to Geekbench, including on
+  single-result pages.
+- Per-test Geekbench 7 instruction information is extremely limited and marked
+  as provisional until Primate Labs publishes
+  `geekbench7-benchmark-internals.pdf`.
 
 ## [v0.3.0] - 2025-05-26
 

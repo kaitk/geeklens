@@ -41,10 +41,16 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 2. Visit a supported CPU result page (for example, https://browser.geekbench.com/v7/cpu/1248)
 3. GeekLens will automatically enhance the page with instruction set annotations
 
+Geekbench 7 instruction data is only available while signed in to Geekbench,
+including on single-result pages.
+
 ## Data Sources
 
 - Geekbench 6 workload mappings are based on the [Geekbench 6 benchmark internals documentation](https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf).
-- Geekbench 7 system instruction sets are read from the result payload. Per-workload Geekbench 7 mappings marked with an amber warning are inferred from equivalent Geekbench 6 workloads because no Geekbench 7 benchmark internals document is currently available.
+- Geekbench 7 system instruction sets are read from the result payload.
+  Per-test instruction information is currently extremely limited and marked
+  with an amber warning until Primate Labs publishes
+  `geekbench7-benchmark-internals.pdf`.
 - See [Geekbench 7 data sources and confidence](docs/geekbench7-sources.md) for mapping provenance, known unknowns, and research requirements.
 - If you have any good sources for instruction set data, **particularly for RISC-V** please submit a pull request!
 
