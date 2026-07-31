@@ -13,20 +13,21 @@ describe('Geekbench 7 benchmark mappings', () => {
     expect(BENCHMARKS_V7['File Compression'].instructions).not.toContain('AESNI');
   });
 
-  test('warns without naming instructions for suspected workloads', () => {
+  test('resolves no match for suspected workloads regardless of reported support', () => {
     for (const name of ['Ray Tracer', 'Game Physics']) {
       // SSE2 and NEON are reported by every x86 and ARM result respectively, so
-      // badging the library minimums would discriminate nothing.
-      const match = getV7SupportedInstructions(name, new Set(['SSE2', 'AVX2', 'NEON']));
-
-      expect(match?.confidence).toBe('suspected');
-      expect(match?.instructions).toEqual([]);
-      expect(match?.confidenceNote).toContain('Likely SIMD-accelerated');
+      // badging the library minimums would discriminate nothing. With nothing
+      // specific to name, these render nothing rather than a lone warning.
+      expect(getV7SupportedInstructions(name, new Set(['SSE2', 'AVX2', 'NEON']))).toBeNull();
+      expect(getV7SupportedInstructions(name, new Set())).toBeNull();
     }
   });
 
-  test('emits the suspected note even when the CPU reports no instructions', () => {
-    expect(getV7SupportedInstructions('Game Physics', new Set())?.confidenceNote).toBeDefined();
+  test('retains suspected notes as documentation even though they never render', () => {
+    for (const name of ['Ray Tracer', 'Game Physics']) {
+      expect(BENCHMARKS_V7[name].confidence).toBe('suspected');
+      expect(BENCHMARKS_V7[name].confidenceNote).toContain('Likely SIMD-accelerated');
+    }
   });
 
   test('marks inherited mappings as inferred', () => {

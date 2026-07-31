@@ -12,10 +12,10 @@
 
   let settingsStore = getSettingsStore();
 
-  // A suspected workload has nothing but the warning, so hiding warnings must
-  // drop its container too rather than leave an empty, still-spaced row.
+  // The warning only ever qualifies badges that are present; a workload with no
+  // instructions to name resolves to no match and never reaches this component.
   const showWarning = $derived(Boolean(confidenceNote) && settingsStore.value.mappingWarnings);
-  const showContainer = $derived(instructions.length > 0 || showWarning);
+  const showContainer = $derived(instructions.length > 0);
 </script>
 
 {#if showContainer}

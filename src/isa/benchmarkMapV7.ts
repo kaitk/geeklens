@@ -4,7 +4,9 @@ import type { Instruction } from './instructions';
 /**
  * `suspected` workloads carry a note but no instruction names: the workload is
  * near-certainly SIMD-accelerated, yet naming extensions would be a guess. Such
- * entries keep `instructions` empty and still render the amber warning.
+ * entries keep `instructions` empty and render nothing at all; their notes exist
+ * so the reasoning survives here rather than being rediscovered. Promote one to
+ * `inferred` only once it can name instructions.
  */
 export type MappingConfidence = 'confirmed' | 'inferred' | 'suspected';
 
@@ -72,16 +74,10 @@ export function getV7SupportedInstructions(
   const benchmark = BENCHMARKS_V7[benchmarkName];
   if (!benchmark) return null;
 
-  // A suspected workload names no instructions by design, so it is the note —
-  // not the badge list — that has to reach the page.
-  if (benchmark.confidence === 'suspected') {
-    return {
-      instructions: [],
-      confidence: benchmark.confidence,
-      confidenceNote: benchmark.confidenceNote,
-    };
-  }
-
+  // A `suspected` workload names no instructions, so it resolves to no match
+  // and renders nothing. Its note is retained above as documentation of what is
+  // and is not known, not as page content: a lone warning on a row with no
+  // badges clutters the table without telling the reader anything actionable.
   const instructions = getSupportedInstructions(benchmark, supportedInstructions);
   if (instructions.length === 0) return null;
 
