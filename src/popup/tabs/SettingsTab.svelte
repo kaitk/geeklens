@@ -44,45 +44,39 @@
       <p>Choose which GeekLens additions appear on result pages.</p>
     </div>
 
-    <label class="setting-row is-disabled">
+    <label class="setting-row">
       <span
-        ><strong>Reference averages <em>Coming next</em></strong><small
-          >Geekbench Browser averages and deltas</small
+        ><strong>Reference averages</strong><small>Geekbench Browser averages and deltas</small
         ></span
       >
-      <input type="checkbox" bind:checked={settings.showReferenceComparison} disabled />
+      <input type="checkbox" bind:checked={settings.showReferenceComparison} />
     </label>
-    <label class="setting-row is-disabled">
+    <label class="setting-row">
       <span
-        ><strong>Processor identity <em>Coming next</em></strong><small
-          >Vendor, ISA family, and catalogue link</small
+        ><strong>Processor identity</strong><small>Vendor, ISA family, and catalogue link</small
         ></span
       >
-      <input type="checkbox" bind:checked={settings.showProcessorSummary} disabled />
+      <input type="checkbox" bind:checked={settings.showProcessorSummary} />
     </label>
-    <label class="setting-row is-disabled">
+    <label class="setting-row">
       <span
-        ><strong>Topology &amp; MT scaling <em>Coming next</em></strong><small
-          >Core layout and score scaling</small
+        ><strong>Topology &amp; MT scaling</strong><small>Core layout and score scaling</small
         ></span
       >
-      <input type="checkbox" bind:checked={settings.showTopologyScaling} disabled />
+      <input type="checkbox" bind:checked={settings.showTopologyScaling} />
     </label>
-    <label class="setting-row is-disabled">
+    <label class="setting-row">
       <span
-        ><strong>Frequency distribution <em>Coming next</em></strong><small
-          >Geekbench frequency sample summary</small
+        ><strong>Frequency distribution</strong><small>Geekbench frequency sample summary</small
         ></span
       >
-      <input type="checkbox" bind:checked={settings.showFrequencyDistribution} disabled />
+      <input type="checkbox" bind:checked={settings.showFrequencyDistribution} />
     </label>
-    <label class="setting-row is-disabled">
+    <label class="setting-row">
       <span
-        ><strong>Memory details <em>Coming next</em></strong><small
-          >Reported, computed, and published facts</small
-        ></span
+        ><strong>Memory details</strong><small>Reported, computed, and published facts</small></span
       >
-      <input type="checkbox" bind:checked={settings.showMemoryDetails} disabled />
+      <input type="checkbox" bind:checked={settings.showMemoryDetails} />
     </label>
     <label class="setting-row">
       <span

@@ -6,12 +6,14 @@
  */
 import type { Settings } from '../settings/settings';
 import { createAddedRowMarker } from './addedRowMarker';
+import { scoreDelta } from './scoreDelta';
 
 export interface ProcessorContextViewModel {
   name: string;
   vendor: string;
+  vendorKey: string;
   architecture: string;
-  cataloguePath: string;
+  cataloguePath: string | null;
   frequency: {
     minGHz: number;
     q1GHz: number;
@@ -19,9 +21,9 @@ export interface ProcessorContextViewModel {
     meanGHz: number;
     q3GHz: number;
     maxGHz: number;
-  };
-  clusters: string;
-  scaling: string;
+  } | null;
+  clusters: string | null;
+  scaling: string | null;
   reference: {
     singleCore: number;
     multiCore: number;
@@ -31,6 +33,11 @@ export interface ProcessorContextViewModel {
   memory: Array<{
     value: string;
     provenance: 'reported' | 'computed' | 'published';
+    detail?: string;
+    source?: {
+      url: string;
+      label: string;
+    };
   }>;
 }
 
@@ -67,7 +74,7 @@ function identity(name: string, preview: ProcessorContextViewModel): HTMLElement
   nameElement.textContent = nameWithoutVendor(name, preview.vendor);
 
   const vendorBadge = document.createElement('span');
-  vendorBadge.className = `geeklens-preview-badge geeklens-preview-badge-${preview.vendor.toLowerCase()}`;
+  vendorBadge.className = `geeklens-preview-badge geeklens-preview-badge-${preview.vendorKey}`;
   vendorBadge.textContent = preview.vendor;
 
   const architectureBadge = document.createElement('span');
@@ -76,21 +83,29 @@ function identity(name: string, preview: ProcessorContextViewModel): HTMLElement
 
   heading.append(vendorBadge, nameElement, architectureBadge);
 
-  const catalogue = document.createElement('a');
-  catalogue.className = 'geeklens-preview-catalogue';
-  catalogue.href = preview.cataloguePath;
-  catalogue.target = '_blank';
-  catalogue.rel = 'noopener noreferrer';
-  catalogue.textContent = 'Catalogue ↗';
-  heading.appendChild(catalogue);
+  if (preview.cataloguePath) {
+    const catalogue = document.createElement('a');
+    catalogue.className = 'geeklens-preview-catalogue';
+    catalogue.href = preview.cataloguePath;
+    catalogue.target = '_blank';
+    catalogue.rel = 'noopener noreferrer';
+    catalogue.textContent = 'Catalogue ↗';
+    heading.appendChild(catalogue);
+  }
   wrapper.appendChild(heading);
   return wrapper;
 }
 
-function frequency(preview: ProcessorContextViewModel, comparison: boolean): HTMLElement {
-  const { minGHz, q1GHz, medianGHz, meanGHz, q3GHz, maxGHz } = preview.frequency;
-  const span = maxGHz - minGHz || 1;
-  const position = (value: number) => `${((value - minGHz) / span) * 100}%`;
+function frequency(
+  preview: ProcessorContextViewModel,
+  comparison: boolean,
+  scale?: { minGHz: number; maxGHz: number },
+): HTMLElement {
+  const { minGHz, q1GHz, medianGHz, meanGHz, q3GHz, maxGHz } = preview.frequency!;
+  const scaleMin = scale?.minGHz ?? minGHz;
+  const scaleMax = scale?.maxGHz ?? maxGHz;
+  const span = scaleMax - scaleMin || 1;
+  const position = (value: number) => `${((value - scaleMin) / span) * 100}%`;
 
   const wrapper = document.createElement('div');
   wrapper.className = `geeklens-preview-frequency${comparison ? ' is-comparison' : ''}`;
@@ -130,6 +145,8 @@ function frequency(preview: ProcessorContextViewModel, comparison: boolean): HTM
     tooltip.appendChild(row);
   }
   chart.appendChild(tooltip);
+  chart.style.setProperty('--min', position(minGHz));
+  chart.style.setProperty('--max', position(maxGHz));
   chart.style.setProperty('--q1', position(q1GHz));
   chart.style.setProperty('--q3', position(q3GHz));
   chart.style.setProperty('--median', position(medianGHz));
@@ -145,9 +162,11 @@ function referenceLink(
   cataloguePath: string,
   generation: string,
   minimumUniqueResults?: number,
-): HTMLAnchorElement {
-  const difference = current - reference;
-  const percent = (difference / reference) * 100;
+): HTMLElement {
+  const delta = scoreDelta(current, reference);
+  if (!delta) return unavailableReference();
+  const difference = delta.absolute;
+  const percent = delta.percentage;
   const sign = difference >= 0 ? '+' : '−';
   const fullText = `${reference.toLocaleString()} avg ${sign}${Math.abs(difference).toLocaleString()} (${sign}${Math.abs(percent).toFixed(1)}%)`;
 
@@ -243,7 +262,7 @@ function annotateSingleScoreReferences(preview: ProcessorContextViewModel): void
     note.className = 'geeklens-preview-reference';
     const reference = preview.reference;
     note.appendChild(
-      reference
+      reference && preview.cataloguePath
         ? referenceLink(
             current,
             index === 0 ? reference.singleCore : reference.multiCore,
@@ -272,7 +291,7 @@ function annotateSinglePerformanceReferences(preview: ProcessorContextViewModel)
       : 'multiCore';
     const reference = preview.reference;
     scoreCell.appendChild(
-      reference
+      reference && preview.cataloguePath
         ? referenceLink(
             current,
             reference[scoreKind],
@@ -297,17 +316,25 @@ function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel):
     const value = document.createElement('span');
     value.textContent = fact.value;
 
-    const provenance = document.createElement('span');
+    const provenance = document.createElement(fact.source ? 'a' : 'span');
     provenance.className = `geeklens-preview-provenance is-${fact.provenance}`;
     provenance.textContent = fact.provenance;
     provenance.tabIndex = 0;
+    if (fact.source) {
+      const link = provenance as HTMLAnchorElement;
+      link.href = fact.source.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
+    const factDetail = fact.detail ? ` ${fact.detail}` : '';
+    const sourceDetail = fact.source ? ` Source: ${fact.source.label}. Click to open source.` : '';
     provenance.setAttribute(
       'aria-label',
-      `${fact.provenance}: ${MEMORY_PROVENANCE_HELP[fact.provenance]}`,
+      `${fact.provenance}: ${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`,
     );
     const tooltip = document.createElement('span');
     tooltip.className = 'geeklens-preview-row-tooltip';
-    tooltip.textContent = MEMORY_PROVENANCE_HELP[fact.provenance];
+    tooltip.textContent = `${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`;
     provenance.appendChild(tooltip);
 
     line.append(value, provenance);
@@ -331,9 +358,10 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
 
   for (const [className, text] of [
     ['geeklens-preview-native-topology', nativeTopology || 'Topology unavailable'],
-    ['', preview.clusters],
-    ['', preview.scaling],
+    ['', preview.clusters ?? ''],
+    ['', preview.scaling ?? ''],
   ]) {
+    if (!text) continue;
     const line = document.createElement('div');
     if (className) line.className = className;
     line.textContent = text;
@@ -344,7 +372,7 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
 
 function comparisonDetailRow(
   label: string,
-  previews: readonly ProcessorContextViewModel[],
+  previews: readonly (ProcessorContextViewModel | null)[],
   render: (preview: ProcessorContextViewModel, index: number) => HTMLElement,
 ): HTMLTableRowElement {
   const row = document.createElement('tr');
@@ -358,7 +386,8 @@ function comparisonDetailRow(
   for (const [index, preview] of previews.entries()) {
     const cell = document.createElement('td');
     cell.className = 'geeklens-preview-detail-value';
-    cell.appendChild(render(preview, index));
+    if (preview) cell.appendChild(render(preview, index));
+    else cell.textContent = 'Not available';
     row.appendChild(cell);
   }
   return row;
@@ -396,6 +425,7 @@ export function renderSingleProcessorContext(
 
     if (
       settings.showFrequencyDistribution &&
+      preview.frequency &&
       !cpuTable?.querySelector('[data-geeklens-preview-detail="frequency"]')
     ) {
       const frequencyRow = document.createElement('tr');
@@ -420,11 +450,14 @@ export function renderSingleProcessorContext(
     (table) => table.querySelector('th')?.textContent?.trim() === 'Memory Information',
   );
   const sizeCell = memoryTable?.querySelector('tbody tr td:last-child');
-  if (settings.showMemoryDetails && sizeCell) appendMemoryDetails(sizeCell, preview);
+  if (settings.showMemoryDetails && preview.memory.length > 0 && sizeCell) {
+    sizeCell.parentElement?.firstElementChild?.replaceChildren('Details');
+    appendMemoryDetails(sizeCell, preview);
+  }
 }
 
 export function renderComparisonProcessorContext(
-  previews: readonly [ProcessorContextViewModel, ProcessorContextViewModel],
+  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
   settings: Settings,
 ): void {
   const table = document.querySelector('table.system-information');
@@ -461,9 +494,14 @@ export function renderComparisonProcessorContext(
   }
   if (
     settings.showFrequencyDistribution &&
+    previews.some((preview) => preview?.frequency) &&
     !table?.querySelector('[data-geeklens-preview-detail="frequency"]')
   ) {
-    const frequencyRow = comparisonDetailRow('Frequency', previews, (preview) =>
+    const frequencyPreviews: readonly [
+      ProcessorContextViewModel | null,
+      ProcessorContextViewModel | null,
+    ] = [previews[0]?.frequency ? previews[0] : null, previews[1]?.frequency ? previews[1] : null];
+    const frequencyRow = comparisonDetailRow('Frequency', frequencyPreviews, (preview) =>
       frequency(preview, true),
     );
     detailRows.push(frequencyRow);
@@ -478,10 +516,12 @@ export function renderComparisonProcessorContext(
       .slice(1, 3)
       .forEach((cell, index) => {
         const preview = previews[index];
-        if (preview) appendMemoryDetails(cell, preview);
+        if (preview?.memory.length) appendMemoryDetails(cell, preview);
       });
   }
-  if (settings.showReferenceComparison) annotateComparisonReferences(previews);
+  if (settings.showReferenceComparison && previews[0] && previews[1]) {
+    annotateComparisonReferences([previews[0], previews[1]]);
+  }
 }
 
 function annotateComparisonReferences(
@@ -507,7 +547,7 @@ function annotateComparisonReferences(
           if (!preview) return;
           const reference = preview.reference;
           cell.appendChild(
-            reference
+            reference && preview.cataloguePath
               ? referenceLink(
                   current,
                   reference[scoreKind],

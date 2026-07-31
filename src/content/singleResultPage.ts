@@ -1,6 +1,10 @@
 import { categorizeInstructionSets } from '../isa/categories';
 import { parseGeekbenchGeneration, type GeekbenchGeneration } from '../geekbench/generation';
-import { extractProcessorLinks, type CanonicalProcessorLinks } from '../geekbench/processorLinks';
+import {
+  extractProcessorLinks,
+  mergeProcessorLinks,
+  type CanonicalProcessorLinks,
+} from '../geekbench/processorLinks';
 import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
 import {
   initialInstructionStatus,
@@ -18,10 +22,14 @@ import {
 } from './domUtils';
 import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
 import { isPageAnnotated, showStatus } from './statusBanner';
-import { resultsCache } from '../cache/ResultsCache';
+import { resultsCache, type CachedResultContext } from '../cache/ResultsCache';
 import { loadSettings } from '../settings/settings';
 import { markAddedRowLabel } from './addedRowMarker';
-import { applyProcessorContextPreferences } from './processorContextUi';
+import {
+  applyProcessorContextPreferences,
+  renderSingleProcessorContext,
+} from './processorContextUi';
+import { buildProcessorContextViewModel } from './processorContextViewModel';
 
 // Main function to annotate the Geekbench results
 export async function annotateGeekbenchResults() {
@@ -42,7 +50,10 @@ export async function annotateGeekbenchResults() {
     await waitForElement('table.benchmark-table');
     const settings = await loadSettings();
     applyProcessorContextPreferences(settings);
-    const instructionSets = await getInstructionSets(generation, resultId, signedOut);
+    const context = await getResultContext(generation, resultId, signedOut);
+    const instructionSets = context?.instructionSet ?? null;
+    const processorContext = buildProcessorContextViewModel(context);
+    if (processorContext) renderSingleProcessorContext(processorContext, settings);
     if (!instructionSets) {
       showStatus(singleResultInstructionStatus(generation, false));
       return;
@@ -58,13 +69,13 @@ export async function annotateGeekbenchResults() {
   }
 }
 
-async function getInstructionSets(
+async function getResultContext(
   generation: GeekbenchGeneration,
   resultId: string,
   signedOut: boolean,
-): Promise<string | null> {
+): Promise<CachedResultContext | null> {
   const cached = await resultsCache.getResultContext(generation, resultId);
-  const processorLinks = extractProcessorLinks();
+  const processorLinks = mergeProcessorLinks(cached?.processorLinks, extractProcessorLinks());
 
   // Geekbench 6 renders the instruction sets into the page; Geekbench 7 omits
   // the row entirely and only exposes them in the authenticated JSON payload.
@@ -77,7 +88,12 @@ async function getInstructionSets(
         processorLinks,
       });
     }
-    return instructionSets;
+    return {
+      instructionSet: instructionSets,
+      metadata: cached?.metadata ?? null,
+      processorLinks,
+      timestamp: cached?.timestamp ?? Date.now(),
+    };
   }
 
   // A signed-out payload request is not merely doomed: Geekbench stores the
@@ -98,7 +114,12 @@ async function getInstructionSets(
       processorLinks,
     });
   }
-  return instructionSets;
+  return {
+    instructionSet: instructionSets,
+    metadata,
+    processorLinks,
+    timestamp: cached?.timestamp ?? Date.now(),
+  };
 }
 
 function hasProcessorLinks(links: CanonicalProcessorLinks): boolean {

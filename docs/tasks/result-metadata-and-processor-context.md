@@ -1,9 +1,9 @@
 # Result metadata and processor context
 
-**Status:** stages 1 and 2 implemented. The complete-state UI/UX has been
-approved and retained as a detached, data-driven renderer; all fabricated
-preview data has been removed. Later stages remain planned and should be split
-into independently reviewable changes.
+**Status:** stages 1–8 are implemented for the validated Geekbench 7 processor
+chart scope. The complete-state UI/UX remains canonical and data-driven; all
+fabricated preview data has been removed. Every implemented data control is
+enabled and defaults on.
 **Raised:** 2026-07-31.
 
 Stage 1 added sanitized full-payload fixtures, linked/unlinked Mac HTML fixtures,
@@ -26,6 +26,75 @@ single/comparison pages to cache one result context per generation/result ID.
 The context includes normalized metadata, the compatibility instruction string,
 and explicit canonical processor/Mac links. Geekbench 6 keeps its rendered-HTML
 instruction path and gains link caching only where it shares existing requests.
+
+Stage 3 added a pure cached-context-to-view-model mapper and retained full result
+contexts in both page adapters. Geekbench 7 single and comparison pages now
+render real processor name, vendor, ISA family, and an explicitly discovered
+catalogue link in the approved native processor cells. Missing or malformed
+metadata renders no summary, and a missing comparison side retains its native
+Geekbench value. `showProcessorSummary` is now enabled and defaults on; the
+other four processor-context controls remain disabled and forced off. Existing
+ISA annotations continue to derive from the same context's instruction string.
+
+The first stage-7 slice added a generated, checked-in identity snapshot of 264
+AMD, Intel, and Qualcomm processors from the captured Geekbench 7 Processor
+Benchmark Chart, plus 15 Mac configurations from the captured Mac family table. The
+Mac page's conflicting Geekbench 6/7 score copy is recorded explicitly, so this
+slice imports its identities/configurations but not its scores. A pure
+resolver applies exact Mac path, processor path, and reviewed alias precedence,
+rejects ambiguous/configuration-incompatible aliases, and returns typed unmatched
+reasons. Only exact resolved entries produce catalogue links and score
+references. Runtime performs no catalogue request.
+
+Stage 4 maps cached frequency statistics into the view model and renders the
+approved native Frequency row on single and comparison pages. Comparison graphs
+use per-result scales so widely separated clock ranges do not squash either
+distribution, while visible and accessible text retains exact per-result
+min/mean/max values. Missing and all-zero captures render no single
+row and an explicit unavailable comparison cell. The default-on Frequency
+setting is enabled; no fetch or catalogue lookup was added.
+
+Stage 5 renders payload-reported capacity/configuration, conservatively computed
+DDR4/DDR5 theoretical bandwidth, and exact catalogue-published Apple/Qualcomm
+memory facts as separate one-fact-per-line values. Published provenance links to
+the reviewed first-party source and includes its retrieval date in accessible
+text. LPDDR/unified-memory bandwidth is never computed from payload fields, and
+unmatched Apple results retain capacity without fabricated specifications. The
+Memory setting is enabled and defaults on.
+
+The stage-5 follow-up displays payload transfer rates as nearby nominal
+hundreds when the observation is within one percent (for example, 3598 as
+3600), retaining the exact payload value in the provenance tooltip. This is a
+display normalization, not a claim that the configuration is a JEDEC-certified
+bin. Matched Apple entries expose the source-supported `Unified memory`
+technology label; LPDDR generations remain omitted unless an exact device or
+processor source supports them. Expanded single-result memory blocks relabel
+the native `Size` field to `Details`.
+
+The exact 10-core M1 Pro match is the first Apple LPDDR exception: independent
+technical documentation identifies its unified memory as LPDDR5-6400 on a
+256-bit interface, consistent with its published 200 GB/s maximum. It must not
+be labelled LPDDR5X.
+
+The Lenovo `21CQS02000` capture also pins an observed payload correction: its
+exact ThinkPad X13 Gen 3 AMD system/processor pair is matched to Lenovo's
+LPDDR5-6400 specification. The UI retains the conflicting DDR5/1596 payload
+values in the provenance tooltip and suppresses the invalid desktop-DDR
+bandwidth calculation. Four 32-bit subchannels alone are deliberately not used
+as an LPDDR heuristic because desktop DDR5 exposes the same topology.
+
+Stage 6 renders normalized core/thread totals, internally consistent anonymous
+cluster counts, and the submitted run's `MT score / ST score` ratio. It does not
+assign performance/efficiency roles or present the ratio as parallel
+efficiency. The topology setting is enabled and defaults on.
+
+Stages 7–8 now retain the Geekbench 7 single- and multi-core averages from the
+captured processor chart in the generated catalogue. Exact generation-matched
+processor identities expose signed absolute and percentage deltas through the
+approved score UI; unmatched processors, Geekbench 6 results, and Mac family
+tables with conflicting Geekbench 6/7 page copy expose no reference. The
+reference setting is enabled and defaults on. Mac averages remain the next data
+handoff once a capture unambiguously identifies them as Geekbench 7 CPU scores.
 
 ## Goal
 
@@ -137,12 +206,10 @@ files in order:
    and DOM ownership boundaries.
 5. `src/geekbench/__fixtures__/manifest.ts` — why each full fixture exists.
 
-Important current boundary: both page adapters cache full result contexts, but
-their local loading functions still return only instruction strings because no
-metadata UI exists yet. The first stage-3 change should return or retain a
-`CachedResultContext`/view model for rendering while continuing to derive the
-existing instruction annotations from `context.instructionSet`. Do not fetch the
-payload again from a component or feature-specific helper.
+Important current boundary: both page adapters retain full result contexts and
+derive the processor-identity view model and existing instruction annotations
+from the same cached/fetched context. The renderer performs no fetching, and no
+feature-specific payload request was introduced.
 
 The approved presentation is preserved in `src/content/processorContextUi.ts`.
 It accepts `ProcessorContextViewModel` data and performs no fetching, payload
@@ -151,26 +218,50 @@ from the page adapters until a real view-model builder exists. Do not replace or
 redesign it while doing the plumbing. `src/content/addedRowMarker.ts` owns the
 small dot and tooltip used to identify rows added by GeekLens.
 
-The popup already contains the final settings grouping and ordering. Controls
+The popup contains the final settings grouping and ordering. Controls
 appear in page order: reference averages, processor identity, topology/scaling,
-frequency, memory, then ISA. The five processor-context controls are disabled
-and forced off until their real implementation lands; ISA and the universal
-badge/tooltips preferences remain active. Enable each control only in the same
-reviewable change that supplies its real data.
+frequency, memory, then ISA. All processor-context controls now have real data
+paths and default on.
 
-Suggested implementation order from here:
+Next handoff:
 
-1. Finish stage 3 as the first small visible slice: build a pure
-   `ResultMetadata`/`CachedResultContext` to `ProcessorContextViewModel` mapper,
-   retain full contexts in both adapters, render processor/vendor/ISA identity
-   on single-result pages, then comparison pages, and enable only
-   `showProcessorSummary`.
-2. Build the identity resolver and minimal hardware catalogue portion of stage 7
-   before catalogue-sourced memory is needed. Score-average ingestion can wait.
-3. Add stages 4 and 5 independently behind default-off experimental settings.
-4. Add stage 6 only after comparison layout has room for another derived value.
-5. Complete stage 7 score references, then stage 8 deltas, only when
-   generation-compatible Geekbench Browser averages are available.
+1. Manually exercise representative single and comparison pages in unpacked
+   Chrome and Firefox builds as required by `AGENTS.md`.
+2. Add Mac score references only after obtaining a capture whose CPU-score copy
+   unambiguously identifies Geekbench 7; the current Mac page says Geekbench 6.
+3. Refresh the bundled processor chart through the maintainer generator when a
+   reviewed new snapshot is available.
+
+### Stage 3 completion and next handoff
+
+Stage 3 is covered by table-driven view-model tests for AMD, Intel, Apple,
+NVIDIA's generic CPU-name case, RISC-V unknown vendor, and missing metadata.
+DOM integration tests cover native single/comparison processor cells,
+primary-before-baseline order, a missing comparison side, duplicate guards, and
+the disabled setting. Settings tests cover the newly enabled identity control
+while continuing to force every unwired control off.
+
+Automated validation completed with formatting, lint, 118 unit/DOM tests,
+TypeScript/Svelte checks, and Chrome MV3 and Firefox MV2 builds. The build warned
+only that offline schema validation could not reach `json.schemastore.org`.
+Manual unpacked-extension checks against live authenticated Geekbench results
+remain outstanding because no live browser/session was available here.
+
+The stage-7 identity foundation adds six resolver tests; the complete automated
+suite now contains 124 passing tests. `scripts/generateProcessorCatalogue.ts`
+and `scripts/generateMacCatalogue.ts` regenerate the processor and Mac snapshots
+from maintainer captures. Reviewed payload aliases and explicitly observed
+processor/Mac link relationships remain in `processorCatalogue.ts` so generation
+does not silently widen matching rules.
+
+Stages 4–5 add display-model, DOM, provenance, unavailable-data, and shared-scale
+coverage; the complete automated suite now contains 133 passing tests. Manual
+unpacked-extension checks remain outstanding.
+
+Next handoff: implement stage 6 topology and score scaling from cached totals,
+clusters, and ST/MT scores. Preserve native topology text first, render clusters
+without assigning P/E roles, call the derived value `MT scaling`, and enable its
+default-on setting. Do not divide by cores/threads or describe it as efficiency.
 
 Required tests by slice:
 
@@ -228,15 +319,16 @@ Required tests by slice:
 Proposed settings shape (names may be adjusted once, before release):
 
 - `showProcessorSummary`: default on; vendor/ISA/name only.
-- `showFrequencyDistribution`: experimental, default off.
-- `showMemoryDetails`: experimental, default off.
-- `showTopologyScaling`: experimental, default off.
-- `showReferenceComparison`: experimental, default off.
+- `showFrequencyDistribution`: default on.
+- `showMemoryDetails`: default on once implemented.
+- `showTopologyScaling`: default on once implemented.
+- `showReferenceComparison`: default on once implemented.
 
 Additive settings remain backward-compatible because `loadSettings` merges
 stored values over `defaultSettings`. Update `SettingsTab.svelte` and
-`settings.test.ts` together. Experimental controls should say so in their label
-or supporting copy rather than relying on default-off status to communicate it.
+`settings.test.ts` together. Controls do not need experimental labeling; their
+supporting copy should describe the data shown. Functional Data shown controls
+default on.
 
 ### 1. Typed payload parser and fixtures
 
@@ -320,7 +412,7 @@ Acceptance criteria:
 - `showProcessorSummary` can disable only the new summary without disabling
   existing workload instruction badges.
 
-### 4. Frequency distribution (experimental, default off)
+### 4. Frequency distribution (toggleable, default on)
 
 **Already available:** `ResultMetadata.frequency` contains cleaned positive MHz
 samples and min/Q1/median/mean/Q3/max. The parser uses the documented lower-index
@@ -344,9 +436,9 @@ Implementation notes:
 - The compact graphic should place min/max whiskers and a mean marker. Only draw
   a quartile box/median line if those values are part of the chosen visual; do
   not call a min/mean/max-only line a box plot.
-- Use one linear MHz scale per result on single pages. For comparisons, use a
-  shared scale for both processors so positions are visually comparable, while
-  still printing exact values.
+- Use one linear MHz scale per result on both single and comparison pages. Local
+  comparison scales keep narrow distributions readable when processor clocks
+  differ substantially; print exact values so the ranges remain comparable.
 - Do not interpret the series as per-core, sustained boost, or P/E-cluster data.
   It is an unlabeled series supplied by Geekbench.
 
@@ -359,7 +451,7 @@ Acceptance criteria:
   without interpreting geometry or color.
 - Enabling the feature causes no payload or catalogue request.
 
-### 5. Memory configuration and theoretical bandwidth (experimental, default off)
+### 5. Memory configuration and theoretical bandwidth (toggleable, default on)
 
 **Already available:** payload memory capacity/type/clock/rate/channels and
 conservative DDR4/DDR5 theoretical bandwidth are normalized in
@@ -468,12 +560,15 @@ Acceptance criteria:
 - Comparison layout keeps primary/baseline association unambiguous and does not
   imply normalized per-core efficiency.
 
-### 7. Processor identity and reference catalogue (experimental, default off)
+### 7. Processor identity and reference catalogue (toggleable)
 
 **Already available:** result contexts cache explicit processor and Mac paths.
 `processorLinks.ts` accepts only same-origin canonical paths, maps comparison
-columns, and lets newly observed explicit links replace stale cached ones. No
-name heuristic or catalogue exists yet.
+columns, and lets newly observed explicit links replace stale cached ones. The
+bundled identity catalogue and resolver cover exact chart paths/names, reviewed
+payload aliases, the observed Apple M4/Mac mini paths, ambiguity rejection, and
+explicit unmatched reasons. Hardware specifications and score references are
+not yet represented.
 
 - First inspect result-page links and stable identifiers. Prefer an explicit
   Geekbench processor/Mac link when present.
@@ -607,10 +702,11 @@ However, do not manually “memorize” bare scores in TypeScript. Keep a genera
 data file plus provenance and retrieval date, and provide a maintenance script
 that fetches only on maintainer demand. Review diffs before committing updates.
 
-The snapshot must be generation-specific. Current processor pages describe their
-tables as Geekbench 6 data even while the Browser navigation promotes Geekbench
-7, so comparing a Geekbench 7 payload against those numbers would be invalid
-unless Geekbench clarifies or updates the source.
+The snapshot must be generation-specific. The processor chart captured on
+2026-07-31 explicitly describes Geekbench 7 user-submitted results and a minimum
+of five unique results per included processor. Identity generation currently
+ignores its scores. A later score snapshot must retain that generation, retrieval
+date, minimum-sample statement, and the chart's mutable-average provenance.
 
 Use the [Geekbench Processor Benchmark Chart](https://browser.geekbench.com/processor-benchmarks)
 as the broadest known discovery list. It is not a complete processor registry,
@@ -665,6 +761,8 @@ link, an explicit Mac link, and an unmatched processor.
 ## Hardware specification sources validated so far
 
 - [Apple: M1 Pro and M1 Max MacBook Pro](https://www.apple.com/newsroom/2021/10/apple-unveils-game-changing-macbook-pro/)
+- [AnandTech: M1 Pro and M1 Max SoC analysis](https://www.anandtech.com/show/17024/apple-m1-max-performance-review)
 - [Apple: M4 Mac mini and M4 Pro](https://www.apple.com/uk/newsroom/2024/10/apples-new-mac-mini-is-more-mighty-more-mini-and-built-for-apple-intelligence/)
 - [Apple: M5 Pro and M5 Max](https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/)
 - [Qualcomm: Snapdragon X2 Elite product brief](https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/Snapdragon-X2-Elite-Product-Brief.pdf)
+- [Lenovo: ThinkPad X13 Gen 3 AMD specifications](https://psref.lenovo.com/syspool/Sys/PDF/ThinkPad/ThinkPad_X13_Gen_3_AMD/ThinkPad_X13_Gen_3_AMD_Spec.html)

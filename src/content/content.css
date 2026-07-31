@@ -63,6 +63,22 @@ table.system-information td {
   color: #8f3142;
 }
 
+.geeklens-preview-badge-intel {
+  background: #e5f0f8;
+  color: #17608e;
+}
+
+.geeklens-preview-badge-nvidia {
+  background: #ebf4df;
+  color: #426b14;
+}
+
+.geeklens-preview-badge-qualcomm,
+.geeklens-preview-badge-google {
+  background: #f4e7ec;
+  color: #84334f;
+}
+
 .geeklens-preview-catalogue {
   margin-left: 2px;
   font-size: 11px;
@@ -121,8 +137,8 @@ table.system-information td {
 }
 
 .geeklens-preview-distribution .whisker {
-  right: 0;
-  left: 0;
+  right: calc(100% - var(--max));
+  left: var(--min);
   height: 1px;
   background: #a4a9ae;
 }
@@ -134,11 +150,11 @@ table.system-information td {
 }
 
 .geeklens-preview-distribution .cap.min {
-  left: 0;
+  left: var(--min);
 }
 
 .geeklens-preview-distribution .cap.max {
-  right: 0;
+  left: var(--max);
 }
 
 .geeklens-preview-distribution .box {

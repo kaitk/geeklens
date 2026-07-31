@@ -34,7 +34,11 @@ import type { CachedResultContext } from '../cache/ResultsCache';
 import { withClearedComparisonBaseline } from './comparisonBaseline';
 import { loadSettings } from '../settings/settings';
 import { markAddedRowLabel } from './addedRowMarker';
-import { applyProcessorContextPreferences } from './processorContextUi';
+import {
+  applyProcessorContextPreferences,
+  renderComparisonProcessorContext,
+} from './processorContextUi';
+import { buildProcessorContextViewModel } from './processorContextViewModel';
 
 // Extract result IDs from the URL
 function extractResultIds(): { baseline: string | null; primary: string | null } {
@@ -90,14 +94,14 @@ async function loadResultContext(
   version: string | null,
   cached: CachedResultContext | null,
   comparisonLinks: CanonicalProcessorLinks,
-): Promise<string | null> {
+): Promise<CachedResultContext | null> {
   try {
     // Check if version supports instruction sets
     if (version && !versionSupportsInstructionSets(version)) {
       console.log(
         `GeekLens: Skipping fetch for ${resultId}, version ${version} doesn't support instruction sets`,
       );
-      return null;
+      return cached;
     }
 
     if (generation === 7) {
@@ -109,10 +113,15 @@ async function loadResultContext(
         metadata,
         processorLinks: comparisonLinks,
       });
-      return instructionSet;
+      return {
+        instructionSet,
+        metadata,
+        processorLinks: mergeProcessorLinks(cached?.processorLinks, comparisonLinks),
+        timestamp: cached?.timestamp ?? Date.now(),
+      };
     }
 
-    if (cached?.instructionSet) return cached.instructionSet;
+    if (cached?.instructionSet) return cached;
 
     const fetched = await fetchInstructionSetsFromHtml(generation, resultId);
     const processorLinks = mergeProcessorLinks(comparisonLinks, fetched.processorLinks);
@@ -122,10 +131,15 @@ async function loadResultContext(
         processorLinks,
       });
     }
-    return fetched.instructionSet;
+    return {
+      instructionSet: fetched.instructionSet,
+      metadata: cached?.metadata ?? null,
+      processorLinks,
+      timestamp: cached?.timestamp ?? Date.now(),
+    };
   } catch (error) {
     console.error(`GeekLens: Error fetching data for result ${resultId}:`, error);
-    return null;
+    return cached;
   }
 }
 
@@ -188,8 +202,10 @@ export async function annotateGeekbenchComparisonPage() {
       console.log('GeekLens: Signed out of Geekbench 7, skipping payload fetch');
     }
 
-    let primaryInstructions = primaryCached?.instructionSet ?? null;
-    let baselineInstructions = baselineCached?.instructionSet ?? null;
+    let primaryContext = primaryCached;
+    let baselineContext = baselineCached;
+    let primaryInstructions = primaryContext?.instructionSet ?? null;
+    let baselineInstructions = baselineContext?.instructionSet ?? null;
     const needsPrimaryFetch =
       (generation === 7 ? !primaryCached?.metadata : !primaryInstructions) &&
       (primaryVersion === null || versionSupportsInstructionSets(primaryVersion));
@@ -201,7 +217,7 @@ export async function annotateGeekbenchComparisonPage() {
 
     if (needsFetch && !cannotFetch) {
       await withClearedComparisonBaseline(generation, primary, baseline, async () => {
-        [primaryInstructions, baselineInstructions] = await Promise.all([
+        [primaryContext, baselineContext] = await Promise.all([
           needsPrimaryFetch
             ? loadResultContext(
                 generation,
@@ -210,7 +226,7 @@ export async function annotateGeekbenchComparisonPage() {
                 primaryCached,
                 processorLinks.primary,
               )
-            : primaryInstructions,
+            : primaryContext,
           needsBaselineFetch
             ? loadResultContext(
                 generation,
@@ -219,9 +235,19 @@ export async function annotateGeekbenchComparisonPage() {
                 baselineCached,
                 processorLinks.baseline,
               )
-            : baselineInstructions,
+            : baselineContext,
         ]);
+        primaryInstructions = primaryContext?.instructionSet ?? null;
+        baselineInstructions = baselineContext?.instructionSet ?? null;
       });
+    }
+
+    primaryContext = mergeContextLinks(primaryContext, processorLinks.primary);
+    baselineContext = mergeContextLinks(baselineContext, processorLinks.baseline);
+    const primaryProcessor = buildProcessorContextViewModel(primaryContext);
+    const baselineProcessor = buildProcessorContextViewModel(baselineContext);
+    if (primaryProcessor || baselineProcessor) {
+      renderComparisonProcessorContext([primaryProcessor, baselineProcessor], settings);
     }
 
     // If at least one CPU has instruction sets, we can proceed
@@ -257,6 +283,17 @@ export async function annotateGeekbenchComparisonPage() {
     console.error('GeekLens: Failed to annotate comparison page', error);
     showStatus({ text: 'GeekLens Error', type: 'warning' });
   }
+}
+
+function mergeContextLinks(
+  context: CachedResultContext | null,
+  processorLinks: CanonicalProcessorLinks,
+): CachedResultContext | null {
+  if (!context) return null;
+  return {
+    ...context,
+    processorLinks: mergeProcessorLinks(context.processorLinks, processorLinks),
+  };
 }
 
 function annotateSystemInstructionSets(

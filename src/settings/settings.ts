@@ -18,11 +18,11 @@ export interface Settings {
 }
 
 export const defaultSettings: Readonly<Settings> = {
-  showProcessorSummary: false,
-  showTopologyScaling: false,
-  showFrequencyDistribution: false,
-  showMemoryDetails: false,
-  showReferenceComparison: false,
+  showProcessorSummary: true,
+  showTopologyScaling: true,
+  showFrequencyDistribution: true,
+  showMemoryDetails: true,
+  showReferenceComparison: true,
   showIsaAnnotations: true,
   coloredBadges: true,
   tooltips: true,
@@ -46,11 +46,6 @@ export async function loadSettings(): Promise<Settings> {
         // Keep approved-but-unwired features off even if the visual prototype
         // previously stored them as enabled. Remove an override only when that
         // feature is backed by a real result-context view model.
-        showProcessorSummary: false,
-        showTopologyScaling: false,
-        showFrequencyDistribution: false,
-        showMemoryDetails: false,
-        showReferenceComparison: false,
       };
     }
     console.debug('Failed to load geekLensSettings, returning default');

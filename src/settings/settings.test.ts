@@ -38,6 +38,9 @@ describe('loadSettings', () => {
 
     expect(settings.coloredBadges).toBe(false);
     expect(settings.tooltips).toBe(true);
+    expect(settings.showProcessorSummary).toBe(true);
+    expect(settings.showFrequencyDistribution).toBe(true);
+    expect(settings.showIsaAnnotations).toBe(true);
   });
 
   test('defaults mapping warnings on for settings stored before the option existed', async () => {
@@ -46,7 +49,7 @@ describe('loadSettings', () => {
     expect((await loadSettings()).mappingWarnings).toBe(true);
   });
 
-  test('keeps approved but unwired processor-context blocks disabled', async () => {
+  test('enables all implemented context controls', async () => {
     stored = {
       geekLensSettings: {
         coloredBadges: true,
@@ -60,11 +63,11 @@ describe('loadSettings', () => {
     };
     const settings = await loadSettings();
 
-    expect(settings.showProcessorSummary).toBe(false);
-    expect(settings.showTopologyScaling).toBe(false);
-    expect(settings.showFrequencyDistribution).toBe(false);
-    expect(settings.showMemoryDetails).toBe(false);
-    expect(settings.showReferenceComparison).toBe(false);
+    expect(settings.showProcessorSummary).toBe(true);
+    expect(settings.showTopologyScaling).toBe(true);
+    expect(settings.showFrequencyDistribution).toBe(true);
+    expect(settings.showMemoryDetails).toBe(true);
+    expect(settings.showReferenceComparison).toBe(true);
     expect(settings.showIsaAnnotations).toBe(true);
   });
 });
