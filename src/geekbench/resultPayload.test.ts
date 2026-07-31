@@ -6,6 +6,22 @@ async function fixture(resultId: string): Promise<unknown> {
   return Bun.file(new URL(`__fixtures__/${resultId}.gb6.json`, import.meta.url)).json();
 }
 
+/** Minimal payload carrying only the two identity metrics vendor classification
+ * reads, in the priority order the parser applies them. */
+function vendorOf(processorName: string, systemName: string): string | undefined {
+  return extractResultMetadata(
+    {
+      document_version: 7,
+      platform: { architecture: 'aarch64' },
+      metrics: [
+        { id: 5, value: systemName },
+        { id: 9, value: processorName },
+      ],
+    },
+    7,
+  )?.processor.vendor.value;
+}
+
 describe('extractInstructionSetsFromPayload', () => {
   test('extracts metric 20000 from a matching Geekbench payload', () => {
     const payload = {
@@ -69,6 +85,18 @@ describe('extractResultMetadata', () => {
     expect(metadata?.processor.vendor).toEqual({ value: 'nvidia', source: 'metric:5' });
   });
 
+  test('classifies mobile SoC vendors without hijacking their host systems', () => {
+    expect(vendorOf('Samsung Exynos 2400', 'Samsung SM-S926B')).toBe('samsung');
+    expect(vendorOf('MediaTek Dimensity 9400', 'Vivo X200')).toBe('mediatek');
+
+    // A Samsung chassis with a non-Samsung processor must classify by the
+    // processor: name candidates outrank the system-name fallback.
+    expect(vendorOf('Intel Core Ultra 7 155H', 'SAMSUNG Galaxy Book4 Pro')).toBe('intel');
+    expect(vendorOf('Snapdragon(R) X Elite - X1E80100', 'SAMSUNG Galaxy Book4 Edge')).toBe(
+      'qualcomm',
+    );
+  });
+
   test('extracts DDR4 and DDR5 configuration with generation-aware channel widths', async () => {
     const amd = extractResultMetadata(await fixture('1248'), 7);
     const intel = extractResultMetadata(await fixture('64437'), 7);
@@ -90,6 +118,54 @@ describe('extractResultMetadata', () => {
       channelWidthBits: 32,
     });
     expect(intel?.memory.theoreticalBandwidthGBs).toBeCloseTo(102.4);
+
+    // Both are 128-bit total: DDR4 as 2 x 64-bit channels, DDR5 as the 4 x
+    // 32-bit subchannels a dual-channel DDR5 configuration exposes.
+    expect(amd?.memory.busWidthBits).toBe(128);
+    expect(intel?.memory.busWidthBits).toBe(128);
+    expect(amd?.memory.reportedRateBelowJedecMinimum).toBeFalse();
+    expect(intel?.memory.reportedRateBelowJedecMinimum).toBeFalse();
+  });
+
+  test('suppresses bandwidth when a reported rate falls below its own JEDEC floor', () => {
+    // Soldered LPDDR5 is commonly reported under a desktop DDR5 label at its
+    // ~800 MHz command clock, so the stated rate cannot describe DDR5 at all.
+    const lpddr5 = extractResultMetadata(
+      {
+        document_version: 7,
+        platform: { architecture: 'x86_64' },
+        metrics: [
+          { id: 30, value: 'DDR5 SDRAM' },
+          { id: 75, value: '798 MHz', ivalue: 798 },
+          { id: 76, value: '4', ivalue: 4 },
+          { id: 87, value: '1596 MT/s', ivalue: 1596 },
+        ],
+      },
+      7,
+    );
+
+    expect(lpddr5?.memory.reportedRateBelowJedecMinimum).toBeTrue();
+    expect(lpddr5?.memory.theoreticalBandwidthGBs).toBeNull();
+    // Width is a topology fact and stays trustworthy even when the rate is not.
+    expect(lpddr5?.memory.busWidthBits).toBe(128);
+  });
+
+  test('keeps bandwidth for the lowest rate each DDR generation actually defines', () => {
+    const ddr4 = extractResultMetadata(
+      {
+        document_version: 7,
+        platform: { architecture: 'x86_64' },
+        metrics: [
+          { id: 30, value: 'DDR4 SDRAM' },
+          { id: 76, value: '2', ivalue: 2 },
+          { id: 87, value: '1600 MT/s', ivalue: 1600 },
+        ],
+      },
+      7,
+    );
+
+    expect(ddr4?.memory.reportedRateBelowJedecMinimum).toBeFalse();
+    expect(ddr4?.memory.theoreticalBandwidthGBs).toBeCloseTo(25.6);
   });
 
   test('keeps capacity when detailed memory configuration is absent', async () => {

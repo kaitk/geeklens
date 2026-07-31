@@ -27,6 +27,8 @@ export type ProcessorVendor =
   | 'qualcomm'
   | 'nvidia'
   | 'google'
+  | 'samsung'
+  | 'mediatek'
   | 'unknown';
 
 export interface SourcedValue<T> {
@@ -57,6 +59,13 @@ export interface MemoryMetadata {
   transferRateMTs: SourcedValue<number> | null;
   channels: SourcedValue<number> | null;
   channelWidthBits: number | null;
+  /** Total interface width: reported channels x per-channel width. */
+  busWidthBits: number | null;
+  /**
+   * The payload named a DDR generation but reported a rate below that
+   * generation's JEDEC minimum, so its type/rate pair cannot both be true.
+   */
+  reportedRateBelowJedecMinimum: boolean;
   theoreticalBandwidthGBs: number | null;
 }
 
@@ -214,6 +223,17 @@ function vendorFromText(value: string): ProcessorVendor | null {
   }
   if (normalized.includes('nvidia')) return 'nvidia';
   if (normalized.includes('google') || normalized.includes('tensor')) return 'google';
+  // Mobile vendors are matched on their SoC brands first. Callers pass the
+  // processor-name candidates ahead of system/board names, so a Samsung-chassis
+  // laptop with an Intel or AMD part still classifies by its processor.
+  if (normalized.includes('exynos') || normalized.includes('samsung')) return 'samsung';
+  if (
+    normalized.includes('mediatek') ||
+    normalized.includes('dimensity') ||
+    normalized.includes('helio')
+  ) {
+    return 'mediatek';
+  }
   return null;
 }
 
@@ -287,19 +307,48 @@ function memoryCapacity(metrics: Map<number, GeekbenchMetric>): SourcedValue<num
   };
 }
 
+/** Lowest data rate each JEDEC desktop generation is defined for, in MT/s.
+ *
+ * A payload reporting a rate below its own claimed generation's floor is
+ * self-inconsistent: the value cannot describe the technology it names. The
+ * sampled LPDDR5 laptop capture reports its ~800 MHz command clock as
+ * `1596 MT/s` under a `DDR5 SDRAM` label, because LPDDR5 runs WCK at 4x CK and
+ * the reporting path only sees CK. Treat that as an anomaly rather than
+ * silently scaling it: the true data rate is not recoverable from the payload.
+ */
+const JEDEC_MINIMUM_TRANSFER_RATE_MTS: Readonly<Record<'DDR4' | 'DDR5', number>> = {
+  DDR4: 1600,
+  DDR5: 3200,
+};
+
+function ddrGeneration(type: string | undefined): 'DDR4' | 'DDR5' | null {
+  if (/^DDR5\b/i.test(type ?? '')) return 'DDR5';
+  if (/^DDR4\b/i.test(type ?? '')) return 'DDR4';
+  return null;
+}
+
 function memoryMetadata(metrics: Map<number, GeekbenchMetric>): MemoryMetadata {
   const type = metricString(metrics, METRIC.memoryType);
   const clockMHz = metricFrequency(metrics, METRIC.memoryClock);
   const transferRateMTs = metricUnit(metrics, METRIC.memoryTransferRate, 'MT/s');
   const channels = metricInteger(metrics, METRIC.memoryChannels);
 
-  let channelWidthBits: number | null = null;
-  if (/^DDR5\b/i.test(type?.value ?? '')) channelWidthBits = 32;
-  else if (/^DDR4\b/i.test(type?.value ?? '')) channelWidthBits = 64;
+  const generation = ddrGeneration(type?.value);
+  const channelWidthBits = generation === 'DDR5' ? 32 : generation === 'DDR4' ? 64 : null;
 
+  // Soldered LPDDR parts are routinely reported under a desktop DDR label, so
+  // the reported rate is the only evidence that the label is untrustworthy.
+  const reportedRateBelowJedecMinimum =
+    generation !== null &&
+    transferRateMTs !== null &&
+    transferRateMTs.value < JEDEC_MINIMUM_TRANSFER_RATE_MTS[generation];
+
+  const busWidthBits = channels && channelWidthBits ? channels.value * channelWidthBits : null;
+
+  // Never derive bandwidth from a rate the payload has already contradicted.
   const theoreticalBandwidthGBs =
-    transferRateMTs && channels && channelWidthBits
-      ? (transferRateMTs.value * channels.value * channelWidthBits) / 8 / 1000
+    transferRateMTs && busWidthBits && !reportedRateBelowJedecMinimum
+      ? (transferRateMTs.value * busWidthBits) / 8 / 1000
       : null;
 
   return {
@@ -309,6 +358,8 @@ function memoryMetadata(metrics: Map<number, GeekbenchMetric>): MemoryMetadata {
     transferRateMTs,
     channels,
     channelWidthBits,
+    busWidthBits,
+    reportedRateBelowJedecMinimum,
     theoreticalBandwidthGBs,
   };
 }

@@ -74,7 +74,11 @@ describe('buildProcessorContextViewModel', () => {
         provenance: 'reported',
         detail: 'Exact payload value: 3598 MT/s.',
       },
-      { value: '2 × 64-bit channels', provenance: 'reported' },
+      {
+        value: '128-bit bus',
+        provenance: 'reported',
+        detail: 'Reported as 2 × 64-bit channels.',
+      },
       { value: '57.6 GB/s theoretical peak', provenance: 'computed' },
     ]);
     expect(buildProcessorContextViewModel(await context('64437'))?.memory).toContainEqual({
@@ -109,8 +113,18 @@ describe('buildProcessorContextViewModel', () => {
         provenance: 'published',
       }),
     );
-    expect(buildProcessorContextViewModel(await context('64810'))?.memory).toEqual([
-      { value: '48 GB', provenance: 'reported' },
+    // Apple publishes unified-memory bandwidth per chip but not type, rate, or
+    // bus width, so a matched Apple identity adds exactly those two facts.
+    const appleM5Max = buildProcessorContextViewModel(await context('64810'));
+    expect(appleM5Max?.memory.map((fact) => [fact.value, fact.provenance])).toEqual([
+      ['48 GB', 'reported'],
+      ['Unified memory', 'published'],
+      ['Up to 614 GB/s published maximum', 'published'],
+    ]);
+
+    // Absent identities still add nothing beyond the reported capacity.
+    expect(buildProcessorContextViewModel(await context('58949'))?.memory).toEqual([
+      { value: '121.7 GB', provenance: 'reported' },
     ]);
   });
 
@@ -137,6 +151,32 @@ describe('buildProcessorContextViewModel', () => {
       }),
     );
     expect(memory.some((fact) => fact.value.includes('theoretical peak'))).toBeFalse();
+  });
+
+  test('flags a self-contradicting rate instead of printing it for unlisted systems', async () => {
+    // Same payload shape as the reviewed Lenovo capture but with no exact system
+    // entry, which is the common case for soldered-LPDDR laptops.
+    const cached = await context('1248');
+    if (!cached.metadata) throw new Error('fixture metadata unavailable');
+    cached.metadata.processor.name = { value: 'Unlisted LPDDR5 laptop', source: 'metric:9' };
+    cached.metadata.memory.type = { value: 'DDR5 SDRAM', source: 'metric:30' };
+    cached.metadata.memory.transferRateMTs = { value: 1596, source: 'metric:87' };
+    cached.metadata.memory.channels = { value: 4, source: 'metric:76' };
+    cached.metadata.memory.channelWidthBits = 32;
+    cached.metadata.memory.busWidthBits = 128;
+    cached.metadata.memory.reportedRateBelowJedecMinimum = true;
+    cached.metadata.memory.theoreticalBandwidthGBs = null;
+
+    const memory = buildProcessorContextViewModel(cached)?.memory ?? [];
+    expect(memory.map((fact) => fact.value)).toEqual([
+      '32 GB',
+      'DDR5-class (rate unverified)',
+      '128-bit bus',
+    ]);
+    // The old behaviour printed a confident 25.5 GB/s here, understating the
+    // real figure by exactly the LPDDR5 4:1 WCK:CK ratio.
+    expect(memory.some((fact) => fact.value.includes('theoretical peak'))).toBeFalse();
+    expect(memory[1]?.detail).toContain('1596 MT/s');
   });
 
   test('uses only validated cached catalogue links', async () => {

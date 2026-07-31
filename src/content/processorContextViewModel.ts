@@ -23,6 +23,8 @@ const VENDOR_LABELS: Record<ProcessorVendor, string> = {
   qualcomm: 'Qualcomm',
   nvidia: 'NVIDIA',
   google: 'Google',
+  samsung: 'Samsung',
+  mediatek: 'MediaTek',
   unknown: 'Unknown',
 };
 
@@ -125,20 +127,43 @@ function memory(
     const type = payload.type?.value.replace(/\s+SDRAM$/i, '') ?? 'Memory';
     const exactRate = payload.transferRateMTs?.value;
     const displayedRate = exactRate ? nominalTransferRate(exactRate) : null;
-    facts.push({
-      value: `${type}${displayedRate ? `-${displayedRate}` : ''}`,
-      provenance: 'reported',
-      detail:
-        exactRate && displayedRate !== exactRate
-          ? `Exact payload value: ${exactRate} MT/s.`
-          : undefined,
-    });
+
+    if (payload.reportedRateBelowJedecMinimum) {
+      // The type/rate pair contradicts itself, so print neither as fact. This is
+      // the general soldered-LPDDR case; an exact system entry above supersedes
+      // it whenever one exists.
+      facts.push({
+        value: `${type}-class (rate unverified)`,
+        provenance: 'reported',
+        detail:
+          `The payload reported ${type} at ${exactRate} MT/s, which is below the ` +
+          `lowest rate ${type} is defined for. Soldered LPDDR is commonly reported ` +
+          `this way, under a desktop label and at its command clock rather than its ` +
+          `data rate. The true rate is not recoverable from this result.`,
+      });
+    } else {
+      facts.push({
+        value: `${type}${displayedRate ? `-${displayedRate}` : ''}`,
+        provenance: 'reported',
+        detail:
+          exactRate && displayedRate !== exactRate
+            ? `Exact payload value: ${exactRate} MT/s.`
+            : undefined,
+      });
+    }
   }
-  if (payload.channels && payload.channelWidthBits) {
+  if (payload.busWidthBits) {
+    // Present total interface width so payload-derived and catalogue-published
+    // widths are directly comparable; keep the reported channel topology as a
+    // secondary detail rather than a competing vocabulary.
     const channelKind = payload.channelWidthBits === 32 ? 'subchannels' : 'channels';
     facts.push({
-      value: `${payload.channels.value} × ${payload.channelWidthBits}-bit ${channelKind}`,
+      value: `${payload.busWidthBits}-bit bus`,
       provenance: 'reported',
+      detail:
+        payload.channels && payload.channelWidthBits
+          ? `Reported as ${payload.channels.value} × ${payload.channelWidthBits}-bit ${channelKind}.`
+          : undefined,
     });
   }
   if (!systemMemory && payload.theoreticalBandwidthGBs !== null) {

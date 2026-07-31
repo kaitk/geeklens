@@ -77,11 +77,85 @@ technical documentation identifies its unified memory as LPDDR5-6400 on a
 be labelled LPDDR5X.
 
 The Lenovo `21CQS02000` capture also pins an observed payload correction: its
-exact ThinkPad X13 Gen 3 AMD system/processor pair is matched to Lenovo's
+exact ThinkPad T14s Gen 3 AMD system/processor pair is matched to Lenovo's
 LPDDR5-6400 specification. The UI retains the conflicting DDR5/1596 payload
 values in the provenance tooltip and suppresses the invalid desktop-DDR
 bandwidth calculation. Four 32-bit subchannels alone are deliberately not used
 as an LPDDR heuristic because desktop DDR5 exposes the same topology.
+
+**Correction (2026-08-01):** this entry previously cited the ThinkPad X13 Gen 3
+AMD PSREF page. Lenovo machine type `21CQ` is T14s Gen 3 (AMD); X13 Gen 3 (AMD)
+is `21CM`/`21CN`. Both ship LPDDR5-6400, so the wrong document produced the
+right value and the error was invisible in the rendered output.
+
+### Payload validity floor
+
+The whitelist above only ever covered one machine, so every other soldered-LPDDR
+laptop fell through to the computed-bandwidth path and rendered a figure
+understated by the LPDDR5 4:1 WCK:CK ratio. `reportedRateBelowJedecMinimum`
+generalizes the correction without extending the whitelist: a payload naming a
+DDR generation while reporting a rate below that generation's JEDEC minimum
+(DDR4 1600, DDR5 3200) is self-inconsistent, so bandwidth is suppressed and the
+type renders as `<generation>-class (rate unverified)` with the exact reported
+values in the tooltip.
+
+The reported rate is deliberately **not** scaled by 4 to recover the true data
+rate. The inference is well supported for LPDDR5, but the result would be a
+derived number presented as observation, and the sampled evidence is a single
+capture. Exact per-system entries remain the only route to a published rate.
+
+Interface width is unaffected: channel topology stays trustworthy when the rate
+does not, so `busWidthBits` is retained and drives the unified `N-bit bus`
+presentation shared by payload-derived and catalogue-published widths.
+
+### Apple catalogue identities
+
+Apple chips are absent from the Geekbench 7 Processor Benchmark Chart, so these
+entries carry published memory facts and no score references. Apple publishes
+unified-memory bandwidth per chip but not memory type, transfer rate, or bus
+width, so only bandwidth is recorded except for M1 Pro, where an exact technical
+source supports LPDDR5-6400 on a 256-bit interface.
+
+`Apple M1 Ultra` alias-matches an existing unconfigured Mac entry, so its
+hardware is attached to that entry rather than to a new identity; adding a second
+entry sharing the alias would resolve to `ambiguous-alias` and lose a working
+match. `Apple M1` already resolves to `ambiguous-alias` because three
+unconfigured Mac entries share the alias.
+
+### Source tiers
+
+Apple coverage now spans M1 through M5, 29 configured core-count bins, of which
+28 resolve to exactly one entry. Two publisher tiers are used, and the tier is
+always visible in the provenance tooltip rather than being blended away:
+
+- **Apple** for chips Apple chose to headline a bandwidth figure for. This is
+  most of the catalogue, including M4 Max at 546 GB/s from the M4 Pro/Max
+  announcement rather than the MacBook Pro announcement's "over half a terabyte
+  per second".
+- **Wikipedia** for the rest. Apple never published bandwidth for the M3 family
+  or for the lower-binned M4 Max, and publishes no memory type, transfer rate,
+  or bus width for any chip. The Apple silicon articles carry all four
+  consistently across variants. Also used for M1 and M1 Max.
+- **Notebookcheck** for M1 Pro, which predates this decision and states memory
+  type, bus width, and bandwidth together.
+
+Remaining gaps:
+
+- Bus width for the M3 Max and every M4/M5 variant. The M3 Max controller counts
+  were not stated unambiguously enough to assert 384-bit/512-bit, and the M4/M5
+  articles omit width entirely.
+- Qualcomm X Series transfer rate and bus width. Qualcomm publishes memory type
+  and peak bandwidth only.
+- `Apple M1` alias matching. Three unconfigured Mac entries share the alias, so
+  it resolves to `ambiguous-alias` regardless of core count. Its hardware is
+  attached to all three Mac entries, so canonical Mac-path matches do resolve and
+  do carry the facts; only the alias fallback is unavailable. Fixing this needs
+  either core counts on the generated Mac entries or a resolver change.
+
+A follow-up could compute bandwidth for exact-entry systems from the published
+rate and the reported bus width (102.4 GB/s for the Lenovo capture). This was
+deliberately not added: it would mix a published rate with a reported width under
+a single `computed` provenance label, which needs its own provenance decision.
 
 Stage 6 renders normalized core/thread totals, internally consistent anonymous
 cluster counts, and the submitted run's `MT score / ST score` ratio. It does not

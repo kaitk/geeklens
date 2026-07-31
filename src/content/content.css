@@ -84,10 +84,24 @@ table.system-information td {
   color: #426b14;
 }
 
-.geeklens-preview-badge-qualcomm,
-.geeklens-preview-badge-google {
+/* Samsung, MediaTek, and any future secondary vendor deliberately have no rule
+ * and inherit the neutral badge above. The badge prints the vendor name, so
+ * colour is decoration rather than the identifier, and a Samsung black would sit
+ * a few percent from the Apple graphite the two are most often compared against.
+ * Add a colour only for a vendor whose brand hue is both well known and not
+ * already taken. */
+.geeklens-preview-badge-qualcomm {
   background: #f4e7ec;
   color: #84334f;
+}
+
+/* Google Tensor is illustrated in blue on its Wikipedia page; Apple's newsroom
+ * and Qualcomm's product pages publish no hex for it, so this is a pastel match
+ * to that description rather than an exact brand value. Previously shared
+ * Qualcomm's pink, which read as a second Qualcomm badge. */
+.geeklens-preview-badge-google {
+  background: #e9edf6;
+  color: #33418f;
 }
 
 .geeklens-preview-catalogue {
@@ -438,6 +452,42 @@ table.system-information td {
 .geeklens-preview-reference-tooltip-note {
   padding-top: 3px;
   border-top: 1px solid rgb(255 255 255 / 25%);
+  color: #f2f2f2;
+  text-align: left;
+}
+
+.geeklens-preview-memory-tooltip {
+  display: grid;
+  gap: 4px;
+  min-width: 230px;
+  text-align: left;
+  text-decoration: none;
+}
+
+.geeklens-preview-memory-tooltip-title {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.geeklens-preview-memory-tooltip-line {
+  text-align: left;
+}
+
+.geeklens-preview-memory-tooltip-source {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 3px;
+  border-top: 1px solid rgb(255 255 255 / 25%);
+  text-align: left;
+}
+
+.geeklens-preview-memory-tooltip-source strong {
+  font-weight: 600;
+}
+
+.geeklens-preview-memory-tooltip-note {
   color: #f2f2f2;
   text-align: left;
 }

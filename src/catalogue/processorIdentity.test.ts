@@ -76,15 +76,29 @@ describe('resolveProcessorIdentity', () => {
   });
 
   test('returns explicit unmatched results for absent catalogue identities', async () => {
-    expect(resolveProcessorIdentity(await context('64810'))).toMatchObject({
+    expect(resolveProcessorIdentity(await context('4469'))).toMatchObject({
       kind: 'unmatched',
       reason: 'no-match',
-      evidence: 'Apple M5 Max',
+      evidence: 'eswin,eic770x',
     });
     expect(resolveProcessorIdentity(await context('58949'))).toMatchObject({
       kind: 'unmatched',
       reason: 'no-match',
       evidence: 'ARM ARMv8',
+    });
+  });
+
+  test('resolves reviewed Apple identities by family alias and exact core count', async () => {
+    expect(resolveProcessorIdentity(await context('64810'))).toMatchObject({
+      kind: 'alias',
+      catalogueKey: 'apple-m5-max-18c',
+      evidence: 'Apple M5 Max',
+    });
+    // The generated Mac entries sharing the `Apple M4 Pro` alias all require GPU
+    // core counts that no payload supplies, so exactly one candidate survives.
+    expect(resolveProcessorIdentity(await context('64820'))).toMatchObject({
+      kind: 'alias',
+      catalogueKey: 'apple-m4-pro-12c',
     });
   });
 
@@ -105,7 +119,8 @@ describe('resolveProcessorIdentity', () => {
   test('requires configured aliases to satisfy their exact constraints', async () => {
     const cached = await context('1262');
     cached.metadata!.processor.name = { value: 'Apple M4', source: 'test' };
-    cached.metadata!.topology.physicalCores = { value: 8, source: 'test' };
+    // 8, 9, and 10 are the shipping M4 bins; 6 matches no configured entry.
+    cached.metadata!.topology.physicalCores = { value: 6, source: 'test' };
 
     expect(resolveProcessorIdentity(cached)).toMatchObject({
       kind: 'unmatched',

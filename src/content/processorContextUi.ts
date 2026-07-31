@@ -304,6 +304,44 @@ function annotateSinglePerformanceReferences(preview: ProcessorContextViewModel)
   }
 }
 
+/** Memory tooltips carry a provenance definition, an optional payload/derivation
+ * note, and an optional source line. Rendering them as separate blocks rather
+ * than one concatenated string keeps exact payload values and source attribution
+ * legible instead of running together in a centred paragraph. */
+function memoryTooltip(fact: ProcessorContextViewModel['memory'][number]): HTMLElement {
+  const tooltip = document.createElement('span');
+  tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-memory-tooltip';
+
+  const title = document.createElement('strong');
+  title.className = 'geeklens-preview-memory-tooltip-title';
+  title.textContent = fact.provenance;
+  tooltip.appendChild(title);
+
+  for (const text of [MEMORY_PROVENANCE_HELP[fact.provenance], fact.detail]) {
+    if (!text) continue;
+    const line = document.createElement('span');
+    line.className = 'geeklens-preview-memory-tooltip-line';
+    line.textContent = text;
+    tooltip.appendChild(line);
+  }
+
+  if (fact.source) {
+    const source = document.createElement('span');
+    source.className = 'geeklens-preview-memory-tooltip-source';
+    const label = document.createElement('span');
+    label.textContent = 'Source';
+    const value = document.createElement('strong');
+    value.textContent = fact.source.label;
+    source.append(label, value);
+
+    const action = document.createElement('span');
+    action.className = 'geeklens-preview-memory-tooltip-note';
+    action.textContent = 'Click to open source';
+    tooltip.append(source, action);
+  }
+  return tooltip;
+}
+
 function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel): void {
   if (cell.querySelector('[data-geeklens-preview-memory]')) return;
   const details = document.createElement('div');
@@ -332,10 +370,7 @@ function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel):
       'aria-label',
       `${fact.provenance}: ${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`,
     );
-    const tooltip = document.createElement('span');
-    tooltip.className = 'geeklens-preview-row-tooltip';
-    tooltip.textContent = `${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`;
-    provenance.appendChild(tooltip);
+    provenance.appendChild(memoryTooltip(fact));
 
     line.append(value, provenance);
     details.appendChild(line);
