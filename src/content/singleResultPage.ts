@@ -1,6 +1,7 @@
 import { categorizeInstructionSets } from '../isa/categories';
 import { parseGeekbenchGeneration, type GeekbenchGeneration } from '../geekbench/generation';
-import { fetchInstructionSetsFromPayload } from '../geekbench/resultPayloadClient';
+import { extractProcessorLinks, type CanonicalProcessorLinks } from '../geekbench/processorLinks';
+import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
 import {
   initialInstructionStatus,
   singleResultInstructionStatus,
@@ -54,20 +55,38 @@ async function getInstructionSets(
   generation: GeekbenchGeneration,
   resultId: string,
 ): Promise<string | null> {
-  const cached = await resultsCache.getInstructionSet(generation, resultId);
-  if (cached) return cached;
+  const cached = await resultsCache.getResultContext(generation, resultId);
+  const processorLinks = extractProcessorLinks();
 
   // Geekbench 6 renders the instruction sets into the page; Geekbench 7 omits
   // the row entirely and only exposes them in the authenticated JSON payload.
-  const instructionSets =
-    generation === 6
-      ? findInstructionSetValueCell()?.textContent?.trim() || null
-      : await fetchInstructionSetsFromPayload(generation, resultId);
+  if (generation === 6) {
+    const instructionSets =
+      cached?.instructionSet ?? findInstructionSetValueCell()?.textContent?.trim() ?? null;
+    if (instructionSets || hasProcessorLinks(processorLinks)) {
+      await resultsCache.storeResultContext(generation, resultId, {
+        instructionSet: instructionSets,
+        processorLinks,
+      });
+    }
+    return instructionSets;
+  }
 
-  if (instructionSets) {
-    await resultsCache.storeInstructionSet(generation, resultId, instructionSets);
+  const metadata = cached?.metadata ?? (await fetchResultMetadataFromPayload(generation, resultId));
+  const instructionSets = metadata?.instructionSets?.value ?? cached?.instructionSet ?? null;
+
+  if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
+    await resultsCache.storeResultContext(generation, resultId, {
+      instructionSet: instructionSets,
+      metadata,
+      processorLinks,
+    });
   }
   return instructionSets;
+}
+
+function hasProcessorLinks(links: CanonicalProcessorLinks): boolean {
+  return Boolean(links.processorPath || links.macPath);
 }
 
 function annotateSystemInstructionSets(generation: GeekbenchGeneration, instructionSets: string) {

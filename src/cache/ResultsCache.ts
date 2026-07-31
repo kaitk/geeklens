@@ -1,22 +1,71 @@
-// db.ts
 import { resultCacheKey, type GeekbenchGeneration } from '../geekbench/generation';
+import { mergeProcessorLinks, type CanonicalProcessorLinks } from '../geekbench/processorLinks';
+import type { ResultMetadata } from '../geekbench/resultPayload';
 
 const DB_NAME = 'GeekLensCache';
+// Keep the original store name so the version-1 instruction-only rows survive.
 const STORE_NAME = 'instructionSets';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
-// Currently only ISA info is saved, but more might be added in the future
-interface BenchmarkResultRecord {
+export interface StoredResultRecord {
   resultId: string;
-  instructionSet: string;
+  // Version-1 rows contain only these three fields.
+  instructionSet?: string;
+  timestamp: number;
+  metadata?: ResultMetadata;
+  processorLinks?: CanonicalProcessorLinks;
+}
+
+export interface CachedResultContext {
+  instructionSet: string | null;
+  metadata: ResultMetadata | null;
+  processorLinks: CanonicalProcessorLinks;
   timestamp: number;
 }
 
-export class ResultsCache {
-  private dbPromise: Promise<IDBDatabase>;
+export interface ResultContextUpdate {
+  instructionSet?: string | null;
+  metadata?: ResultMetadata | null;
+  processorLinks?: CanonicalProcessorLinks;
+}
 
-  constructor() {
-    this.dbPromise = this.initDB();
+export function normalizeStoredResultRecord(record: StoredResultRecord): CachedResultContext {
+  return {
+    instructionSet: record.instructionSet || record.metadata?.instructionSets?.value || null,
+    metadata: record.metadata ?? null,
+    processorLinks: mergeProcessorLinks(null, record.processorLinks),
+    timestamp: record.timestamp,
+  };
+}
+
+export function mergeStoredResultRecord(
+  cacheKey: string,
+  existing: StoredResultRecord | undefined,
+  update: ResultContextUpdate,
+  timestamp = Date.now(),
+): StoredResultRecord {
+  const metadata =
+    update.metadata === undefined ? existing?.metadata : (update.metadata ?? undefined);
+  const instructionSet =
+    update.instructionSet === undefined
+      ? (existing?.instructionSet ?? metadata?.instructionSets?.value)
+      : (update.instructionSet ?? undefined);
+
+  return {
+    resultId: cacheKey,
+    instructionSet,
+    metadata,
+    processorLinks: mergeProcessorLinks(existing?.processorLinks, update.processorLinks),
+    timestamp,
+  };
+}
+
+export class ResultsCache {
+  private dbPromise: Promise<IDBDatabase> | null = null;
+
+  private database(): Promise<IDBDatabase> {
+    this.dbPromise ??= this.initDB();
+    return this.dbPromise;
   }
 
   private initDB(): Promise<IDBDatabase> {
@@ -25,7 +74,7 @@ export class ResultsCache {
 
       request.onerror = (event) => {
         console.error('GeekLens: Error opening IndexedDB', event);
-        reject('Failed to open database');
+        reject(new Error('Failed to open database'));
       };
 
       request.onupgradeneeded = (event) => {
@@ -34,6 +83,9 @@ export class ResultsCache {
           const store = db.createObjectStore(STORE_NAME, { keyPath: 'resultId' });
           store.createIndex('timestamp', 'timestamp', { unique: false });
         }
+        // Version 2 adds optional fields to each record. IndexedDB stores are
+        // schemaless, so retaining the store is the complete safe migration:
+        // legacy instructionSet rows remain readable and are enriched on use.
       };
 
       request.onsuccess = (event) => {
@@ -43,64 +95,80 @@ export class ResultsCache {
     });
   }
 
+  async storeResultContext(
+    generation: GeekbenchGeneration,
+    resultId: string,
+    update: ResultContextUpdate,
+  ): Promise<void> {
+    try {
+      const db = await this.database();
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const cacheKey = resultCacheKey(generation, resultId);
+
+      await new Promise<void>((resolve, reject) => {
+        const getRequest = store.get(cacheKey);
+        getRequest.onerror = (event) => {
+          console.error('GeekLens: Error reading result before cache update', event);
+          reject(new Error('Failed to read cached result'));
+        };
+        getRequest.onsuccess = () => {
+          const existing = getRequest.result as StoredResultRecord | undefined;
+          const putRequest = store.put(mergeStoredResultRecord(cacheKey, existing, update));
+          putRequest.onsuccess = () => resolve();
+          putRequest.onerror = (event) => {
+            console.error('GeekLens: Error storing result context', event);
+            reject(new Error('Failed to store result context'));
+          };
+        };
+      });
+    } catch (error) {
+      console.error('GeekLens: DB error storing result context', error);
+      throw error;
+    }
+  }
+
+  async getResultContext(
+    generation: GeekbenchGeneration,
+    resultId: string,
+  ): Promise<CachedResultContext | null> {
+    try {
+      const db = await this.database();
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+
+      return await new Promise((resolve, reject) => {
+        const request = store.get(resultCacheKey(generation, resultId));
+        request.onsuccess = () => {
+          const record = request.result as StoredResultRecord | undefined;
+          resolve(record ? normalizeStoredResultRecord(record) : null);
+        };
+        request.onerror = (event) => {
+          console.error('GeekLens: Error retrieving result context', event);
+          reject(new Error('Failed to retrieve result context'));
+        };
+      });
+    } catch (error) {
+      console.error('GeekLens: DB error retrieving result context', error);
+      return null;
+    }
+  }
+
+  // Compatibility helpers for Geekbench 6 and existing callers.
   async storeInstructionSet(
     generation: GeekbenchGeneration,
     resultId: string,
     instructionSet: string,
   ): Promise<void> {
-    try {
-      const db = await this.dbPromise;
-      const transaction = db.transaction(STORE_NAME, 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-
-      const record: BenchmarkResultRecord = {
-        resultId: resultCacheKey(generation, resultId),
-        instructionSet,
-        timestamp: Date.now(),
-      };
-
-      return new Promise((resolve, reject) => {
-        const request = store.put(record);
-        request.onsuccess = () => resolve();
-        request.onerror = (e) => {
-          console.error('GeekLens: Error storing instruction set', e);
-          reject('Failed to store instruction set');
-        };
-      });
-    } catch (error) {
-      console.error('GeekLens: DB error storing instruction set', error);
-      throw error;
-    }
+    await this.storeResultContext(generation, resultId, { instructionSet });
   }
 
   async getInstructionSet(
     generation: GeekbenchGeneration,
     resultId: string,
   ): Promise<string | null> {
-    try {
-      const db = await this.dbPromise;
-      const transaction = db.transaction(STORE_NAME, 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
-
-      return new Promise((resolve, reject) => {
-        const request = store.get(resultCacheKey(generation, resultId));
-
-        request.onsuccess = (event) => {
-          const result = (event.target as IDBRequest).result as BenchmarkResultRecord | undefined;
-          resolve(result?.instructionSet || null);
-        };
-
-        request.onerror = (e) => {
-          console.error('GeekLens: Error retrieving instruction set', e);
-          reject('Failed to retrieve instruction set');
-        };
-      });
-    } catch (error) {
-      console.error('GeekLens: DB error retrieving instruction set', error);
-      return null;
-    }
+    return (await this.getResultContext(generation, resultId))?.instructionSet ?? null;
   }
 }
 
-// Export singleton instance
 export const resultsCache = new ResultsCache();

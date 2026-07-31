@@ -1,7 +1,7 @@
 # Result metadata and processor context
 
-**Status:** stage 1 implemented; later stages remain planned and should be split
-into independently reviewable changes.
+**Status:** stages 1 and 2 implemented; later stages remain planned and should be
+split into independently reviewable changes.
 **Raised:** 2026-07-31.
 
 Stage 1 added sanitized full-payload fixtures, linked/unlinked Mac HTML fixtures,
@@ -17,6 +17,13 @@ name fallbacks, and marks fixture sanitization as a maintainer-only import step.
 Two full Geekbench 6 compatibility fixtures cover Apple M5 Max and AMD Ryzen 9
 9950X. They verify the shared parser but do not change the Geekbench 7-first
 runtime and product scope.
+
+Stage 2 changed the Geekbench 7 payload client to return normalized metadata,
+upgraded IndexedDB records without replacing the legacy object store, and wired
+single/comparison pages to cache one result context per generation/result ID.
+The context includes normalized metadata, the compatibility instruction string,
+and explicit canonical processor/Mac links. Geekbench 6 keeps its rendered-HTML
+instruction path and gains link caching only where it shares existing requests.
 
 ## Goal
 
@@ -114,6 +121,51 @@ one to avoid redundant fixture bulk.
 
 ## Staged implementation
 
+### Continuation handoff
+
+Start a new implementation context by reading `docs/architecture.md`, then these
+files in order:
+
+1. `src/geekbench/resultPayload.ts` — normalized `ResultMetadata` contract and
+   source provenance.
+2. `src/cache/ResultsCache.ts` — version-2 `CachedResultContext`, lazy migration,
+   and canonical links.
+3. `src/geekbench/processorLinks.ts` — explicit-link validation and precedence.
+4. `src/content/singleResultPage.ts` and `comparisonPage.ts` — current loading
+   and DOM ownership boundaries.
+5. `src/geekbench/__fixtures__/manifest.ts` — why each full fixture exists.
+
+Important current boundary: both page adapters cache full result contexts, but
+their local loading functions still return only instruction strings because no
+metadata UI exists yet. The first stage-3 change should return or retain a
+`CachedResultContext`/view model for rendering while continuing to derive the
+existing instruction annotations from `context.instructionSet`. Do not fetch the
+payload again from a component or feature-specific helper.
+
+Suggested implementation order from here:
+
+1. Finish stage 3 as the first small visible slice: processor/vendor/ISA summary
+   on single-result pages, then comparison pages.
+2. Build the identity resolver and minimal hardware catalogue portion of stage 7
+   before catalogue-sourced memory is needed. Score-average ingestion can wait.
+3. Add stages 4 and 5 independently behind default-off experimental settings.
+4. Add stage 6 only after comparison layout has room for another derived value.
+5. Complete stage 7 score references, then stage 8 deltas, only when
+   generation-compatible Geekbench Browser averages are available.
+
+Proposed settings shape (names may be adjusted once, before release):
+
+- `showProcessorSummary`: default on; vendor/ISA/name only.
+- `showFrequencyDistribution`: experimental, default off.
+- `showMemoryDetails`: experimental, default off.
+- `showTopologyScaling`: experimental, default off.
+- `showReferenceComparison`: experimental, default off.
+
+Additive settings remain backward-compatible because `loadSettings` merges
+stored values over `defaultSettings`. Update `SettingsTab.svelte` and
+`settings.test.ts` together. Experimental controls should say so in their label
+or supporting copy rather than relying on default-off status to communicate it.
+
 ### 1. Typed payload parser and fixtures
 
 - Replace the single-purpose extraction boundary with a typed, defensive
@@ -145,6 +197,12 @@ one to avoid redundant fixture bulk.
 
 ### 3. ISA family and vendor classification
 
+**Already available:** `ResultMetadata.architecture` and
+`ResultMetadata.processor.vendor` are normalized, sourced, and covered across
+the fixture manifest. Explicit catalogue links are cached separately. This stage
+is now primarily a result-context/view-model and presentation task, not new
+payload parsing.
+
 - Map payload architecture strictly to `x86`, `ARM`, `RISC-V`, or `unknown`.
 - Classify vendor from normalized CPU/display names using ordered, tested rules:
   Apple, AMD, Intel, Qualcomm, NVIDIA, Google, then unknown. Keep vendor and ISA
@@ -162,7 +220,40 @@ one to avoid redundant fixture bulk.
 - Put vendor colors in one accessible theme map; badge color cannot be the only
   carrier of meaning. Check contrast in both extension themes/page contexts.
 
+Implementation notes:
+
+- Keep internal parser values (`x86`, `arm`, `risc-v`, `unknown`) separate from
+  display labels (`x86`, `ARM`, `RISC-V`, `Unknown`).
+- Render the processor display name as text in the badge/summary; color is
+  supplementary. Suggested initial vendor palette families are Apple black,
+  AMD red, Intel blue, NVIDIA green, Qualcomm a distinguishable darker red, and
+  unknown neutral gray. Final tokens must pass contrast checks against the actual
+  light/dark backgrounds; do not hard-code colors inside Svelte components.
+- Google remains parser/test coverage but is not required for the initial
+  desktop/laptop product catalogue. RISC-V architecture may display while vendor
+  remains unknown.
+- Prefer a dedicated processor-summary component and mount helper. Do not reuse
+  instruction-badge CSS classes or insert parsing logic into the component.
+- On comparison pages, preserve Geekbench's primary-then-baseline column order.
+  A missing context on one side must not suppress the other side.
+
+Acceptance criteria:
+
+- One GB7 payload supplies both existing instruction annotations and the new
+  summary; no component performs a fetch.
+- Single and comparison fixtures cover AMD, Intel, Apple, NVIDIA's generic CPU
+  name fallback, RISC-V unknown vendor, and a missing-result side.
+- Unknown architecture/vendor produces neutral text or an intentionally omitted
+  vendor treatment, never a misleading guessed brand.
+- `showProcessorSummary` can disable only the new summary without disabling
+  existing workload instruction badges.
+
 ### 4. Frequency distribution (experimental, default off)
+
+**Already available:** `ResultMetadata.frequency` contains cleaned positive MHz
+samples and min/Q1/median/mean/Q3/max. The parser uses the documented lower-index
+empirical quantile `floor((n - 1) × p)` without interpolation. All-zero Qualcomm
+and RISC-V series normalize to `null`.
 
 - Add a settings flag only after the parser and cache are stable.
 - Render on single-result pages first. Define how heterogeneous CPUs are
@@ -173,7 +264,35 @@ one to avoid redundant fixture bulk.
 - Extend to comparison pages only after column width and primary/baseline order
   are tested.
 
+Implementation notes:
+
+- Build a pure display model from cached statistics; components should not sort
+  samples or recompute quartiles. Keep the raw samples cached for future use but
+  do not put every sample into the DOM.
+- The compact graphic should place min/max whiskers and a mean marker. Only draw
+  a quartile box/median line if those values are part of the chosen visual; do
+  not call a min/mean/max-only line a box plot.
+- Use one linear MHz scale per result on single pages. For comparisons, use a
+  shared scale for both processors so positions are visually comparable, while
+  still printing exact values.
+- Do not interpret the series as per-core, sustained boost, or P/E-cluster data.
+  It is an unlabeled series supplied by Geekbench.
+
+Acceptance criteria:
+
+- The 5800X3D fixture pins exact statistics and a usable visualization.
+- Qualcomm and RISC-V fixtures render no empty/zero chart and show either nothing
+  or a concise “not available” state according to the UI design.
+- Keyboard/screen-reader users can obtain min, mean, and max with MHz units
+  without interpreting geometry or color.
+- Enabling the feature causes no payload or catalogue request.
+
 ### 5. Memory configuration and theoretical bandwidth (experimental, default off)
+
+**Already available:** payload memory capacity/type/clock/rate/channels and
+conservative DDR4/DDR5 theoretical bandwidth are normalized in
+`ResultMetadata.memory`. LPDDR and unified-memory bandwidth intentionally remain
+`null` until an exact catalogue match supplies a sourced published value.
 
 - Normalize memory capacity, technology/generation, clock, effective transfer
   rate, and channel/subchannel count from the observed metrics. Preserve raw
@@ -214,7 +333,38 @@ one to avoid redundant fixture bulk.
     Treat `up to` literally. Do not assign a maximum-family value to a cut-down or
     ambiguous configuration without an exact match.
 
+Implementation notes:
+
+- Introduce a view model that keeps `payload` and `catalogue` memory facts in
+  separate fields. Resolution may choose which value to display, but must retain
+  provenance and never overwrite payload observations in the cache.
+- Recommended display order is capacity, technology/rate, channel topology, then
+  bandwidth. Omit missing segments instead of producing punctuation-heavy
+  placeholders.
+- Label computed desktop DDR values “theoretical peak.” Label first-party Apple
+  or Qualcomm values “published” or “up to” as recorded by the catalogue entry.
+  Neither is a Geekbench memory benchmark result.
+- Do not infer Apple bandwidth from capacity or chip family alone. Match the
+  required CPU/GPU/core configuration. Likewise normalize `X2E94100` to the
+  exact Qualcomm SKU alias only through a tested catalogue rule.
+- Comparison views must expose why two bandwidth values differ in provenance;
+  avoid a bare number that visually equates computed and vendor-published data.
+
+Acceptance criteria:
+
+- DDR4 and DDR5 fixtures retain the pinned 57.568 and 102.4 GB/s calculations.
+- LPDDR5X synthetic coverage cannot accidentally enter the desktop DDR5
+  32-bit-subchannel rule.
+- Capacity-only Apple results remain useful without fabricated speed/channel
+  values; exact catalogue matches can add published bandwidth with a source.
+- Missing or ambiguous channel semantics yields no bandwidth number.
+
 ### 6. Topology and multi-core scaling (candidate comparison feature)
+
+**Already available:** physical cores, logical threads, and positive core
+clusters are normalized. Zero-core placeholders are discarded. Google exercises
+three frequency-labelled clusters; Raptor Lake and Arrow Lake exercise two
+unlabelled-role clusters. The parser deliberately does not name P/E roles.
 
 - Normalize total cores/threads and cluster counts where internally consistent.
   Retain unknown cluster roles; do not label clusters P/E solely from ordering.
@@ -226,7 +376,32 @@ one to avoid redundant fixture bulk.
   precision on heterogeneous CPUs and should remain out of scope unless its
   interpretation is clearly designed and tested.
 
+Implementation notes:
+
+- Compute the score scaling ratio only when both scores are finite and positive:
+  `multiCoreScore / singleCoreScore`. Keep the unrounded value in the view model;
+  two decimal places is a reasonable initial display precision.
+- Do not divide the ratio by cores or threads, and do not call it utilization,
+  efficiency, or speedup of identical work. GB7 ST and MT suites differ.
+- Present total cores/threads before raw cluster counts. Cluster order alone does
+  not establish performance/efficiency roles.
+- Treat topology inconsistencies as partial metadata: totals may render while
+  unusable clusters remain omitted.
+
+Acceptance criteria:
+
+- Ratio tests cover normal, missing, zero, and malformed score inputs.
+- Raptor Lake displays two anonymous clusters; Zen 2 and N305 do not display
+  Geekbench's `0 Cores` placeholder.
+- Comparison layout keeps primary/baseline association unambiguous and does not
+  imply normalized per-core efficiency.
+
 ### 7. Processor identity and reference catalogue (experimental, default off)
+
+**Already available:** result contexts cache explicit processor and Mac paths.
+`processorLinks.ts` accepts only same-origin canonical paths, maps comparison
+columns, and lets newly observed explicit links replace stale cached ones. No
+name heuristic or catalogue exists yet.
 
 - First inspect result-page links and stable identifiers. Prefer an explicit
   Geekbench processor/Mac link when present.
@@ -247,6 +422,99 @@ one to avoid redundant fixture bulk.
   provenance block from Geekbench score averages; useful fields include memory
   technology, transfer rate, bus width, published bandwidth, capacity limits,
   and the exact CPU/GPU/core configuration to which they apply.
+
+Recommended resolver precedence:
+
+1. Exact cached Mac path, when the requested fact is device/configuration
+   specific.
+2. Exact cached processor path.
+3. Exact normalized alias plus required configuration constraints.
+4. Explicit unmatched result with a reason; never silent fuzzy matching.
+
+Suggested checked-in schema (adapt names to existing style, not semantics):
+
+```ts
+interface CatalogueSource {
+  url: string;
+  retrievedOn: string; // YYYY-MM-DD
+  publisher: 'Geekbench' | 'Apple' | 'AMD' | 'Intel' | 'Qualcomm' | 'NVIDIA';
+  note?: string;
+}
+
+interface HardwareSpecification {
+  memoryType?: string;
+  transferRateMTs?: number;
+  busWidthBits?: number;
+  bandwidthGBs?: number;
+  bandwidthQualifier?: 'published' | 'up-to';
+  maxCapacityBytes?: number;
+  cpuCores?: number;
+  gpuCores?: number;
+  source: CatalogueSource;
+}
+
+interface GeekbenchScoreReference {
+  generation: 6 | 7;
+  singleCore: number;
+  multiCore: number;
+  sampleCount?: number;
+  source: CatalogueSource;
+}
+
+interface ProcessorCatalogueEntry {
+  key: string;
+  displayName: string;
+  vendor: ProcessorVendor;
+  architecture: ProcessorArchitecture;
+  processorPaths: readonly string[];
+  macPaths?: readonly string[];
+  aliases: readonly string[];
+  requiredConfiguration?: {
+    physicalCores?: number;
+    gpuCores?: number;
+    modelIdentifier?: string;
+  };
+  hardware?: HardwareSpecification;
+  scoreReferences?: readonly GeekbenchScoreReference[];
+}
+```
+
+Catalogue rules:
+
+- Keep data in a dedicated checked-in module/data file, not scattered through
+  matching code or Svelte components. Prefer a maintainer-only generator for
+  larger snapshots, with reviewed diffs.
+- Hardware specifications and Geekbench score aggregates are distinct provenance
+  blocks even when attached to the same identity entry.
+- Do not fetch catalogue or score pages in an end user's browser. Runtime uses
+  the bundled snapshot only.
+- The broad processor chart is a discovery source, not proof of completeness.
+  Preserve explicitly observed links absent from that chart.
+- Processor and Mac/device matches can coexist. A CPU-family match must not
+  silently inherit a chassis/configuration-specific bandwidth or score.
+- Geekbench score references are generation-specific. Do not compare current GB7
+  payload scores to a page that explicitly describes GB6 aggregates.
+
+Recommended first catalogue slice:
+
+- Exact linked fixture identities: Apple M4/Mac mini and the linked AMD/Intel
+  examples already captured by result pages.
+- Exact hardware-spec entries already validated below: M1 Pro, M4 Pro, the
+  18-core CPU/40-core GPU M5 Max, and Snapdragon X2E-94-100.
+- A deliberate unmatched M5 page/link case and DGX Spark's generic CPU-name case
+  to pin fallback behavior.
+- Keep Google/mobile out of initial catalogue completeness requirements.
+
+Acceptance criteria:
+
+- Resolver output includes match kind (`mac-path`, `processor-path`, `alias`, or
+  `unmatched`), catalogue key when matched, and the evidence used.
+- Explicit links beat aliases in tests, and ambiguous aliases do not match.
+- The bundled catalogue records source URL/retrieval date for every external
+  hardware or score fact.
+- No runtime network request is introduced; the existing one-payload-per-result
+  behavior remains unchanged.
+- Missing M5 links are a tested unmatched/alias path, not an exception.
 
 ### 8. Score deltas and UI design
 

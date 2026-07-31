@@ -1,9 +1,9 @@
 import type { GeekbenchGeneration } from './generation';
-import { extractInstructionSetsFromPayload } from './resultPayload';
+import { extractResultMetadata, type ResultMetadata } from './resultPayload';
 import { resultPayloadUrl } from './urls';
 
 /**
- * Fetches a result's `.gb6` payload and returns its instruction-set string.
+ * Fetches and normalizes a result's `.gb6` payload once for all metadata users.
  *
  * The endpoint requires an authenticated session and fails while a comparison
  * baseline is selected. Signed-out visitors get a login response, which
@@ -13,10 +13,10 @@ import { resultPayloadUrl } from './urls';
  * already cached in IndexedDB by result ID, whereas HTTP-caching this URL
  * risks pinning a login redirect against it for the life of the cache entry.
  */
-export async function fetchInstructionSetsFromPayload(
+export async function fetchResultMetadataFromPayload(
   generation: GeekbenchGeneration,
   resultId: string,
-): Promise<string | null> {
+): Promise<ResultMetadata | null> {
   const response = await fetch(resultPayloadUrl(generation, resultId), {
     credentials: 'same-origin',
   });
@@ -26,5 +26,5 @@ export async function fetchInstructionSetsFromPayload(
     return null;
   }
 
-  return extractInstructionSetsFromPayload(await response.json(), generation);
+  return extractResultMetadata(await response.json(), generation);
 }

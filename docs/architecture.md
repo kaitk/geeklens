@@ -16,16 +16,18 @@ shape and owns annotation at DOM ready.
 
 The content entry delegates to two page adapters:
 
-- `src/content/singleResultPage.ts` reads the result's system table, caches its
-  instruction-set string, and annotates benchmark tables.
-- `src/content/comparisonPage.ts` obtains instruction sets for both results
-  (from IndexedDB or fetched result pages), adds them to the comparison system
-  table, and annotates both CPUs' graph rows.
+- `src/content/singleResultPage.ts` reads the result's system table, loads one
+  cached result context, and annotates benchmark tables from its compatibility
+  instruction-set string.
+- `src/content/comparisonPage.ts` obtains result contexts for both results (from
+  IndexedDB or fetched result pages), adds instruction sets to the comparison
+  system table, and annotates both CPUs' graph rows.
 
 Both adapters route between Geekbench 6 and 7 based on the URL generation.
 Geekbench 6 exposes instruction sets in result-page HTML. Geekbench 7 omits that
-row, so GeekLens reads metric `20000` from the result's `.gb6` JSON payload and
-adds an Instruction Sets row to the rendered system information.
+row, so GeekLens fetches and normalizes the result's `.gb6` JSON payload once,
+reads metric `20000` from the cached metadata, and adds an Instruction Sets row
+to the rendered system information.
 
 Geekbench 7 is the primary target for new result-metadata features. Geekbench 6
 remains supported for its existing instruction annotations and may share richer
@@ -60,9 +62,19 @@ Geekbench 6 and Geekbench 7 benchmark maps. It returns a `confidenceNote` for
 inferred mappings and omits it for documented ones, so callers cannot render an
 inferred Geekbench 7 mapping without its warning.
 
-`src/cache/ResultsCache.ts` stores raw instruction-set strings in IndexedDB.
-Cache keys include the Geekbench generation and result ID
-(`v<generation>:cpu:<resultId>`) so results cannot collide across generations.
+`src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized
+payload metadata when available, a compatibility instruction-set string, and
+explicit Geekbench processor/Mac links found in result HTML. Cache keys include
+the Geekbench generation and result ID (`v<generation>:cpu:<resultId>`) so
+results cannot collide across generations. Database version 2 deliberately
+retains the original `instructionSets` object store; its schemaless version-1
+rows remain readable and are enriched lazily rather than discarded.
+
+Canonical-link parsing lives in `src/geekbench/processorLinks.ts`. It accepts
+only same-origin `/processors/<slug>` and `/macs/<slug>` paths from system tables.
+Single-result pages scan their system tables; comparison pages map the second
+and third system-table columns to primary and baseline results. Explicit links
+are stronger identity evidence than future name/alias heuristics.
 
 Geekbench 7 has no public benchmark-internals document. Its deliberately narrow
 per-workload map lives in `src/isa/benchmarkMapV7.ts`; inferred mappings must
