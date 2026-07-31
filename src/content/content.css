@@ -20,6 +20,17 @@ table.system-information td {
   background-color: rgb(255 152 0 / 80%);
 }
 
+/* Inherits the pill's colour so the link reads as the message, not as chrome. */
+.geeklens-status-link,
+.geeklens-status-link:visited {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.geeklens-status-link:hover {
+  text-decoration: none;
+}
+
 /* Temporary complete-state processor-context preview. */
 .geeklens-preview-processor {
   display: grid;

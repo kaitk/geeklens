@@ -3,6 +3,12 @@ import type { GeekbenchGeneration } from './generation';
 export interface InstructionDataStatus {
   text: string;
   type: 'info' | 'warning';
+  /**
+   * Set when signing in is what unblocks the data, so the banner can offer the
+   * link. Kept as a flag rather than a URL: these functions stay pure, and the
+   * destination is only knowable from the rendered page.
+   */
+  action?: 'sign-in';
 }
 
 export function initialInstructionStatus(
@@ -13,6 +19,7 @@ export function initialInstructionStatus(
     return {
       text: 'GeekLens: Sign in to load instruction data',
       type: 'warning',
+      action: 'sign-in',
     };
   }
 
@@ -34,6 +41,7 @@ export function singleResultInstructionStatus(
     ? {
         text: 'GeekLens: Sign in to load instruction data',
         type: 'warning',
+        action: 'sign-in',
       }
     : {
         text: 'GeekLens: No instruction data available',
@@ -75,6 +83,7 @@ export function comparisonInstructionStatus(
       ? {
           text: 'GeekLens: Partial data — sign in and reload',
           type: 'warning',
+          action: 'sign-in',
         }
       : {
           text: 'GeekLens: Partial instruction data',

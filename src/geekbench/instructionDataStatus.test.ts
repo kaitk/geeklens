@@ -10,6 +10,7 @@ describe('initialInstructionStatus', () => {
     expect(initialInstructionStatus(7, true)).toEqual({
       text: 'GeekLens: Sign in to load instruction data',
       type: 'warning',
+      action: 'sign-in',
     });
   });
 
@@ -27,6 +28,7 @@ describe('singleResultInstructionStatus', () => {
     expect(singleResultInstructionStatus(7, false)).toEqual({
       text: 'GeekLens: Sign in to load instruction data',
       type: 'warning',
+      action: 'sign-in',
     });
   });
 
@@ -34,6 +36,8 @@ describe('singleResultInstructionStatus', () => {
     expect(singleResultInstructionStatus(6, false).text).toBe(
       'GeekLens: No instruction data available',
     );
+    // Signing in cannot produce Geekbench 6 data, so the banner must not offer it.
+    expect(singleResultInstructionStatus(6, false).action).toBeUndefined();
   });
 });
 
@@ -49,6 +53,7 @@ describe('comparisonInstructionStatus', () => {
     expect(comparisonInstructionStatus(7, true, false)).toEqual({
       text: 'GeekLens: Partial data — sign in and reload',
       type: 'warning',
+      action: 'sign-in',
     });
     expect(comparisonInstructionStatus(7, false, true).type).toBe('warning');
   });

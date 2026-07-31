@@ -2,7 +2,7 @@ import type { GeekbenchGeneration } from './generation';
 
 export const BROWSER_HOST = 'browser.geekbench.com';
 
-const BROWSER_ORIGIN = `https://${BROWSER_HOST}`;
+export const BROWSER_ORIGIN = `https://${BROWSER_HOST}`;
 
 /**
  * Geekbench Browser URL shapes. These are an external interface: they are not
