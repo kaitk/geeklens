@@ -1,7 +1,9 @@
 # Result metadata and processor context
 
-**Status:** stages 1 and 2 implemented; later stages remain planned and should be
-split into independently reviewable changes.
+**Status:** stages 1 and 2 implemented. The complete-state UI/UX has been
+approved and retained as a detached, data-driven renderer; all fabricated
+preview data has been removed. Later stages remain planned and should be split
+into independently reviewable changes.
 **Raised:** 2026-07-31.
 
 Stage 1 added sanitized full-payload fixtures, linked/unlinked Mac HTML fixtures,
@@ -142,16 +144,86 @@ metadata UI exists yet. The first stage-3 change should return or retain a
 existing instruction annotations from `context.instructionSet`. Do not fetch the
 payload again from a component or feature-specific helper.
 
+The approved presentation is preserved in `src/content/processorContextUi.ts`.
+It accepts `ProcessorContextViewModel` data and performs no fetching, payload
+parsing, catalogue matching, or fallback guessing. It is intentionally detached
+from the page adapters until a real view-model builder exists. Do not replace or
+redesign it while doing the plumbing. `src/content/addedRowMarker.ts` owns the
+small dot and tooltip used to identify rows added by GeekLens.
+
+The popup already contains the final settings grouping and ordering. Controls
+appear in page order: reference averages, processor identity, topology/scaling,
+frequency, memory, then ISA. The five processor-context controls are disabled
+and forced off until their real implementation lands; ISA and the universal
+badge/tooltips preferences remain active. Enable each control only in the same
+reviewable change that supplies its real data.
+
 Suggested implementation order from here:
 
-1. Finish stage 3 as the first small visible slice: processor/vendor/ISA summary
-   on single-result pages, then comparison pages.
+1. Finish stage 3 as the first small visible slice: build a pure
+   `ResultMetadata`/`CachedResultContext` to `ProcessorContextViewModel` mapper,
+   retain full contexts in both adapters, render processor/vendor/ISA identity
+   on single-result pages, then comparison pages, and enable only
+   `showProcessorSummary`.
 2. Build the identity resolver and minimal hardware catalogue portion of stage 7
    before catalogue-sourced memory is needed. Score-average ingestion can wait.
 3. Add stages 4 and 5 independently behind default-off experimental settings.
 4. Add stage 6 only after comparison layout has room for another derived value.
 5. Complete stage 7 score references, then stage 8 deltas, only when
    generation-compatible Geekbench Browser averages are available.
+
+Required tests by slice:
+
+- Stage 3: table-driven view-model tests for AMD, Intel, Apple, NVIDIA's generic
+  CPU-name fallback, RISC-V unknown vendor, and unknown/malformed metadata; DOM
+  tests for the native processor cell on single/comparison pages, column order,
+  one missing comparison side, duplicate guards, and the setting disabled.
+- Stage 4: exact min/mean/max display-model tests, all-zero/missing suppression,
+  graph geometry bounds, accessible tooltip text, single/comparison DOM
+  placement, and the setting disabled. Quartiles may remain internal to graph
+  geometry but are not user-facing tooltip content.
+- Stage 5: DDR4/DDR5 and capacity-only view-model tests, provenance preservation,
+  LPDDR/unified-memory non-computation, one-fact-per-line DOM output, provenance
+  tooltip accessibility, and the setting disabled.
+- Stage 6: scaling tests for normal/missing/zero/malformed scores, anonymous
+  cluster rendering, native core/thread preservation, and comparison ordering.
+- Stages 7–8: exact-path/alias/unmatched resolver tests, ambiguous-alias
+  rejection, generation compatibility, unavailable-average presentation,
+  signed absolute/percentage delta rounding, source-link behavior, and no
+  runtime network request.
+- Settings: legacy stored-setting migration, disabled-control defaults, dirty
+  state/one-save behavior, universal color/tooltips behavior, and active-tab
+  reload. DOM/UI slices still require manual Chrome and Firefox checks.
+
+### Approved UI/UX contract
+
+- Extend native Geekbench rows and columns. Do not reintroduce context strips,
+  disclosures, standalone cards, or a GeekLens badge on every value.
+- Processor cells contain a soft vendor token replacing the vendor prefix, the
+  vendor-less processor name, a neutral architecture token, and an exact
+  catalogue link when available. Catalogue/source links open in a new tab.
+- Comparison pages use separate native `Topology & scaling` and `Frequency`
+  rows so both processor columns align. Single pages reuse the native Topology
+  row and add Frequency immediately below it. Native processor/core/thread text
+  appears first, anonymous clusters second, and `MT scaling` third.
+- Frequency shows `min–max GHz · mean` above the compact distribution. Its
+  hover/focus tooltip shows only minimum, mean, and maximum, one per line.
+- Memory replaces the native value with one fact per line. `REPORTED`,
+  `COMPUTED`, and `PUBLISHED` use soft tokens and immediate accessible
+  hover/focus tooltips. Payload and catalogue provenance must never be merged.
+- Reference comparisons appear beneath the large single-result scores, beside
+  comparison scores, and in ST/MT performance headers. Visible copy is compact,
+  for example `(+4.1% vs avg)`; the clickable hover/focus tooltip contains the
+  result, average, signed absolute/percentage difference, generation, only
+  source-supported inclusion information, and “Click to open source.” Use
+  `(avg unavailable)` with a neutral explanatory tooltip when an exact,
+  generation-compatible average is absent.
+- Added rows use a small dot with the common tooltip “This row was added by the
+  GeekLens extension.” This includes injected Instruction Sets rows; do not mark
+  a native Geekbench 6 row.
+- Vendor, architecture, provenance, and instruction badges share soft
+  rectangular geometry and restrained semantic colors. Badge colors and all
+  GeekLens tooltips are universal preferences.
 
 Proposed settings shape (names may be adjusted once, before release):
 

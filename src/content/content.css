@@ -19,3 +19,415 @@ table.system-information td {
 .gb-extension-warning {
   background-color: rgb(255 152 0 / 80%);
 }
+
+/* Temporary complete-state processor-context preview. */
+.geeklens-preview-processor {
+  display: grid;
+  gap: 5px;
+  word-break: normal;
+}
+
+.geeklens-preview-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.geeklens-preview-identity strong {
+  color: #212529;
+}
+
+.geeklens-preview-badge {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: #eef0f2;
+  color: #59616a;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+}
+
+.geeklens-preview-badge-apple {
+  background: #ececee;
+  color: #343438;
+}
+
+.geeklens-preview-badge-amd {
+  background: #f5e7ea;
+  color: #8f3142;
+}
+
+.geeklens-preview-catalogue {
+  margin-left: 2px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.geeklens-preview-native-topology,
+.geeklens-preview-topology,
+.geeklens-preview-memory {
+  color: #737373;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.geeklens-preview-frequency {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.geeklens-preview-frequency-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.geeklens-preview-frequency-label {
+  color: #737373;
+  white-space: nowrap;
+}
+
+.geeklens-preview-frequency-values {
+  color: #555;
+  white-space: nowrap;
+}
+
+.geeklens-preview-distribution {
+  position: relative;
+  display: inline-block;
+  flex: 1 1 130px;
+  width: 150px;
+  min-width: 90px;
+  max-width: 180px;
+  height: 16px;
+  outline: none;
+}
+
+.geeklens-preview-distribution i {
+  position: absolute;
+  display: block;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.geeklens-preview-distribution .whisker {
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: #a4a9ae;
+}
+
+.geeklens-preview-distribution .cap {
+  width: 1px;
+  height: 9px;
+  background: #858b91;
+}
+
+.geeklens-preview-distribution .cap.min {
+  left: 0;
+}
+
+.geeklens-preview-distribution .cap.max {
+  right: 0;
+}
+
+.geeklens-preview-distribution .box {
+  left: var(--q1);
+  width: calc(var(--q3) - var(--q1));
+  height: 10px;
+  border: 1px solid #6378a7;
+  border-radius: 2px;
+  background: #e9edf6;
+}
+
+.geeklens-preview-distribution .median {
+  left: var(--median);
+  width: 2px;
+  height: 13px;
+  background: #526a9e;
+}
+
+.geeklens-preview-distribution .mean {
+  left: var(--mean);
+  width: 6px;
+  height: 6px;
+  border: 1px solid #526a9e;
+  background: #fff;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.geeklens-preview-frequency-tooltip {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1001;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  width: max-content;
+  max-width: 20rem;
+  padding: 6px 10px;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  background-color: #6c757d;
+  color: white;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: none;
+  white-space: normal;
+}
+
+.geeklens-preview-frequency-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #6c757d;
+}
+
+.geeklens-preview-frequency-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 130px;
+  text-align: left;
+}
+
+.geeklens-preview-frequency-tooltip-row strong {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.geeklens-preview-distribution:hover .geeklens-preview-frequency-tooltip,
+.geeklens-preview-distribution:focus .geeklens-preview-frequency-tooltip {
+  visibility: visible;
+}
+
+.geeklens-preview-frequency.is-comparison {
+  gap: 3px;
+}
+
+.geeklens-preview-frequency.is-comparison .geeklens-preview-distribution {
+  width: 100%;
+  max-width: none;
+}
+
+.geeklens-preview-reference {
+  display: block;
+  color: #68717b;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.geeklens-preview-memory {
+  display: grid;
+  gap: 4px;
+  color: inherit;
+  font-size: inherit;
+}
+
+.geeklens-preview-memory-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.geeklens-preview-provenance {
+  position: relative;
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: #eef0f2;
+  color: #59616a;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+  text-transform: uppercase;
+  cursor: help;
+  outline: none;
+}
+
+.geeklens-preview-provenance.is-computed {
+  background: #eceff6;
+  color: #536b9c;
+}
+
+.geeklens-preview-provenance.is-published {
+  background: #f7f0df;
+  color: #8a641b;
+}
+
+.geeklens-uncolored-badges .geeklens-preview-badge,
+.geeklens-uncolored-badges .geeklens-preview-provenance,
+.geeklens-uncolored-badges .gb-instruction-badge {
+  background: #eef0f2 !important;
+  color: #59616a !important;
+}
+
+.geeklens-tooltips-disabled .geeklens-preview-frequency-tooltip,
+.geeklens-tooltips-disabled .geeklens-preview-row-tooltip,
+.geeklens-tooltips-disabled .gb-instruction-tooltip,
+.geeklens-tooltips-disabled .gb-mapping-warning-tooltip {
+  display: none !important;
+}
+
+.geeklens-preview-comparison-reference {
+  position: relative;
+  display: inline-block;
+  margin-left: 7px;
+  font-size: 11px;
+  font-weight: 400;
+  text-decoration: none;
+  white-space: nowrap;
+  outline: none;
+}
+
+.geeklens-preview-comparison-reference.is-positive {
+  color: #28a745;
+}
+
+.geeklens-preview-comparison-reference.is-negative {
+  color: #c23b43;
+}
+
+.geeklens-preview-comparison-reference.is-unavailable {
+  color: #7a8087;
+  cursor: help;
+}
+
+.geeklens-preview-comparison-reference:hover,
+.geeklens-preview-comparison-reference:focus {
+  text-decoration: underline;
+}
+
+.geeklens-preview-detail-label,
+.geeklens-preview-detail-value {
+  border-top: 1px solid rgb(0 0 0 / 5%);
+  padding: 0.75rem;
+  vertical-align: top;
+}
+
+.geeklens-preview-detail-label {
+  color: #212529;
+}
+
+.geeklens-preview-row-marker {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  color: #6378a7;
+  cursor: help;
+  font-size: 14px;
+  line-height: 1;
+  vertical-align: 0;
+  outline: none;
+}
+
+.geeklens-preview-row-tooltip {
+  visibility: hidden;
+  position: absolute;
+  z-index: 1001;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  width: max-content;
+  max-width: 20rem;
+  padding: 6px 10px;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  background-color: #6c757d;
+  color: white;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: none;
+  white-space: normal;
+}
+
+.geeklens-preview-row-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #6c757d;
+}
+
+.geeklens-preview-row-marker:hover .geeklens-preview-row-tooltip,
+.geeklens-preview-row-marker:focus .geeklens-preview-row-tooltip,
+.geeklens-preview-provenance:hover .geeklens-preview-row-tooltip,
+.geeklens-preview-provenance:focus .geeklens-preview-row-tooltip,
+.geeklens-preview-comparison-reference:hover .geeklens-preview-row-tooltip,
+.geeklens-preview-comparison-reference:focus .geeklens-preview-row-tooltip {
+  visibility: visible;
+}
+
+.geeklens-preview-reference-tooltip {
+  display: grid;
+  gap: 4px;
+  min-width: 230px;
+  text-decoration: none;
+}
+
+.geeklens-preview-reference-tooltip-title {
+  margin-bottom: 2px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.geeklens-preview-reference-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+}
+
+.geeklens-preview-reference-tooltip-row strong {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.geeklens-preview-reference-tooltip-note {
+  padding-top: 3px;
+  border-top: 1px solid rgb(255 255 255 / 25%);
+  color: #f2f2f2;
+  text-align: left;
+}
+
+.geeklens-preview-detail-value .geeklens-preview-topology {
+  color: #737373;
+  font-size: 11px;
+}
+
+.geeklens-preview-detail-value .geeklens-preview-native-topology {
+  margin-bottom: 3px;
+  color: #212529;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .geeklens-preview-frequency-values {
+    white-space: normal;
+  }
+}

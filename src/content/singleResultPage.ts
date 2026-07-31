@@ -19,6 +19,9 @@ import {
 import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
 import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache } from '../cache/ResultsCache';
+import { loadSettings } from '../settings/settings';
+import { markAddedRowLabel } from './addedRowMarker';
+import { applyProcessorContextPreferences } from './processorContextUi';
 
 // Main function to annotate the Geekbench results
 export async function annotateGeekbenchResults() {
@@ -37,14 +40,18 @@ export async function annotateGeekbenchResults() {
   // Wait for benchmark tables to ensure page is fully rendered
   try {
     await waitForElement('table.benchmark-table');
-    const instructionSets = await getInstructionSets(generation, resultId);
+    const settings = await loadSettings();
+    applyProcessorContextPreferences(settings);
+    const instructionSets = await getInstructionSets(generation, resultId, signedOut);
     if (!instructionSets) {
       showStatus(singleResultInstructionStatus(generation, false));
       return;
     }
 
-    annotateSystemInstructionSets(generation, instructionSets);
-    annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets));
+    if (settings.showIsaAnnotations) {
+      annotateSystemInstructionSets(generation, instructionSets);
+      annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets));
+    }
     showStatus(singleResultInstructionStatus(generation, true));
   } catch (error) {
     console.error('GeekLens: Failed to find benchmark tables', error);
@@ -54,6 +61,7 @@ export async function annotateGeekbenchResults() {
 async function getInstructionSets(
   generation: GeekbenchGeneration,
   resultId: string,
+  signedOut: boolean,
 ): Promise<string | null> {
   const cached = await resultsCache.getResultContext(generation, resultId);
   const processorLinks = extractProcessorLinks();
@@ -72,7 +80,15 @@ async function getInstructionSets(
     return instructionSets;
   }
 
-  const metadata = cached?.metadata ?? (await fetchResultMetadataFromPayload(generation, resultId));
+  // A signed-out payload request is not merely doomed: Geekbench stores the
+  // rejected path as the session's post-login destination, so a later sign-in
+  // lands the user on raw `.gb6` JSON instead of the result page.
+  if (signedOut && !cached?.metadata) {
+    console.log('GeekLens: Signed out of Geekbench 7, skipping payload fetch');
+  }
+  const metadata =
+    cached?.metadata ??
+    (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
   const instructionSets = metadata?.instructionSets?.value ?? cached?.instructionSet ?? null;
 
   if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
@@ -112,6 +128,7 @@ function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
   const labelCell = document.createElement('td');
   labelCell.className = 'name';
   labelCell.textContent = 'Instruction Sets';
+  markAddedRowLabel(labelCell);
   const valueCell = document.createElement('td');
   valueCell.className = 'value';
   row.append(labelCell, valueCell);

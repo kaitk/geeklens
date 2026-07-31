@@ -8,35 +8,35 @@ export interface BadgeStyle {
 const groupColors: Record<InstructionCategory, BadgeStyle> = {
   // SIMD Vector Extensions
   SIMD_MODERN_WIDE: {
-    backgroundColor: '#bfdbfe', // blue-200
-    color: '#1e40af', // blue-800
+    backgroundColor: '#e8eef8',
+    color: '#405b8c',
   },
   SIMD_MODERN: {
-    backgroundColor: '#e0f2fe',
-    color: '#0369a1',
+    backgroundColor: '#eaf3f7',
+    color: '#3c6b7d',
   },
   SIMD_LEGACY: {
-    backgroundColor: '#ffedd5',
-    color: '#9a3412',
+    backgroundColor: '#f6eee8',
+    color: '#8a5940',
   },
   SIMD_ML: {
-    backgroundColor: '#dbeafe',
-    color: '#1e40af',
+    backgroundColor: '#e8eef8',
+    color: '#405b8c',
   },
   // Matrix & AI (Ambers/Oranges)
   ML: {
-    backgroundColor: '#fbbf24', // amber-400
-    color: '#78350f', // amber-900
+    backgroundColor: '#f7efd8',
+    color: '#80651e',
   },
   // Cryptographic (Greens)
   CRYPTO: {
-    backgroundColor: '#bbf7d0', // green-200
-    color: '#166534', // green-800
+    backgroundColor: '#e8f3ea',
+    color: '#3f7048',
   },
   // General Compute
   OTHER: {
-    backgroundColor: '#e5e7eb', // gray-200
-    color: '#374151', // gray-700
+    backgroundColor: '#eef0f2',
+    color: '#59616a',
   },
 };
 

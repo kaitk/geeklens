@@ -32,6 +32,8 @@
 <style>
   .gb-instruction-badge {
     display: inline-block;
+    box-sizing: border-box;
+    min-height: 18px;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 10px;

@@ -32,6 +32,9 @@ import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache } from '../cache/ResultsCache';
 import type { CachedResultContext } from '../cache/ResultsCache';
 import { withClearedComparisonBaseline } from './comparisonBaseline';
+import { loadSettings } from '../settings/settings';
+import { markAddedRowLabel } from './addedRowMarker';
+import { applyProcessorContextPreferences } from './processorContextUi';
 
 // Extract result IDs from the URL
 function extractResultIds(): { baseline: string | null; primary: string | null } {
@@ -172,6 +175,8 @@ export async function annotateGeekbenchComparisonPage() {
       resultsCache.getResultContext(generation, baseline),
     ]);
     await waitForElement('table.comparison-benchmark-table');
+    const settings = await loadSettings();
+    applyProcessorContextPreferences(settings);
     const processorLinks = extractComparisonProcessorLinks();
 
     await Promise.all([
@@ -220,7 +225,7 @@ export async function annotateGeekbenchComparisonPage() {
     }
 
     // If at least one CPU has instruction sets, we can proceed
-    if (primaryInstructions || baselineInstructions) {
+    if (settings.showIsaAnnotations && (primaryInstructions || baselineInstructions)) {
       annotateSystemInstructionSets(primaryInstructions, baselineInstructions);
 
       // Annotate benchmark tables with instruction sets for each CPU
@@ -278,6 +283,7 @@ function annotateSystemInstructionSets(
 
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Instruction Sets';
+  markAddedRowLabel(labelCell);
   newRow.appendChild(labelCell);
 
   // One cell per compared result, in the page's primary-then-baseline order.

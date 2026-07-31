@@ -43,6 +43,14 @@ mounting), so neither adapter creates DOM containers itself. Mount containers
 carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
 guards must use those markers rather than Svelte component CSS classes.
 
+The approved processor-context presentation is retained, but not yet connected,
+in `src/content/processorContextUi.ts`. It is a display-model renderer, not a
+parser or data source. Page adapters must pass it real cached contexts through a
+pure view-model boundary; never embed preview values or fetch from the renderer.
+Until each real data slice is wired, its popup control stays disabled and forced
+off. `src/content/addedRowMarker.ts` owns the common marker for rows GeekLens
+creates.
+
 Geekbench Browser URL shapes live in `src/geekbench/urls.ts`, and the
 authenticated `.gb6` payload fetch in `src/geekbench/resultPayloadClient.ts`.
 Keep both generations' URL literals there rather than at the call sites.
@@ -138,3 +146,7 @@ public result is available.
 - The popup settings use synchronized browser storage, while result metadata uses
   page-origin IndexedDB.
 - Settings are consumed by badge components.
+- Saving popup settings reloads the active Geekbench tab because DOM-level data
+  blocks are not live-mounted components. Badge colors and tooltips are global
+  presentation preferences; processor-context controls are enabled only as
+  their real view models land.

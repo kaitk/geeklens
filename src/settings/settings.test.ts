@@ -45,4 +45,26 @@ describe('loadSettings', () => {
 
     expect((await loadSettings()).mappingWarnings).toBe(true);
   });
+
+  test('keeps approved but unwired processor-context blocks disabled', async () => {
+    stored = {
+      geekLensSettings: {
+        coloredBadges: true,
+        tooltips: true,
+        showProcessorSummary: true,
+        showTopologyScaling: true,
+        showFrequencyDistribution: true,
+        showMemoryDetails: true,
+        showReferenceComparison: true,
+      },
+    };
+    const settings = await loadSettings();
+
+    expect(settings.showProcessorSummary).toBe(false);
+    expect(settings.showTopologyScaling).toBe(false);
+    expect(settings.showFrequencyDistribution).toBe(false);
+    expect(settings.showMemoryDetails).toBe(false);
+    expect(settings.showReferenceComparison).toBe(false);
+    expect(settings.showIsaAnnotations).toBe(true);
+  });
 });

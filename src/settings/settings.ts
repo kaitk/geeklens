@@ -1,6 +1,12 @@
 import browser from 'webextension-polyfill';
 
 export interface Settings {
+  showProcessorSummary: boolean;
+  showTopologyScaling: boolean;
+  showFrequencyDistribution: boolean;
+  showMemoryDetails: boolean;
+  showReferenceComparison: boolean;
+  showIsaAnnotations: boolean;
   coloredBadges: boolean;
   tooltips: boolean;
   /**
@@ -12,6 +18,12 @@ export interface Settings {
 }
 
 export const defaultSettings: Readonly<Settings> = {
+  showProcessorSummary: false,
+  showTopologyScaling: false,
+  showFrequencyDistribution: false,
+  showMemoryDetails: false,
+  showReferenceComparison: false,
+  showIsaAnnotations: true,
   coloredBadges: true,
   tooltips: true,
   mappingWarnings: true,
@@ -28,7 +40,18 @@ export async function loadSettings(): Promise<Settings> {
       geekLensSettings?: Settings;
     };
     if (result?.geekLensSettings) {
-      return { ...defaultSettings, ...result.geekLensSettings };
+      return {
+        ...defaultSettings,
+        ...result.geekLensSettings,
+        // Keep approved-but-unwired features off even if the visual prototype
+        // previously stored them as enabled. Remove an override only when that
+        // feature is backed by a real result-context view model.
+        showProcessorSummary: false,
+        showTopologyScaling: false,
+        showFrequencyDistribution: false,
+        showMemoryDetails: false,
+        showReferenceComparison: false,
+      };
     }
     console.debug('Failed to load geekLensSettings, returning default');
   } catch (e) {

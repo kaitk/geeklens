@@ -1,6 +1,6 @@
 # GeekLens Privacy Policy
 
-Last Updated: 2026-07-28
+Last Updated: 2026-08-01
 
 ## Overview
 
@@ -19,9 +19,13 @@ telemetry, advertising, or tracking.
 GeekLens processes and stores only what is necessary for its user-facing
 functionality:
 
-- **Extension settings:** Badge color and tooltip preferences are stored using
-  browser synchronized storage. The browser vendor may synchronize these
-  settings when browser sync is enabled; the developer cannot access them.
+- **Extension settings:** Data-block visibility and annotation presentation
+  preferences are stored using browser synchronized storage. The browser vendor
+  may synchronize these settings when browser sync is enabled; the developer
+  cannot access them.
+- **Active tab:** After the user clicks Save in extension settings, GeekLens uses
+  temporary active-tab access to reload the current Geekbench page so the saved
+  preferences take effect. This access is not used to record browsing history.
 - **Cached CPU information:** Public Geekbench result IDs and instruction-set
   metadata are cached in page-origin IndexedDB to avoid repeated requests.
 - **Geekbench page content:** The current Geekbench CPU result or comparison
