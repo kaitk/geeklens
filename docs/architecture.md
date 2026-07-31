@@ -60,7 +60,13 @@ Geekbench's space-separated instruction-set string is:
 `src/isa/workloadInstructions.ts` is the only place that chooses between the
 Geekbench 6 and Geekbench 7 benchmark maps. It returns a `confidenceNote` for
 inferred mappings and omits it for documented ones, so callers cannot render an
-inferred Geekbench 7 mapping without its warning.
+inferred Geekbench 7 mapping without its warning. A `suspected` workload returns
+the note with an empty instruction list, so the two annotation call sites render
+on either signal rather than on badge count alone. The `mappingWarnings` setting
+suppresses the warning at render time in `TableInstructionSets.svelte`, not at
+lookup time, so toggling it re-renders open pages; a suspected workload drops its
+container entirely when warnings are hidden, since the warning was its only
+content.
 
 `src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized
 payload metadata when available, a compatibility instruction-set string, and
@@ -77,9 +83,11 @@ and third system-table columns to primary and baseline results. Explicit links
 are stronger identity evidence than future name/alias heuristics.
 
 Geekbench 7 has no public benchmark-internals document. Its deliberately narrow
-per-workload map lives in `src/isa/benchmarkMapV7.ts`; inferred mappings must
-carry an amber warning and must not be promoted to confirmed without a direct
-source or instruction trace. See
+per-workload map lives in `src/isa/benchmarkMapV7.ts`; inferred and suspected
+mappings must carry an amber warning and must not be promoted to confirmed
+without a direct source or instruction trace. Instructions that every result of
+an architecture reports, such as SSE2 or NEON, are not badged: they would render
+universally and discriminate nothing. See
 [Geekbench 7 data sources and confidence](geekbench7-sources.md) for the current
 evidence and open questions.
 

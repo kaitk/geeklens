@@ -39,4 +39,10 @@ describe('loadSettings', () => {
     expect(settings.coloredBadges).toBe(false);
     expect(settings.tooltips).toBe(true);
   });
+
+  test('defaults mapping warnings on for settings stored before the option existed', async () => {
+    stored = { geekLensSettings: { coloredBadges: true, tooltips: true } };
+
+    expect((await loadSettings()).mappingWarnings).toBe(true);
+  });
 });

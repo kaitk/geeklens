@@ -3,11 +3,18 @@ import browser from 'webextension-polyfill';
 export interface Settings {
   coloredBadges: boolean;
   tooltips: boolean;
+  /**
+   * The amber warning on unconfirmed Geekbench 7 mappings. Defaults to on:
+   * hiding it is an explicit choice, so an inferred mapping never reads as
+   * documented fact by accident.
+   */
+  mappingWarnings: boolean;
 }
 
 export const defaultSettings: Readonly<Settings> = {
   coloredBadges: true,
   tooltips: true,
+  mappingWarnings: true,
 };
 
 /**

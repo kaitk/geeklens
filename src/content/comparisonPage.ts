@@ -341,7 +341,9 @@ function annotateGraphRow(
     benchmarkName,
     cpuInstructions,
   );
-  if (instructions.length === 0) return;
+  // A note without badges is still worth rendering: suspected workloads carry
+  // only the warning.
+  if (instructions.length === 0 && !confidenceNote) return;
 
   // Get the cell with the CPU name
   const cpuCell = row.querySelector('td:first-child');

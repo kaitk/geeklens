@@ -11,27 +11,34 @@
   const { instructions, confidenceNote }: Props = $props();
 
   let settingsStore = getSettingsStore();
+
+  // A suspected workload has nothing but the warning, so hiding warnings must
+  // drop its container too rather than leave an empty, still-spaced row.
+  const showWarning = $derived(Boolean(confidenceNote) && settingsStore.value.mappingWarnings);
+  const showContainer = $derived(instructions.length > 0 || showWarning);
 </script>
 
-<div class="gb-instruction-container">
-  {#each instructions as instruction}
-    <InstructionBadge
-      instruction={instruction.name}
-      groupType={instruction.category}
-      description={settingsStore.value.tooltips ? instruction.description : undefined}
-    />
-  {/each}
-  {#if confidenceNote}
-    <button
-      type="button"
-      class="gb-mapping-warning"
-      aria-label="Unconfirmed Geekbench 7 instruction mapping"
-    >
-      ⚠
-      <span class="gb-mapping-warning-tooltip">{confidenceNote}</span>
-    </button>
-  {/if}
-</div>
+{#if showContainer}
+  <div class="gb-instruction-container">
+    {#each instructions as instruction}
+      <InstructionBadge
+        instruction={instruction.name}
+        groupType={instruction.category}
+        description={settingsStore.value.tooltips ? instruction.description : undefined}
+      />
+    {/each}
+    {#if showWarning}
+      <button
+        type="button"
+        class="gb-mapping-warning"
+        aria-label="Unconfirmed Geekbench 7 instruction usage"
+      >
+        ⚠
+        <span class="gb-mapping-warning-tooltip">{confidenceNote}</span>
+      </button>
+    {/if}
+  </div>
+{/if}
 
 <style>
   .gb-instruction-container {

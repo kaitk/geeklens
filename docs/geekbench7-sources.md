@@ -5,7 +5,7 @@ and how the provisional per-workload mappings were chosen. It is intentionally
 explicit about inference: Geekbench 7 does not currently have a public
 benchmark-internals document comparable to the Geekbench 6 document.
 
-Last reviewed: 2026-07-28.
+Last reviewed: 2026-07-31.
 
 ## Primary sources
 
@@ -98,8 +98,9 @@ confirmation without reproducible traces or a primary source.
 
 ## Current per-workload mappings
 
-All current Geekbench 7 mappings are marked `inferred` and display an amber
-warning in the extension.
+Geekbench 7 mappings that name instructions are marked `inferred` and display an
+amber warning in the extension. Workloads marked `suspected` display the same
+warning with no instruction names; they are listed separately below.
 
 ### File Compression
 
@@ -161,6 +162,59 @@ Uncertainty:
 - Geekbench 7 does not confirm that the same image-processing implementation or
   dispatch code is retained.
 
+## Suspected workloads (warning without instruction names)
+
+Ray Tracer and Game Physics carry the amber warning but no badges. Both are
+near-certainly SIMD-accelerated, but naming extensions would be a guess, and the
+guess that library documentation supports is not informative.
+
+### Ray Tracer
+
+Evidence: Geekbench 7 documents Blender Cycles and Intel Embree. Embree ships
+AVX2 and AVX-512 kernel variants selected by runtime dispatch, which is central
+to its design rather than an optional path.
+
+Not badged: the shipped Geekbench build's kernel selection is unverified, and
+result data shows no ISA-specific signature (see below).
+
+### Game Physics
+
+Evidence: Geekbench 7 documents Jolt Physics. Jolt requires SSE2 on x86-64 and
+NEON on ARM64, and can be compiled with SSE4.1, SSE4.2, AVX, AVX2, or AVX-512.
+
+Not badged: SSE2 and NEON are build minimums, not evidence of dispatch, and
+metric `20000` reports `sse2` on every x86 result and `neon` on every ARM
+result. Badging them would fire on 100% of results while discriminating
+nothing, next to genuinely selective badges such as AVX512-VNNI. Which optional
+level Primate Labs compiles is undocumented.
+
+## Result-data analysis (2026-07-31)
+
+Per-clock single-core scores from local results 66885 (5950X @5027 MHz), 66616
+(7600X @~5400 MHz), 66573 (9600X @5435 MHz), 66819 (9950X3D @5870 MHz), and
+67090 (M5 Max @4600 MHz) were checked for ISA signatures. Single samples per
+chip; treat as directional.
+
+Game Physics tracks overall single-core almost exactly. Zen 4 to Zen 5 per
+clock: Game Physics +14.3%, overall single-core +14.4%. The ratio of Game
+Physics to overall single-core is .925 / .951 / .950 / .891 across Zen 3, Zen 4,
+Zen 5, and Zen 5 X3D. Zen 5's doubled 512-bit datapath produces no
+workload-specific uplift, so AVX-512 dispatch in Jolt is not supported. Zen 3 to
+Zen 4 shows a small Game Physics-specific gain (+5.7% vs +2.8% overall) in the
+generation AVX-512 first appeared, which is suggestive but within noise for one
+sample.
+
+Ray Tracer favors x86 per clock (ratio to overall single-core .899 to 1.025 on
+x86 vs .845 on the M5 Max), and multi-core scaling is healthy on both (9950X3D
+23.8x, M5 Max 15.9x). Large multi-core gaps are core count, not ISA.
+
+Photo Editor is deliberately excluded from the suspected tier. Its dramatic
+cross-platform multi-core gaps are a scaling phenomenon: the 9950X3D posts the
+highest single-core Photo Editor score observed (4630, 42% above the M5 Max) and
+then scales only 2.5x on 16 cores, while a 6-core 7600X lands within 26% of it
+in multi-core. An instruction-usage warning here would point users at the wrong
+cause.
+
 ## Deliberately unmapped workloads
 
 GeekLens currently makes no per-test ISA claim for:
@@ -173,8 +227,6 @@ GeekLens currently makes no per-test ISA claim for:
 - Asset Compression
 - HDR
 - Photo Editor
-- Ray Tracer
-- Game Physics
 - Video Encoder
 - Audio Encoder
 - Video Player/Decoder

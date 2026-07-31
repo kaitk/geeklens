@@ -1,7 +1,12 @@
 import { getSupportedInstructions, type Benchmark } from './benchmarkMap';
 import type { Instruction } from './instructions';
 
-export type MappingConfidence = 'confirmed' | 'inferred';
+/**
+ * `suspected` workloads carry a note but no instruction names: the workload is
+ * near-certainly SIMD-accelerated, yet naming extensions would be a guess. Such
+ * entries keep `instructions` empty and still render the amber warning.
+ */
+export type MappingConfidence = 'confirmed' | 'inferred' | 'suspected';
 
 export interface Geekbench7Benchmark extends Benchmark {
   confidence: MappingConfidence;
@@ -38,6 +43,20 @@ export const BENCHMARKS_V7: Record<string, Geekbench7Benchmark> = {
     confidenceNote:
       'Inferred: Geekbench 7 describes the same nine-image task, but does not document ISA dispatch.',
   },
+  'Ray Tracer': {
+    description: 'Renders a scene with Blender Cycles and Intel Embree',
+    instructions: [],
+    confidence: 'suspected',
+    confidenceNote:
+      'Likely SIMD-accelerated. Embree and Blender Cycles ship vectorized kernels with runtime dispatch, but Geekbench 7 does not document which paths run in the shipped build.',
+  },
+  'Game Physics': {
+    description: 'Simulates rigid-body physics with Jolt Physics',
+    instructions: [],
+    confidence: 'suspected',
+    confidenceNote:
+      'Likely SIMD-accelerated. Jolt Physics requires SSE2 or NEON and can build with AVX2/AVX-512, but Geekbench 7 does not document which paths are compiled or dispatched.',
+  },
 };
 
 export interface Geekbench7InstructionMatch {
@@ -52,6 +71,16 @@ export function getV7SupportedInstructions(
 ): Geekbench7InstructionMatch | null {
   const benchmark = BENCHMARKS_V7[benchmarkName];
   if (!benchmark) return null;
+
+  // A suspected workload names no instructions by design, so it is the note —
+  // not the badge list — that has to reach the page.
+  if (benchmark.confidence === 'suspected') {
+    return {
+      instructions: [],
+      confidence: benchmark.confidence,
+      confidenceNote: benchmark.confidenceNote,
+    };
+  }
 
   const instructions = getSupportedInstructions(benchmark, supportedInstructions);
   if (instructions.length === 0) return null;

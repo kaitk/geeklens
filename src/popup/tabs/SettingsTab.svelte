@@ -39,6 +39,13 @@
     </label>
   </div>
 
+  <div class="setting">
+    <label>
+      <input type="checkbox" bind:checked={settings.mappingWarnings} onchange={onSaveSettings} />
+      Show warnings on unconfirmed instruction mappings
+    </label>
+  </div>
+
   {#if showSavedMessage}
     <div class="saved-message">Settings saved!</div>
   {/if}

@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Ray Tracer and Game Physics now carry an unconfirmed-mapping warning on
+  Geekbench 7 pages, with no instruction badges: both are near-certainly
+  SIMD-accelerated (Embree/Blender Cycles and Jolt Physics respectively), but
+  Geekbench 7 documents no dispatch, and the extensions their libraries require
+  are reported by every result of an architecture.
+- Added a setting to hide unconfirmed-mapping warnings. Enabled by default.
+
 ## [v0.4.0] - 2026-07-28
 
 ### Added
