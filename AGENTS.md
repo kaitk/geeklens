@@ -14,7 +14,8 @@ result and comparison pages with the instruction sets used by each workload.
 - Treat Geekbench HTML, URLs, benchmark names, and version-specific metadata as
   external interfaces. Keep version-specific assumptions explicit.
 - Make source changes under `src/`. `dist/` and `GeekLens-*.zip` are generated.
-- Preserve compatibility with both Chrome (Manifest V3) and Firefox (Manifest V2).
+- Preserve compatibility with both Chrome and Firefox. Both are Manifest V3, but
+  the background differs: service worker on Chrome, event page on Firefox.
 - Follow the existing TypeScript and Svelte style; avoid unrelated cleanup.
 
 ## Validate

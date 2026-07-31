@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill';
+import browser from '../browserApi';
 
 export interface Settings {
   showProcessorSummary: boolean;

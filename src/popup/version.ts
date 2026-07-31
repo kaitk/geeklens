@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill';
+import browser from '../browserApi';
 
 /**
  * Read from the installed manifest rather than importing `src/manifest.json`.

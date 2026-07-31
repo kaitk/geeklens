@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import browser from 'webextension-polyfill';
+  import browser from '../../browserApi';
   import {
     defaultSettings,
     loadSettings,

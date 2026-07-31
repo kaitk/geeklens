@@ -2,7 +2,7 @@ import { describe, expect, mock, test } from 'bun:test';
 
 let stored: Record<string, unknown> = {};
 
-mock.module('webextension-polyfill', () => ({
+mock.module('../browserApi', () => ({
   default: {
     storage: {
       sync: {

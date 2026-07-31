@@ -121,7 +121,9 @@ including on single-result pages.
 ### Technical Details
 
 - This project uses [vite-plugin-web-extension](https://github.com/samrum/vite-plugin-web-extension) for building browser extensions with Vite
-- The Chromium build uses Manifest V3, while the Firefox build uses Manifest V2 for now
+- Both builds use Manifest V3. Chromium runs the background as a service worker;
+  Firefox runs it as an event page, since Firefox does not support
+  `background.service_worker`
 
 ## Contributing
 

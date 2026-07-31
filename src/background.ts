@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill';
+import browser from './browserApi';
 import { parseGeekbenchGeneration } from './geekbench/generation';
 import { BROWSER_HOST } from './geekbench/urls';
 

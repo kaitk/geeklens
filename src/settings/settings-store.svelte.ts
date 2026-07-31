@@ -1,5 +1,5 @@
-import browser from 'webextension-polyfill';
-import { defaultSettings, loadSettings } from './settings';
+import browser from '../browserApi';
+import { defaultSettings, loadSettings, type Settings } from './settings';
 
 let initialized = false;
 let settings = $state({ ...defaultSettings });
@@ -19,7 +19,7 @@ function init() {
   // Listen for storage changes
   browser.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'sync' && changes.geekLensSettings) {
-      settings = changes.geekLensSettings.newValue;
+      settings = changes.geekLensSettings.newValue as Settings;
     }
   });
 }

@@ -704,9 +704,41 @@ that fetches only on maintainer demand. Review diffs before committing updates.
 
 The snapshot must be generation-specific. The processor chart captured on
 2026-07-31 explicitly describes Geekbench 7 user-submitted results and a minimum
-of five unique results per included processor. Identity generation currently
-ignores its scores. A later score snapshot must retain that generation, retrieval
-date, minimum-sample statement, and the chart's mutable-average provenance.
+of five unique results per included processor. The generated score snapshot
+retains that generation, retrieval date, minimum-sample statement, and the
+chart's mutable-average provenance.
+
+### Updating the bundled catalogue
+
+Catalogue refreshes are maintainer-only and never run in the extension. First
+download the complete Geekbench pages as HTML into `temp/`, preserving their
+tables, then run the generators from the repository root:
+
+```sh
+bun scripts/generateProcessorCatalogue.ts "temp/Processor Benchmarks - Geekbench.html" src/catalogue/processorCatalogue.generated.ts
+bun scripts/generateMacCatalogue.ts "temp/Mac mini (2024) Benchmarks - Geekbench.html" src/catalogue/macCatalogue.generated.ts
+bun run format
+```
+
+The processor generator replaces the checked-in AMD, Intel, and Qualcomm
+identity snapshot and its Geekbench 7 single-/multi-core averages. The Mac
+generator replaces Mac identities and configuration constraints only. It does
+not import scores while the captured Mac page describes its CPU averages as
+Geekbench 6 despite mixed Geekbench 7 navigation copy.
+
+After regeneration:
+
+1. Update the matching source capture's `retrievedOn` value in
+   `src/catalogue/processorCatalogue.ts` and confirm the page still states the
+   same Geekbench generation and minimum-result rule.
+2. Review the generated diff for removed entries, renamed paths, duplicates,
+   implausible scores, and unexpected table-layout changes. A successful script
+   run does not prove that Geekbench kept the same external HTML contract.
+3. Keep reviewed aliases, hardware specifications, system-specific corrections,
+   and their source metadata in `processorCatalogue.ts`; the generators do not
+   infer or overwrite them.
+4. Run the complete validation commands from `AGENTS.md`, including both browser
+   builds, before committing the refreshed snapshot.
 
 Use the [Geekbench Processor Benchmark Chart](https://browser.geekbench.com/processor-benchmarks)
 as the broadest known discovery list. It is not a complete processor registry,
