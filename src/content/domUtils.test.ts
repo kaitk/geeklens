@@ -59,6 +59,29 @@ describe('Geekbench 6 single-result selectors', () => {
   });
 });
 
+describe('Geekbench 7 processor catalogue link fixtures', () => {
+  test('preserves explicit Mac and processor links when Geekbench provides them', async () => {
+    const document = await fixture('geekbench7-mac-linked.html');
+
+    expect(document.querySelector('a[href$="/macs/mac-mini-2024-10c-cpu"]')?.textContent).toBe(
+      'Mac mini (2024)',
+    );
+    expect(document.querySelector('a[href$="/processors/apple-m4"]')?.textContent).toBe('Apple M4');
+  });
+
+  test('preserves the plain-text M5 shape as an expected missing-link case', async () => {
+    const document = await fixture('geekbench7-mac-unlinked.html');
+    const cpuName = Array.from(document.querySelectorAll('td.system-name')).find(
+      (cell) => cell.textContent?.trim() === 'Name',
+    )?.nextElementSibling;
+
+    expect(cpuName?.textContent?.trim()).toBe('Apple M5 Max');
+    expect(cpuName?.querySelector('a')).toBeNull();
+    expect(document.querySelector('a[href*="/macs/"]')).toBeNull();
+    expect(document.querySelector('a[href*="/processors/"]')).toBeNull();
+  });
+});
+
 describe('Geekbench 6 comparison selectors', () => {
   test('finds versions and comparison tables from stored HTML', async () => {
     const document = await fixture('geekbench6-comparison.html');

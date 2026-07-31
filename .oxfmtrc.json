@@ -10,6 +10,8 @@
     "GeekLens-*.zip",
     "bun.lock",
     "screenshots/**",
-    ".claude/**"
+    ".claude/**",
+    "src/geekbench/__fixtures__/*.json",
+    "src/content/__fixtures__/geekbench7-mac-*.html"
   ]
 }

@@ -27,6 +27,11 @@ Geekbench 6 exposes instruction sets in result-page HTML. Geekbench 7 omits that
 row, so GeekLens reads metric `20000` from the result's `.gb6` JSON payload and
 adds an Instruction Sets row to the rendered system information.
 
+Geekbench 7 is the primary target for new result-metadata features. Geekbench 6
+remains supported for its existing instruction annotations and may share richer
+features when doing so is low-cost, but it does not require feature parity when
+that would add generation-specific parsing, caching, or UI complexity.
+
 Shared selectors and benchmark-name extraction live in
 `src/content/domUtils.ts`. Svelte components in `src/content/` render badges;
 they should not contain Geekbench page-parsing logic. Both adapters share

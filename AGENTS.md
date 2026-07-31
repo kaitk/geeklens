@@ -19,6 +19,13 @@ result and comparison pages with the instruction sets used by each workload.
 
 ## Validate
 
+### Codex
+
+In the Codex environment, formatting, linting, tests, type/Svelte checks, and
+browser builds must be run with user-approved elevated execution. Request
+approval rather than retrying these commands inside the sandbox after a
+permissions-related failure (for example, Oxfmt reporting `spawn EPERM`).
+
 Run the checks relevant to the change:
 
 ```sh
