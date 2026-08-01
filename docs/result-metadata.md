@@ -15,8 +15,8 @@ hardware claim.
 `src/geekbench/resultPayload.ts` converts a payload into typed, normalized
 metadata. Page adapters cache that metadata with the compatibility instruction
 string and any explicit processor/Mac links, then pass the cached context through
-`src/content/processorContextViewModel.ts`. The renderer in
-`src/content/processorContextUi.ts` consumes only that view model; it does not
+`src/content/processorContextViewModel.ts`. The processor-context renderers consume
+the neutral contract in `src/content/processorContext/model.ts`; they do not
 parse pages, fetch payloads, or resolve identities.
 
 The current Geekbench 7 presentation includes:
@@ -86,8 +86,9 @@ when they belong to one identity. Every external fact records its source URL,
 publisher, and retrieval date. Core-type composition is also published data:
 retain the source's terminology (for example, Zen 5/Zen 5c or Intel
 Performance-/Efficient-cores) instead of normalizing vendors into a fabricated
-taxonomy. Do not assign those names to individual topology segments unless a
-future exact and unambiguous join is designed and tested.
+taxonomy. The matcher assigns those names to reported topology clusters only when
+there is exactly one feasible cluster-to-group assignment. Ambiguous, homogeneous,
+and incomplete shapes remain unnamed.
 
 Geekbench score references are generation-specific mutable averages of
 user-submitted results, not official processor scores. Mac scores are omitted
@@ -124,12 +125,14 @@ generation copy is conflicting or unclear.
 After regeneration:
 
 1. Update the source capture's `retrievedOn` value in
-   `src/catalogue/processorCatalogue.ts` and verify the stated Geekbench
+   `src/catalogue/catalogueSources.ts` and verify the stated Geekbench
    generation and minimum-result rule.
 2. Review removed and renamed entries, duplicate paths, implausible scores, and
    unexpected table-layout changes.
-3. Preserve reviewed aliases, specifications, corrections, compositions, and
-   provenance overlays; generators must not infer or overwrite them.
+3. Preserve reviewed aliases and identities in `processorIdentities.ts`, hardware
+   in `processorHardware.ts`, corrections in `systemMemorySpecifications.ts`, core
+   compositions in `coreCompositions.ts`, and disputes in `cacheDisputes.ts`;
+   generators must not infer or overwrite them.
 4. Run the full validation set in `AGENTS.md`, including both browser builds.
 
 The broad processor chart is a discovery source, not a complete registry.

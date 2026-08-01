@@ -8,80 +8,19 @@ import type { Settings } from '../settings/settings';
 import { createIcon, type IconName } from './icons';
 import { createRowMarker, markRowLabel, type RowMarkerKind } from './rowMarker';
 import { scoreDelta } from './scoreDelta';
-
-export interface ProcessorContextViewModel {
-  name: string;
-  vendor: string;
-  vendorKey: string;
-  architecture: string;
-  cataloguePath: string | null;
-  frequency: {
-    minGHz: number;
-    q1GHz: number;
-    medianGHz: number;
-    meanGHz: number;
-    q3GHz: number;
-    maxGHz: number;
-  } | null;
-  topology: {
-    cores: number | null;
-    threads: number | null;
-    /** `label` names the core type from the catalogue, and is set only when every
-     * cluster could be matched to a group unambiguously; `cores` stays the
-     * reported count either way. Labelled clusters follow the source's group
-     * order. Unlabelled ones are ordered fastest first when every cluster
-     * reports a maximum frequency, otherwise left in payload order — the payload
-     * itself never names a cluster as a performance or efficiency group. */
-    clusters: Array<{ cores: number; maxGHz: number | null; label: string | null }>;
-  } | null;
-  scaling: { ratio: number; singleCore: number; multiCore: number } | null;
-  /** What kinds of core the processor holds, in the source's own wording. Only
-   * an exact catalogue match supplies this; the payload never does. Stated on its
-   * own line only when the clusters could not carry the same names themselves. */
-  coreComposition: ProvenanceFact | null;
-  reference: {
-    singleCore: number;
-    multiCore: number;
-    generation: 'Geekbench 7';
-    minimumUniqueResults?: number;
-  } | null;
-  /** A reviewed contradiction of the L3 total Geekbench prints for this part.
-   * The reported value is never replaced; this only supplies the objection. */
-  disputedL3Cache: { detail: string; source: { url: string; label: string } } | null;
-  memory: MemoryFact[];
-}
-
-/** One stated fact plus where it came from. Shared by every value that carries a
- * provenance badge, so they all read and behave identically. */
-export interface ProvenanceFact {
-  value: string;
-  provenance: 'reported' | 'computed' | 'published';
-  detail?: string;
-  source?: {
-    url: string;
-    label: string;
-  };
-}
-
-export interface MemoryFact extends ProvenanceFact {
-  kind: 'capacity' | 'specification' | 'interface' | 'bandwidth';
-}
+import type {
+  MemoryFact,
+  ProcessorContextViewModel,
+  ProvenanceFact,
+} from './processorContext/model';
+import { renderIdentity } from './processorContext/identity';
+export type { ProcessorContextViewModel } from './processorContext/model';
 
 const MEMORY_PROVENANCE_HELP = {
   reported: 'Reported by the Geekbench result payload.',
   computed: 'Calculated from the reported memory configuration; not measured.',
   published: 'Published for the matched processor or device; not measured by this result.',
 } as const;
-
-/** Host of an absolute URL, for naming where a link goes. Catalogue entries are
- * expected to carry absolute URLs; anything else simply goes unlabelled. */
-function linkHost(url: string): string | undefined {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '');
-  } catch {
-    return undefined;
-  }
-}
 
 /** A source affordance: hovering says where the fact came from, clicking opens
  * it. The custom tooltip replaces the browser's `title` popup, which appears
@@ -136,40 +75,6 @@ function processorNameAndTopology(cell: Element): { name: string; topology: stri
     name: rawName.replace(/\s+@\s+[\d.]+\s*(?:GHz|MHz).*$/i, ''),
     topology: lines.slice(1).join(' · '),
   };
-}
-
-function identity(name: string, preview: ProcessorContextViewModel): HTMLElement {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'geeklens-preview-processor';
-
-  const heading = document.createElement('div');
-  heading.className = 'geeklens-preview-identity';
-
-  const nameElement = document.createElement('strong');
-  nameElement.textContent = nameWithoutVendor(name, preview.vendor);
-
-  const vendorBadge = document.createElement('span');
-  vendorBadge.className = `geeklens-preview-badge geeklens-preview-badge-${preview.vendorKey}`;
-  vendorBadge.textContent = preview.vendor;
-
-  const architectureBadge = document.createElement('span');
-  architectureBadge.className = 'geeklens-preview-badge geeklens-preview-badge-architecture';
-  architectureBadge.textContent = preview.architecture;
-
-  heading.append(vendorBadge, nameElement, architectureBadge);
-
-  if (preview.cataloguePath) {
-    heading.appendChild(
-      sourceLink({
-        href: preview.cataloguePath,
-        title: 'Processor page',
-        detail: linkHost(preview.cataloguePath),
-        ariaLabel: 'Open processor page in a new tab.',
-      }),
-    );
-  }
-  wrapper.appendChild(heading);
-  return wrapper;
 }
 
 type FrequencyStatistics = NonNullable<ProcessorContextViewModel['frequency']>;
@@ -898,7 +803,7 @@ export function renderSingleProcessorContext(
   if (!nameCell || nameCell.querySelector('[data-geeklens-preview-processor]')) return;
 
   if (settings.showProcessorSummary) {
-    const block = identity(preview.name, preview);
+    const block = renderIdentity(preview.name, preview);
     block.dataset.geeklensPreviewProcessor = '';
     nameCell.replaceChildren(block);
     if (nameRow?.firstElementChild) markRowLabel(nameRow.firstElementChild, 'changed');
@@ -975,7 +880,7 @@ export function renderComparisonProcessorContext(
       if (settings.showProcessorSummary) {
         const preview = previews[index];
         if (!preview) return;
-        const block = identity(preview.name, preview);
+        const block = renderIdentity(preview.name, preview);
         block.dataset.geeklensPreviewProcessor = '';
         cell.replaceChildren(block);
       }

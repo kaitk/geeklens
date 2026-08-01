@@ -1,9 +1,8 @@
 # Processor catalogue sources and provenance
 
-This document records where the reviewed facts in
-[`src/catalogue/processorCatalogue.ts`](../src/catalogue/processorCatalogue.ts)
-come from, how their wording is chosen, and how to re-verify a citation that has
-gone stale. It is the companion to
+This document records where facts in the reviewed source and overlay modules under
+[`src/catalogue/`](../src/catalogue/) come from, how their wording is chosen, and
+how to re-verify a citation that has gone stale. It is the companion to
 [geekbench7-sources.md](geekbench7-sources.md), which covers instruction-set
 evidence rather than processor specifications.
 

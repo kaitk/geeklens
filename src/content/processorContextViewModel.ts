@@ -4,7 +4,7 @@ import type {
   ProcessorVendor,
   ResultMetadata,
 } from '../geekbench/resultPayload';
-import type { ProcessorContextViewModel } from './processorContextUi';
+import type { ProcessorContextViewModel } from './processorContext/model';
 import { resolveProcessorIdentity } from '../catalogue/processorIdentity';
 import type { ProcessorIdentityMatch } from '../catalogue/processorIdentity';
 import {

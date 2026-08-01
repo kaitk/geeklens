@@ -43,8 +43,9 @@ mounting), so neither adapter creates DOM containers itself. Mount containers
 carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
 guards must use those markers rather than Svelte component CSS classes.
 
-The processor-context presentation lives in
-`src/content/processorContextUi.ts`. It is a display-model renderer, not a parser
+The processor-context presentation is orchestrated by
+`src/content/processorContextUi.ts`, with its neutral contract and feature renderers
+under `src/content/processorContext/`. It is not a parser
 or data source. Page adapters pass it real cached contexts through a pure
 view-model boundary; never embed preview values or fetch from the renderer. All
 currently exposed processor-context slices are wired and default on.

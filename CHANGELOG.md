@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [v0.6.0] - 2026-08-01
+
+### Added
+
+- Added sourced core types and expanded memory details for supported processors.
+- Added warnings for incorrect L3 totals reported on affected Ryzen X3D processors.
+
+### Changed
+
+- Improved the processor information layout on result and comparison pages.
+
 ## [v0.5.0] - 2026-08-01
 
 ### Added

@@ -1,6 +1,6 @@
 # Apple and Qualcomm core compositions
 
-**Status:** done, 2026-08-01. Coverage is now 48 of 49 Apple and Qualcomm
+**Status:** historical (completed 2026-08-01). Coverage is now 48 of 49 Apple and Qualcomm
 entries. Three decisions differ from what this note assumed:
 
 - **Apple wording is settled to three terms**, not kept per source: `super`,
@@ -19,7 +19,8 @@ entries. Three decisions differ from what this note assumed:
 
 **Raised:** 2026-08-01.
 
-Extend `REVIEWED_CORE_COMPOSITIONS` in `src/catalogue/processorCatalogue.ts` to
+Historically, this extended `REVIEWED_CORE_COMPOSITIONS` (now in
+`src/catalogue/coreCompositions.ts`) to
 cover Apple silicon and Snapdragon X. Coverage today is 5 of 41 Apple entries and
 0 of 8 Qualcomm entries; the Intel hybrid range is already done.
 
