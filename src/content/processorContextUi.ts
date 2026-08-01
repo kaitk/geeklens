@@ -498,6 +498,20 @@ function rowLabel(label: string, kind: RowMarkerKind = 'added'): DocumentFragmen
   return content;
 }
 
+/** Read a table label without counting our own marker and its tooltip copy.
+ * This keeps row discovery stable when rendering is invoked more than once. */
+function tableRowLabel(row: Element): string {
+  const cell = row.firstElementChild;
+  if (!cell) return '';
+  return Array.from(cell.childNodes)
+    .filter(
+      (node) => !(node.nodeType === 1 && (node as Element).matches('[data-geeklens-row-marker]')),
+    )
+    .map((node) => node.textContent ?? '')
+    .join('')
+    .trim();
+}
+
 /** Socket count is the one topology fact the payload does not carry, so it is
  * read back out of the string Geekbench already renders. */
 function processorCount(nativeTopology: string): number | null {
@@ -547,7 +561,20 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
     composition.className = 'geeklens-preview-topology-composition';
     const text = document.createElement('span');
     text.textContent = preview.coreComposition.value;
-    composition.append(text, provenanceBadge(preview.coreComposition));
+    composition.appendChild(text);
+    if (preview.coreComposition.source) {
+      const source = document.createElement('a');
+      source.className = 'geeklens-preview-catalogue';
+      source.href = preview.coreComposition.source.url;
+      source.target = '_blank';
+      source.rel = 'noopener noreferrer';
+      source.textContent = 'Source ↗';
+      source.setAttribute(
+        'aria-label',
+        `Core composition source: ${preview.coreComposition.source.label}. Opens in a new tab.`,
+      );
+      composition.appendChild(source);
+    }
     value.appendChild(composition);
   }
 
@@ -588,10 +615,9 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
   return value;
 }
 
-/** Multi-core scaling belongs beside the scores it divides, not in the CPU
- * topology table. It is printed as a bare ratio: comparing it against the core
- * count reads as an efficiency figure, which heterogeneous clusters make
- * meaningless. */
+/** Multi-core scaling belongs beside the score it divides. It is printed as a
+ * bare ratio: comparing it against the core count reads as an efficiency
+ * figure, which heterogeneous clusters make meaningless. */
 function scalingNote(scaling: NonNullable<ProcessorContextViewModel['scaling']>): HTMLElement {
   const ratio = `${scaling.ratio.toFixed(2)}×`;
 
@@ -703,7 +729,7 @@ export function renderSingleProcessorContext(
     (table) => table.querySelector('th')?.textContent?.trim() === 'CPU Information',
   );
   const nameRow = Array.from(cpuTable?.querySelectorAll('tbody tr') ?? []).find((row) =>
-    /^(Name|Processor)$/.test(row.firstElementChild?.textContent?.trim() ?? ''),
+    /^(Name|Processor)$/.test(tableRowLabel(row)),
   );
   const nameCell = nameRow?.lastElementChild;
   if (!nameCell || nameCell.querySelector('[data-geeklens-preview-processor]')) return;
@@ -745,12 +771,14 @@ export function renderSingleProcessorContext(
     }
   }
 
-  if (settings.showMultiCoreScaling) annotateSingleScaling(preview);
-
   if (settings.showReferenceComparison) {
     annotateSingleScoreReferences(preview);
     annotateSinglePerformanceReferences(preview);
   }
+
+  // References must read the untouched numeric score before scaling adds its
+  // explanatory text to the same cell.
+  if (settings.showMultiCoreScaling) annotateSingleScaling(preview);
 
   const memoryTable = Array.from(document.querySelectorAll('table.system-table')).find(
     (table) => table.querySelector('th')?.textContent?.trim() === 'Memory Information',
@@ -768,7 +796,7 @@ export function renderComparisonProcessorContext(
 ): void {
   const table = document.querySelector('table.system-information');
   const processorRow = Array.from(table?.querySelectorAll('tbody tr') ?? []).find(
-    (row) => row.firstElementChild?.textContent?.trim() === 'Processor',
+    (row) => tableRowLabel(row) === 'Processor',
   );
   if (!processorRow) return;
 
@@ -801,7 +829,6 @@ export function renderComparisonProcessorContext(
     );
     detailRows.push(topologyRow);
   }
-  if (settings.showMultiCoreScaling) annotateComparisonScaling(previews);
   if (
     settings.showFrequencyDistribution &&
     previews.some((preview) => preview?.frequency) &&
@@ -824,7 +851,7 @@ export function renderComparisonProcessorContext(
   processorRow.after(...detailRows);
 
   const memoryRow = Array.from(table?.querySelectorAll('tbody tr') ?? []).find(
-    (row) => row.firstElementChild?.textContent?.trim() === 'Memory',
+    (row) => tableRowLabel(row) === 'Memory',
   );
   if (settings.showMemoryDetails) {
     let annotated = false;
@@ -845,6 +872,9 @@ export function renderComparisonProcessorContext(
   if (settings.showReferenceComparison && previews[0] && previews[1]) {
     annotateComparisonReferences([previews[0], previews[1]]);
   }
+  // References must read the untouched numeric score before scaling adds its
+  // explanatory text to the same cell.
+  if (settings.showMultiCoreScaling) annotateComparisonScaling(previews);
 }
 
 function annotateComparisonReferences(

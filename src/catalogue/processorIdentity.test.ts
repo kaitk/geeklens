@@ -46,6 +46,36 @@ describe('resolveProcessorIdentity', () => {
     });
   });
 
+  test('attaches reviewed Intel hybrid layouts only to exact catalogue SKUs', () => {
+    const compositions = Object.fromEntries(
+      [
+        'intel-core-i9-12900k',
+        'intel-core-i7-14700k',
+        'intel-core-ultra-9-185h',
+        'intel-core-ultra-9-285h',
+        'intel-core-ultra-7-258v',
+      ].map((key) => [
+        key,
+        PROCESSOR_CATALOGUE.find((entry) => entry.key === key)?.coreComposition,
+      ]),
+    );
+
+    expect(compositions).toMatchObject({
+      'intel-core-i9-12900k': { description: '8 Performance-cores + 8 Efficient-cores' },
+      'intel-core-i7-14700k': { description: '8 Performance-cores + 12 Efficient-cores' },
+      'intel-core-ultra-9-185h': {
+        description: '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+      },
+      'intel-core-ultra-9-285h': {
+        description: '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+      },
+      'intel-core-ultra-7-258v': { description: '4 Performance-cores + 4 Efficient-cores' },
+    });
+    expect(
+      PROCESSOR_CATALOGUE.find((entry) => entry.key === 'intel-core-i5-12400')?.coreComposition,
+    ).toBeUndefined();
+  });
+
   test('gives exact Mac and processor paths precedence over aliases', async () => {
     const cached = await context('1248');
     cached.processorLinks = {
@@ -99,6 +129,26 @@ describe('resolveProcessorIdentity', () => {
     expect(resolveProcessorIdentity(await context('64820'))).toMatchObject({
       kind: 'alias',
       catalogueKey: 'apple-m4-pro-12c',
+    });
+  });
+
+  test('resolves the reviewed Panther Lake result identity', async () => {
+    const cached = await context('61473');
+    cached.metadata!.processor.name = {
+      value: 'Intel(R) Core(TM) Ultra X9 388H',
+      source: 'test',
+    };
+    cached.metadata!.topology.physicalCores = { value: 16, source: 'test' };
+
+    expect(resolveProcessorIdentity(cached)).toMatchObject({
+      kind: 'alias',
+      catalogueKey: 'intel-core-ultra-x9-388h',
+      evidence: 'Intel(R) Core(TM) Ultra X9 388H',
+      entry: {
+        coreComposition: {
+          description: '4 Performance-cores + 8 Efficient-cores + 4 Low Power Efficient-cores',
+        },
+      },
     });
   });
 

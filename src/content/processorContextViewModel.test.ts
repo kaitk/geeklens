@@ -111,6 +111,19 @@ describe('buildProcessorContextViewModel', () => {
       { cores: 16, maxGHz: null },
     ]);
 
+    const pantherLake = await context('61473');
+    pantherLake.metadata!.processor.name = {
+      value: 'Intel(R) Core(TM) Ultra X9 388H',
+      source: 'test',
+    };
+    pantherLake.metadata!.topology.physicalCores = { value: 16, source: 'test' };
+    expect(buildProcessorContextViewModel(pantherLake)?.coreComposition).toMatchObject({
+      value: '4 Performance-cores + 8 Efficient-cores + 4 Low Power Efficient-cores',
+      source: {
+        url: 'https://en.wikipedia.org/wiki/Panther_Lake_(microprocessor)',
+      },
+    });
+
     // Matched entries without a reviewed composition, and unmatched results, both
     // leave the topology row exactly as the payload described it.
     expect(buildProcessorContextViewModel(await context('1248'))?.coreComposition).toBeNull();

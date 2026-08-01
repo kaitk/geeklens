@@ -215,6 +215,12 @@ const WIKIPEDIA_ZEN_5_SOURCE: CatalogueSource = {
   publisher: 'Wikipedia',
 };
 
+const WIKIPEDIA_ALDER_LAKE_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Alder_Lake',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
 const WIKIPEDIA_RAPTOR_LAKE_SOURCE: CatalogueSource = {
   url: 'https://en.wikipedia.org/wiki/Raptor_Lake',
   retrievedOn: '2026-08-01',
@@ -223,6 +229,24 @@ const WIKIPEDIA_RAPTOR_LAKE_SOURCE: CatalogueSource = {
 
 const WIKIPEDIA_ARROW_LAKE_SOURCE: CatalogueSource = {
   url: 'https://en.wikipedia.org/wiki/Arrow_Lake_(microprocessor)',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+const WIKIPEDIA_METEOR_LAKE_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Meteor_Lake',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+const WIKIPEDIA_LUNAR_LAKE_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Lunar_Lake',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+const WIKIPEDIA_PANTHER_LAKE_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Panther_Lake_(microprocessor)',
   retrievedOn: '2026-08-01',
   publisher: 'Wikipedia',
 };
@@ -386,6 +410,17 @@ function appleUnifiedMemory(
 }
 
 const REVIEWED_PROCESSOR_IDENTITIES: readonly ProcessorCatalogueEntry[] = [
+  {
+    key: 'intel-core-ultra-x9-388h',
+    displayName: 'Intel Core Ultra X9 388H',
+    vendor: 'intel',
+    architecture: 'x86',
+    pageUrl: WIKIPEDIA_PANTHER_LAKE_SOURCE.url,
+    processorPaths: [],
+    macPaths: [],
+    aliases: ['Intel Core Ultra X9 388H', 'Intel(R) Core(TM) Ultra X9 388H'],
+    requiredConfiguration: { physicalCores: 16 },
+  },
   // M1 Pro ships in 8- and 10-core bins on one 256-bit interface.
   ...([8, 10] as const).map((cores) =>
     appleIdentity(
@@ -560,6 +595,14 @@ const REVIEWED_PROCESSOR_IDENTITIES: readonly ProcessorCatalogueEntry[] = [
  * originally captured for. Absent entries render exactly as before, so partial
  * coverage is a valid shipping state.
  */
+function sharedCoreComposition(
+  keys: readonly string[],
+  description: string,
+  source: CatalogueSource,
+): Record<string, CoreComposition> {
+  return Object.fromEntries(keys.map((key) => [key, { description, source }]));
+}
+
 const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
   // Zen 5c is a density-optimized Zen 5, not an efficiency core: same
   // microarchitecture and IPC, lower peak clock and less L3 per CCX. AMD's own
@@ -572,14 +615,119 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
     description: '6 Zen 5 + 4 Zen 5c',
     source: WIKIPEDIA_ZEN_5_SOURCE,
   },
-  'intel-core-i9-13900k': {
-    description: '8 Performance-cores + 16 Efficient-cores',
-    source: WIKIPEDIA_RAPTOR_LAKE_SOURCE,
-  },
-  'intel-core-ultra-9-285k': {
-    description: '8 Performance-cores + 16 Efficient-cores',
-    source: WIKIPEDIA_ARROW_LAKE_SOURCE,
-  },
+  ...sharedCoreComposition(
+    ['intel-core-i9-12900k', 'intel-core-i9-12900kf'],
+    '8 Performance-cores + 8 Efficient-cores',
+    WIKIPEDIA_ALDER_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i7-12700k', 'intel-core-i7-12700kf', 'intel-core-i7-12700f'],
+    '8 Performance-cores + 4 Efficient-cores',
+    WIKIPEDIA_ALDER_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i5-12600k', 'intel-core-i5-12600kf'],
+    '6 Performance-cores + 4 Efficient-cores',
+    WIKIPEDIA_ALDER_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i7-1265u', 'intel-core-i5-1235u'],
+    '2 Performance-cores + 8 Efficient-cores',
+    WIKIPEDIA_ALDER_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i3-1215u'],
+    '2 Performance-cores + 4 Efficient-cores',
+    WIKIPEDIA_ALDER_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    [
+      'intel-core-i9-13900ks',
+      'intel-core-i9-13900k',
+      'intel-core-i9-13900kf',
+      'intel-core-i9-14900ks',
+      'intel-core-i9-14900k',
+      'intel-core-i9-14900kf',
+      'intel-core-i9-14900',
+      'intel-core-i9-14900hx',
+    ],
+    '8 Performance-cores + 16 Efficient-cores',
+    WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i7-13700k', 'intel-core-i7-13700kf', 'intel-core-i7-13700'],
+    '8 Performance-cores + 8 Efficient-cores',
+    WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    [
+      'intel-core-i7-14700k',
+      'intel-core-i7-14700kf',
+      'intel-core-i7-14700',
+      'intel-core-i7-14700f',
+      'intel-core-i7-14700hx',
+    ],
+    '8 Performance-cores + 12 Efficient-cores',
+    WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i7-14650hx'],
+    '8 Performance-cores + 8 Efficient-cores',
+    WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    [
+      'intel-core-i5-13600k',
+      'intel-core-i5-13600kf',
+      'intel-core-i5-13500',
+      'intel-core-i5-14600k',
+      'intel-core-i5-14600kf',
+      'intel-core-i5-14500',
+      'intel-core-i5-14500t',
+    ],
+    '6 Performance-cores + 8 Efficient-cores',
+    WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-i5-13400f', 'intel-core-i5-14400', 'intel-core-i5-14400f'],
+    '6 Performance-cores + 4 Efficient-cores',
+    WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-9-185h'],
+    '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+    WIKIPEDIA_METEOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-7-165u'],
+    '2 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+    WIKIPEDIA_METEOR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-9-285k', 'intel-core-ultra-9-275hx'],
+    '8 Performance-cores + 16 Efficient-cores',
+    WIKIPEDIA_ARROW_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-7-265k'],
+    '8 Performance-cores + 12 Efficient-cores',
+    WIKIPEDIA_ARROW_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-9-285h', 'intel-core-ultra-7-255h'],
+    '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+    WIKIPEDIA_ARROW_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-7-258v', 'intel-core-ultra-7-256v'],
+    '4 Performance-cores + 4 Efficient-cores',
+    WIKIPEDIA_LUNAR_LAKE_SOURCE,
+  ),
+  ...sharedCoreComposition(
+    ['intel-core-ultra-x9-388h'],
+    '4 Performance-cores + 8 Efficient-cores + 4 Low Power Efficient-cores',
+    WIKIPEDIA_PANTHER_LAKE_SOURCE,
+  ),
   'apple-m1-pro-10c': {
     description: '8 performance cores + 2 efficiency cores',
     source: APPLE_M1_PRO_MEMORY_SOURCE,

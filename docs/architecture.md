@@ -43,13 +43,14 @@ mounting), so neither adapter creates DOM containers itself. Mount containers
 carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
 guards must use those markers rather than Svelte component CSS classes.
 
-The approved processor-context presentation is retained, but not yet connected,
-in `src/content/processorContextUi.ts`. It is a display-model renderer, not a
-parser or data source. Page adapters must pass it real cached contexts through a
-pure view-model boundary; never embed preview values or fetch from the renderer.
-Until each real data slice is wired, its popup control stays disabled and forced
-off. `src/content/addedRowMarker.ts` owns the common marker for rows GeekLens
-creates.
+The processor-context presentation lives in
+`src/content/processorContextUi.ts`. It is a display-model renderer, not a parser
+or data source. Page adapters pass it real cached contexts through a pure
+view-model boundary; never embed preview values or fetch from the renderer. All
+currently exposed processor-context slices are wired and default on.
+`src/content/rowMarker.ts` owns the common marker for rows GeekLens creates.
+See [Result metadata and processor context](result-metadata.md) for payload,
+identity, provenance, fixture, and catalogue-maintenance rules.
 
 Geekbench Browser URL shapes live in `src/geekbench/urls.ts`, and the
 authenticated `.gb6` payload fetch in `src/geekbench/resultPayloadClient.ts`.

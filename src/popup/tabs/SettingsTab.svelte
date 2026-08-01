@@ -53,6 +53,14 @@
     </label>
     <label class="setting-row">
       <span
+        ><strong>Multi-core scaling</strong><small
+          >Multi-core to single-core score ratio, beside the score</small
+        ></span
+      >
+      <input type="checkbox" bind:checked={settings.showMultiCoreScaling} />
+    </label>
+    <label class="setting-row">
+      <span
         ><strong>Processor identity</strong><small>Vendor, ISA family, and catalogue link</small
         ></span
       >
@@ -61,14 +69,6 @@
     <label class="setting-row">
       <span><strong>Core topology</strong><small>Core, thread, and cluster layout</small></span>
       <input type="checkbox" bind:checked={settings.showCoreTopology} />
-    </label>
-    <label class="setting-row">
-      <span
-        ><strong>Multi-core scaling</strong><small
-          >Multi-core to single-core score ratio, beside the score</small
-        ></span
-      >
-      <input type="checkbox" bind:checked={settings.showMultiCoreScaling} />
     </label>
     <label class="setting-row">
       <span

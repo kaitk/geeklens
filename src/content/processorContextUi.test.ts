@@ -184,11 +184,12 @@ describe('processor context DOM integration', () => {
     expect(composition?.firstElementChild?.textContent).toBe('4 Zen 5 + 8 Zen 5c');
     expect(document.querySelector('.geeklens-preview-topology-bar')).toBeNull();
 
-    const badge = composition?.querySelector('a.geeklens-preview-provenance');
-    expect(badge?.textContent).toContain('published');
-    expect(badge?.getAttribute('href')).toBe('https://example.com/amd');
-    expect(badge?.getAttribute('aria-label')).toContain(
-      'Source: AMD, retrieved 2026-08-01. Click to open source.',
+    expect(composition?.querySelector('.geeklens-preview-provenance')).toBeNull();
+    const source = composition?.querySelector('a.geeklens-preview-catalogue');
+    expect(source?.textContent).toBe('Source ↗');
+    expect(source?.getAttribute('href')).toBe('https://example.com/amd');
+    expect(source?.getAttribute('aria-label')).toBe(
+      'Core composition source: AMD, retrieved 2026-08-01. Opens in a new tab.',
     );
   });
 
@@ -272,29 +273,85 @@ describe('processor context DOM integration', () => {
     expect(document.querySelector('.geeklens-preview-topology')?.textContent).not.toContain('7.25');
   });
 
-  test('places comparison scaling in each multi-core column', async () => {
+  test('keeps single-result scaling below the reference average', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<div class="score-container desktop"><div class="score">2000</div></div><div class="score-container desktop"><div class="score">14500</div></div>',
+    );
+    const preview = model('Intel CPU', 'Intel', 'x86');
+    preview.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    preview.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
+    preview.reference = {
+      singleCore: 1900,
+      multiCore: 14000,
+      generation: 'Geekbench 7',
+    };
+
+    renderSingleProcessorContext(
+      preview,
+      settings(true, {
+        showMultiCoreScaling: true,
+        showReferenceComparison: true,
+      }),
+    );
+
+    const multiCoreScore = document.querySelectorAll('.score-container.desktop .score')[1];
+    expect(
+      multiCoreScore?.querySelector('[data-geeklens-preview-reference]')?.textContent,
+    ).toContain('+3.6% vs avg');
+    expect(
+      multiCoreScore?.querySelector('[data-geeklens-preview-scaling]')?.firstChild?.textContent,
+    ).toBe('7.25× single-core');
+    expect(
+      Array.from(multiCoreScore?.children ?? []).map((child) =>
+        child.hasAttribute('data-geeklens-preview-scaling') ? 'scaling' : 'reference',
+      ),
+    ).toEqual(['reference', 'scaling']);
+  });
+
+  test('keeps comparison scaling beside scores without disturbing differences or averages', async () => {
     globalThis.document = await fixture('geekbench7-comparison.html');
     document
       .querySelector('table.comparison-benchmark-table tbody')
       ?.insertAdjacentHTML(
         'afterbegin',
-        '<tr><td class="name">Multi-Core Score</td><td class="score">14500</td><td class="score">8000</td><td class="delta"></td></tr>',
+        '<tr class="test-multi-core"><td class="name">Multi-Core Score</td><td class="score">14500</td><td class="score">8000</td><td class="delta">181.3%</td></tr>',
       );
     const primary = model('Intel CPU', 'Intel', 'x86');
     primary.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    primary.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
+    primary.reference = {
+      singleCore: 1900,
+      multiCore: 14000,
+      generation: 'Geekbench 7',
+    };
     const baseline = model('AMD CPU', 'AMD', 'x86');
     baseline.scaling = { ratio: 4.5, singleCore: 1778, multiCore: 8000 };
+    baseline.cataloguePath = 'https://browser.geekbench.com/processors/amd-cpu';
+    baseline.reference = {
+      singleCore: 1700,
+      multiCore: 7800,
+      generation: 'Geekbench 7',
+    };
 
     renderComparisonProcessorContext(
       [primary, baseline],
-      settings(true, { showCoreTopology: true, showMultiCoreScaling: true }),
+      settings(true, {
+        showCoreTopology: true,
+        showMultiCoreScaling: true,
+        showReferenceComparison: true,
+      }),
     );
 
+    const scoreRow = document.querySelector('.test-multi-core');
     expect(
-      Array.from(document.querySelectorAll('[data-geeklens-preview-scaling]')).map(
+      Array.from(scoreRow?.querySelectorAll('[data-geeklens-preview-scaling]') ?? []).map(
         (note) => note.firstChild?.textContent,
       ),
     ).toEqual(['7.25× single-core', '4.50× single-core']);
+    expect(scoreRow?.querySelector('.delta')?.textContent).toBe('181.3%');
+    expect(scoreRow?.querySelectorAll('[data-geeklens-preview-reference]')).toHaveLength(2);
     const row = document.querySelector('[data-geeklens-preview-detail="topology"]');
     expect(row?.firstElementChild?.textContent).toContain('Topology');
     expect(row?.textContent).not.toContain('×');
@@ -401,7 +458,9 @@ describe('processor context DOM integration', () => {
     const memoryTable = Array.from(document.querySelectorAll('table.system-table')).find(
       (table) => table.querySelector('th')?.textContent === 'Memory Information',
     );
-    expect(memoryTable?.querySelector('tbody td')?.textContent).toBe('Details');
+    const memoryLabel = memoryTable?.querySelector('tbody td');
+    expect(memoryLabel?.firstElementChild?.textContent).toBe('Details');
+    expect(memoryLabel?.querySelector('[data-geeklens-row-marker="changed"]')).not.toBeNull();
     expect(published?.getAttribute('href')).toBe('https://example.com/source');
     expect(published?.getAttribute('aria-label')).toContain(
       'Source: Example, retrieved 2026-08-01. Click to open source.',

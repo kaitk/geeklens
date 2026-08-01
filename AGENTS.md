@@ -8,9 +8,6 @@ result and comparison pages with the instruction sets used by each workload.
 - Read [docs/architecture.md](docs/architecture.md) before changing page parsing,
   benchmark metadata, caching, or browser manifests.
 - Check [docs/tasks/](docs/tasks/) for known open questions and deferred work.
-  [code-audit-follow-ups.md](docs/tasks/code-audit-follow-ups.md) collects items
-  needing a live Geekbench session; [geekbench7-sde-instruction-trace.md](docs/tasks/geekbench7-sde-instruction-trace.md)
-  covers confirming Geekbench 7 ISA mappings. Add to these rather than guessing.
 - Treat Geekbench HTML, URLs, benchmark names, and version-specific metadata as
   external interfaces. Keep version-specific assumptions explicit.
 - Make source changes under `src/`. `dist/` and `GeekLens-*.zip` are generated.

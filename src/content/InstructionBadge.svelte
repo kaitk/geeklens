@@ -42,6 +42,7 @@
   }
 
   .gb-instruction-tooltip {
+    opacity: 80%;
     visibility: hidden;
     position: absolute;
     bottom: 100%;
