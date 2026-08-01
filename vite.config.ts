@@ -13,7 +13,9 @@ function generateManifest() {
   };
 }
 
-const browser = process.env.TARGET || 'firefox';
+// Must match the {{...}} tags used in src/manifest.json ('chrome' | 'firefox'),
+// otherwise the tagged keys are stripped and the manifest is invalid.
+const browser = process.env.TARGET || 'chrome';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -22,6 +24,10 @@ export default defineConfig({
       manifest: generateManifest,
       watchFilePaths: ['package.json', 'src/manifest.json'],
       browser: browser,
+      // The bundled web-ext-run launches Chrome with --load-extension, which
+      // Chrome ignores since v137. `bun run dev:chrome` drives the browser
+      // with the real web-ext instead - see scripts/dev-chrome.ts.
+      disableAutoLaunch: browser !== 'firefox',
       webExtConfig: {
         target: browser === 'firefox' ? 'firefox-desktop' : 'chromium',
         startUrl: ['https://browser.geekbench.com/v7/cpu/1248'],

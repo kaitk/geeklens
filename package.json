@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite build --watch --mode development",
+    "dev": "bun run dev:chrome",
+    "dev:chrome": "bun scripts/dev-chrome.ts",
+    "dev:firefox": "TARGET=firefox vite build --watch --mode development",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "oxlint",
