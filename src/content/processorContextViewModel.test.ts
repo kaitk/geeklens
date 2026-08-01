@@ -227,6 +227,28 @@ describe('buildProcessorContextViewModel', () => {
     });
   });
 
+  test('carries the L3 dispute for a matched asymmetric X3D part only', async () => {
+    // The bundled 9950X3D reports a single "16 Cores" cluster and gives no
+    // per-die cache split, so this objection can only come from the catalogue.
+    const dispute = buildProcessorContextViewModel(await context('64509'))?.disputedL3Cache;
+    expect(dispute).toEqual({
+      detail:
+        'Geekbench multiplies one die’s L3 by the die count, so this total is likely wrong: the two dies differ. This processor is published as 128 MB.',
+      source: {
+        url: 'https://en.wikipedia.org/wiki/Zen_5',
+        label: 'Wikipedia, retrieved 2026-08-01',
+      },
+    });
+    // Which die gets read is not stable: the same SKU has been observed as both
+    // `96.0 MB x 2` and `32.0 MB x 2`, so the wording may not name one.
+    expect(dispute?.detail).not.toMatch(/larger|smaller|96 MB on|32 MB on/);
+
+    // Single-die X3D reports its L3 correctly, and an unmatched result has no
+    // entry to dispute anything with.
+    expect(buildProcessorContextViewModel(await context('1248'))?.disputedL3Cache).toBeNull();
+    expect(buildProcessorContextViewModel(await context('58949'))?.disputedL3Cache).toBeNull();
+  });
+
   test('omits score scaling for missing, zero, and malformed scores', async () => {
     const cached = await context('1248');
     if (!cached.metadata) throw new Error('fixture metadata unavailable');

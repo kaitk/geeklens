@@ -153,6 +153,21 @@ table.system-information td {
   outline-offset: 1px;
 }
 
+/* Warns about someone else's number rather than pointing at a source we agree
+ * with, so it takes the same amber as the instruction-badge warning instead of
+ * the neutral link grey. */
+.geeklens-preview-cache-dispute,
+.geeklens-preview-cache-dispute:visited {
+  margin-left: 4px;
+  color: #d97706 !important;
+}
+
+.geeklens-preview-cache-dispute:hover,
+.geeklens-preview-cache-dispute:focus-visible {
+  background-color: rgb(217 119 6 / 12%);
+  color: #a15c07 !important;
+}
+
 .geeklens-preview-topology,
 .geeklens-preview-memory {
   color: #737373;
@@ -217,6 +232,8 @@ table.system-information td {
 .geeklens-preview-scaling {
   position: relative;
   display: block;
+  width: fit-content;
+  margin-inline: auto;
   color: #68717b;
   font-size: 11px;
   font-weight: 400;
@@ -516,10 +533,6 @@ table.system-information td {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  /* Centring against the line box lands the icon low: the font reserves descender
-   * space below the baseline that digits and caps never use, so the text's visual
-   * centre sits above the box centre. The em-relative nudge tracks font size. */
-  transform: translateY(-0.2em);
   color: #6f7680;
   cursor: help;
   line-height: 1;
@@ -586,6 +599,19 @@ table.system-information td {
 .geeklens-preview-comparison-reference:hover,
 .geeklens-preview-comparison-reference:focus {
   text-decoration: underline;
+}
+
+table.benchmark-table .geeklens-preview-scaling {
+  margin-inline: 0;
+}
+
+table.benchmark-table .geeklens-preview-scaling::before {
+  content: '·';
+  margin-right: 5px;
+}
+
+table.benchmark-table .stacked-heading > .graph {
+  vertical-align: middle;
 }
 
 .geeklens-preview-detail-label,

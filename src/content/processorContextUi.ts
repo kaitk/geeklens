@@ -5,7 +5,7 @@
  * detached from runtime until the real result-context view model is implemented.
  */
 import type { Settings } from '../settings/settings';
-import { createIcon } from './icons';
+import { createIcon, type IconName } from './icons';
 import { createRowMarker, markRowLabel, type RowMarkerKind } from './rowMarker';
 import { scoreDelta } from './scoreDelta';
 
@@ -45,6 +45,9 @@ export interface ProcessorContextViewModel {
     generation: 'Geekbench 7';
     minimumUniqueResults?: number;
   } | null;
+  /** A reviewed contradiction of the L3 total Geekbench prints for this part.
+   * The reported value is never replaced; this only supplies the objection. */
+  disputedL3Cache: { detail: string; source: { url: string; label: string } } | null;
   memory: MemoryFact[];
 }
 
@@ -86,16 +89,18 @@ function linkHost(url: string): string | undefined {
 function sourceLink(options: {
   href: string;
   title: string;
-  detail?: string;
+  detail?: string | readonly string[];
   ariaLabel: string;
+  icon?: IconName;
+  className?: string;
 }): HTMLAnchorElement {
   const link = document.createElement('a');
-  link.className = 'geeklens-preview-external-link';
+  link.className = ['geeklens-preview-external-link', options.className].filter(Boolean).join(' ');
   link.href = options.href;
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
   link.setAttribute('aria-label', options.ariaLabel);
-  link.appendChild(createIcon('info'));
+  link.appendChild(createIcon(options.icon ?? 'info'));
 
   const tooltip = document.createElement('span');
   tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-source-tooltip';
@@ -103,9 +108,9 @@ function sourceLink(options: {
   title.className = 'geeklens-preview-source-tooltip-title';
   title.textContent = options.title;
   tooltip.appendChild(title);
-  if (options.detail) {
+  for (const line of [options.detail ?? []].flat()) {
     const detail = document.createElement('span');
-    detail.textContent = options.detail;
+    detail.textContent = line;
     tooltip.appendChild(detail);
   }
   const hint = document.createElement('span');
@@ -802,7 +807,7 @@ function annotateSingleScaling(preview: ProcessorContextViewModel): void {
   appendScalingNote(scoreContainers[1]?.querySelector('.score'), preview);
 
   for (const cell of multiCoreScoreCells('table.benchmark-table')) {
-    appendScalingNote(cell, preview);
+    appendScalingNote(cell.parentElement?.querySelector('.graph') ?? cell, preview);
   }
 }
 
@@ -834,6 +839,49 @@ function comparisonDetailRow(
     row.appendChild(cell);
   }
   return row;
+}
+
+function l3CacheRow(table: Element | undefined): Element | undefined {
+  return Array.from(table?.querySelectorAll('tbody tr') ?? []).find(
+    (candidate) => candidate.firstElementChild?.textContent?.trim() === 'L3 Cache',
+  );
+}
+
+/** Flag one reported L3 total that a reviewed source contradicts.
+ *
+ * One affordance, not two: the warning triangle is itself the link to the
+ * source, so a reader gets the objection and where it comes from in a single
+ * tooltip. It sits on the value rather than the row label because comparison
+ * view puts two processors on one row and only one of them may be affected. The
+ * number is never rewritten — this objects to Geekbench's value, it does not
+ * replace it.
+ */
+function markDisputedL3Cache(
+  valueCell: Element | null | undefined,
+  dispute: ProcessorContextViewModel['disputedL3Cache'] | undefined,
+): void {
+  if (!valueCell || !dispute) return;
+  if (valueCell.querySelector('.geeklens-preview-cache-dispute')) return;
+
+  // The objection is to a total assembled from one die's size and a die count.
+  // Which die gets read is not stable — the same 9950X3D has been seen as both
+  // `96.0 MB x 2` and `32.0 MB x 2` — but a count above one is what makes the
+  // total wrong. If Geekbench ever reports these parts as a single figure there
+  // is nothing left to dispute, and the warning would be objecting to a value
+  // that had since become correct.
+  const dies = /[x×]\s*(\d+)/i.exec(valueCell.textContent ?? '');
+  if (!dies || Number(dies[1]) < 2) return;
+
+  valueCell.appendChild(
+    sourceLink({
+      href: dispute.source.url,
+      title: 'Reported L3 is likely wrong',
+      detail: [dispute.detail, dispute.source.label],
+      ariaLabel: `Reported L3 is likely wrong. ${dispute.detail} Source: ${dispute.source.label}. Opens in a new tab.`,
+      icon: 'warning',
+      className: 'geeklens-preview-cache-dispute',
+    }),
+  );
 }
 
 export function renderSingleProcessorContext(
@@ -886,6 +934,8 @@ export function renderSingleProcessorContext(
     }
   }
 
+  markDisputedL3Cache(l3CacheRow(cpuTable)?.lastElementChild, preview.disputedL3Cache);
+
   if (settings.showReferenceComparison) {
     annotateSingleScoreReferences(preview);
     annotateSinglePerformanceReferences(preview);
@@ -932,6 +982,15 @@ export function renderComparisonProcessorContext(
     });
   if (settings.showProcessorSummary && previews.some(Boolean) && processorRow.firstElementChild) {
     markRowLabel(processorRow.firstElementChild, 'changed');
+  }
+
+  // Per lane: the two systems share one L3 row and only one of them may be
+  // reporting a total its part contradicts.
+  const cacheRow = l3CacheRow(table ?? undefined);
+  if (cacheRow) {
+    Array.from(cacheRow.children)
+      .slice(1, 3)
+      .forEach((cell, index) => markDisputedL3Cache(cell, previews[index]?.disputedL3Cache));
   }
 
   const detailRows: HTMLTableRowElement[] = [];

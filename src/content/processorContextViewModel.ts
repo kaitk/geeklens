@@ -172,6 +172,23 @@ function coreComposition(
   };
 }
 
+/** Only an exact catalogue match can dispute a reported value, for the same
+ * reason it is the only thing that can name a core type: the objection is a
+ * published fact about one specific part, not an inference from the payload. */
+function disputedL3Cache(
+  identity: ProcessorIdentityMatch,
+): ProcessorContextViewModel['disputedL3Cache'] {
+  if (identity.kind === 'unmatched' || !identity.entry.l3CacheDispute) return null;
+  const { detail, source } = identity.entry.l3CacheDispute;
+  return {
+    detail,
+    source: {
+      url: source.url,
+      label: `${source.publisher}, retrieved ${source.retrievedOn}`,
+    },
+  };
+}
+
 function scoreScaling(metadata: ResultMetadata): ProcessorContextViewModel['scaling'] {
   const single = metadata.scores.singleCore?.value;
   const multi = metadata.scores.multiCore?.value;
@@ -348,6 +365,7 @@ export function buildProcessorContextViewModel(
     coreComposition: coreComposition(identity),
     scaling: scoreScaling(context.metadata),
     reference: reference(context.metadata, identity),
+    disputedL3Cache: disputedL3Cache(identity),
     memory: memory(context.metadata, identity),
   };
 }

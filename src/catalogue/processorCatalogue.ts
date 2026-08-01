@@ -18,7 +18,19 @@ export interface ProcessorCatalogueEntry {
   };
   hardware?: HardwareSpecification;
   coreComposition?: CoreComposition;
+  l3CacheDispute?: ReportedValueDispute;
   scoreReferences?: readonly GeekbenchScoreReference[];
+}
+
+/** A value Geekbench reports that a reviewed source contradicts.
+ *
+ * The reported value is left exactly as Geekbench printed it and marked, rather
+ * than replaced: the disagreement is the fact worth stating, and a quietly
+ * substituted number would be indistinguishable from a measurement. `detail`
+ * says what is wrong and what the source states instead. */
+export interface ReportedValueDispute {
+  detail: string;
+  source: CatalogueSource;
 }
 
 /** One named group of cores, at the count the source states for the full part.
@@ -229,6 +241,14 @@ const WIKIPEDIA_APPLE_M4_SOURCE: CatalogueSource = {
  * provenance tooltip. */
 const WIKIPEDIA_ZEN_5_SOURCE: CatalogueSource = {
   url: 'https://en.wikipedia.org/wiki/Zen_5',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+/** The Zen 4 article carries no per-SKU cache table; this section of the Ryzen
+ * list is where the Raphael figures actually are. */
+const WIKIPEDIA_ZEN_4_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/List_of_AMD_Ryzen_processors#Raphael_(7000_series,_Zen_4/RDNA2_based)',
   retrievedOn: '2026-08-01',
   publisher: 'Wikipedia',
 };
@@ -790,6 +810,33 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
   },
 };
 
+/** Processors whose reported L3 total cannot be believed.
+ *
+ * Geekbench states L3 as a size and a die count, and multiplies one die's size
+ * by the count. That is right for the symmetric parts it was built for and wrong
+ * for exactly one shape: a dual-die Ryzen with 3D V-Cache on only one of the two
+ * dies, whose dies are not the same size.
+ *
+ * Which die gets read is not stable, so the wording must not name one. The same
+ * 9950X3D has been observed reporting `96.0 MB x 2` (192 MB, the V-Cache die
+ * doubled) and `32.0 MB x 2` (64 MB, the other die doubled). Both are wrong
+ * against an actual 96 + 32, and only the total is safe to state.
+ *
+ * Keyed by SKU rather than matched on an `X3D` name, because the name says
+ * nothing about the shape. Single-die X3D parts (9800X3D, 7800X3D, 5800X3D)
+ * report correctly, and a dual-V-Cache part would too, since doubling one die is
+ * then the right answer. Only the asymmetric four belong here.
+ */
+const ASYMMETRIC_V_CACHE_DETAIL =
+  'Geekbench multiplies one die’s L3 by the die count, so this total is likely wrong: the two dies differ. This processor is published as 128 MB.';
+
+const REVIEWED_L3_CACHE_DISPUTES: Readonly<Record<string, ReportedValueDispute>> = {
+  'amd-ryzen-9-7900x3d': { detail: ASYMMETRIC_V_CACHE_DETAIL, source: WIKIPEDIA_ZEN_4_SOURCE },
+  'amd-ryzen-9-7950x3d': { detail: ASYMMETRIC_V_CACHE_DETAIL, source: WIKIPEDIA_ZEN_4_SOURCE },
+  'amd-ryzen-9-9900x3d': { detail: ASYMMETRIC_V_CACHE_DETAIL, source: WIKIPEDIA_ZEN_5_SOURCE },
+  'amd-ryzen-9-9950x3d': { detail: ASYMMETRIC_V_CACHE_DETAIL, source: WIKIPEDIA_ZEN_5_SOURCE },
+};
+
 /** Reviewed chart identities plus explicitly observed device catalogue links. */
 export const PROCESSOR_CATALOGUE: readonly ProcessorCatalogueEntry[] = [
   ...GENERATED_CATALOGUE,
@@ -797,5 +844,11 @@ export const PROCESSOR_CATALOGUE: readonly ProcessorCatalogueEntry[] = [
   ...REVIEWED_PROCESSOR_IDENTITIES,
 ].map((entry) => {
   const coreComposition = REVIEWED_CORE_COMPOSITIONS[entry.key];
-  return coreComposition ? { ...entry, coreComposition } : entry;
+  const l3CacheDispute = REVIEWED_L3_CACHE_DISPUTES[entry.key];
+  if (!coreComposition && !l3CacheDispute) return entry;
+  return {
+    ...entry,
+    ...(coreComposition ? { coreComposition } : {}),
+    ...(l3CacheDispute ? { l3CacheDispute } : {}),
+  };
 });

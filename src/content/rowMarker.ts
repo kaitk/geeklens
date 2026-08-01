@@ -4,6 +4,9 @@
  * exist on the page otherwise, whereas a row GeekLens edited still shows
  * Geekbench's own reading in changed form. Marking both the same way would
  * imply the extension invented data it only reformatted.
+ *
+ * A value GeekLens disputes but leaves alone is neither, and is not marked this
+ * way at all: it carries the warning affordance in `processorContextUi` instead.
  */
 export type RowMarkerKind = 'added' | 'changed';
 

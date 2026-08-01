@@ -9,7 +9,7 @@
  * icon only needs its shapes listed below. Sizing lives in the stylesheet. */
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export type IconName = 'info' | 'external-link';
+export type IconName = 'info' | 'external-link' | 'warning';
 
 interface IconShape {
   tag: 'circle' | 'path';
@@ -35,6 +35,16 @@ const ICONS: Record<IconName, readonly IconShape[]> = {
   'external-link': [
     { tag: 'path', attributes: { ...STROKE, d: 'M5.2 10.8 10.8 5.2', 'stroke-width': '1.4' } },
     { tag: 'path', attributes: { ...STROKE, d: 'M6.4 5.2h4.4v4.4', 'stroke-width': '1.4' } },
+  ],
+  // Matches the amber ⚠ beside the instruction badges, drawn rather than set as
+  // a glyph for the reason at the top of this file.
+  warning: [
+    {
+      tag: 'path',
+      attributes: { ...STROKE, d: 'M8 2.1 14.7 13.4H1.3Z', 'stroke-width': '1.25' },
+    },
+    { tag: 'path', attributes: { ...STROKE, d: 'M8 6.5v3', 'stroke-width': '1.5' } },
+    { tag: 'circle', attributes: { cx: '8', cy: '11.5', r: '0.85', fill: 'currentColor' } },
   ],
 };
 

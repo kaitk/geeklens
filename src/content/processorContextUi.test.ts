@@ -19,6 +19,7 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
     scaling: null,
     coreComposition: null,
     reference: null,
+    disputedL3Cache: null,
     memory: [],
   };
 }
@@ -284,6 +285,89 @@ describe('processor context DOM integration', () => {
     ).toBe(false);
   });
 
+  test('flags a disputed L3 total with one affordance, leaving the value alone', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('AMD CPU', 'AMD', 'x86');
+    preview.disputedL3Cache = {
+      detail: 'Geekbench multiplies one die’s L3 by the die count. It is published as 128 MB.',
+      source: { url: 'https://example.com/zen5', label: 'Wikipedia, retrieved 2026-08-01' },
+    };
+
+    renderSingleProcessorContext(preview, settings(true));
+
+    const row = Array.from(document.querySelectorAll('table.system-table tbody tr')).find(
+      (candidate) => candidate.firstElementChild?.textContent?.trim() === 'L3 Cache',
+    );
+    // The reported value is the whole point of the warning, so the number itself
+    // is never rewritten — the warning is appended beside it.
+    expect(row?.lastElementChild?.firstChild?.textContent).toBe('32.0 MB x 2');
+
+    // One element carries both the objection and the source, and it is a warning
+    // triangle rather than the neutral info icon used for agreed sources.
+    const flags = row?.querySelectorAll('a, .geeklens-preview-row-marker') ?? [];
+    expect(flags.length).toBe(1);
+    const warning = flags[0]!;
+    expect(warning.classList.contains('geeklens-preview-cache-dispute')).toBe(true);
+    expect(warning.querySelector('svg.geeklens-icon-warning')).not.toBeNull();
+    expect(warning.getAttribute('href')).toBe('https://example.com/zen5');
+    expect(warning.getAttribute('aria-label')).toBe(
+      'Reported L3 is likely wrong. Geekbench multiplies one die’s L3 by the die count. It is published as 128 MB. Source: Wikipedia, retrieved 2026-08-01. Opens in a new tab.',
+    );
+    expect(warning.querySelector('.geeklens-preview-source-tooltip')?.textContent).toBe(
+      'Reported L3 is likely wrongGeekbench multiplies one die’s L3 by the die count. It is published as 128 MB.Wikipedia, retrieved 2026-08-01Click to open in a new tab.',
+    );
+  });
+
+  test('leaves the L3 row alone when nothing disputes it', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+
+    renderSingleProcessorContext(model('AMD CPU', 'AMD', 'x86'), settings(true));
+
+    expect(document.querySelector('.geeklens-preview-cache-dispute')).toBeNull();
+  });
+
+  test('drops the dispute if the reported cache stops being a per-die total', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('AMD CPU', 'AMD', 'x86');
+    preview.disputedL3Cache = {
+      detail: 'Geekbench multiplies one die’s L3 by the die count. It is published as 128 MB.',
+      source: { url: 'https://example.com/zen5', label: 'Wikipedia, retrieved 2026-08-01' },
+    };
+    // What Geekbench would print once it reports one figure for the package.
+    // There is then nothing left to dispute.
+    const row = Array.from(document.querySelectorAll('table.system-table tbody tr')).find(
+      (candidate) => candidate.firstElementChild?.textContent?.trim() === 'L3 Cache',
+    );
+    row!.lastElementChild!.textContent = '128 MB';
+
+    renderSingleProcessorContext(preview, settings(true));
+
+    expect(document.querySelector('[data-geeklens-row-marker="disputed"]')).toBeNull();
+  });
+
+  test('disputes only the affected lane of a shared comparison cache row', async () => {
+    globalThis.document = await fixture('geekbench7-comparison.html');
+    const primary = model('Intel Core i9-13900K', 'Intel', 'x86');
+    const baseline = model('AMD Ryzen 9 9950X3D', 'AMD', 'x86');
+    // Only the baseline is an asymmetric dual-die part. The primary reports
+    // `36.0 MB x 1`, which is a single die and correct as printed.
+    baseline.disputedL3Cache = {
+      detail: 'Geekbench multiplies one die’s L3 by the die count. It is published as 128 MB.',
+      source: { url: 'https://example.com/zen5', label: 'Wikipedia, retrieved 2026-08-01' },
+    };
+
+    renderComparisonProcessorContext([primary, baseline], settings(true));
+
+    const row = Array.from(document.querySelectorAll('table.system-information tbody tr')).find(
+      (candidate) => candidate.firstElementChild?.textContent?.trim() === 'L3 Cache',
+    );
+    const cells = Array.from(row?.children ?? []);
+    expect(cells[1]?.querySelector('.geeklens-preview-cache-dispute')).toBeNull();
+    expect(cells[2]?.querySelector('.geeklens-preview-cache-dispute')).not.toBeNull();
+    expect(cells[1]?.textContent).toBe('36.0 MB x 1');
+    expect(cells[2]?.firstChild?.textContent).toBe('96.0 MB x 2');
+  });
+
   test('omits the composition line when no catalogue entry supplies one', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
     const preview = model('Intel CPU', 'Intel', 'x86');
@@ -338,22 +422,32 @@ describe('processor context DOM integration', () => {
     expect(document.querySelector('.geeklens-preview-topology-bar')).toBeNull();
   });
 
-  test('prints multi-core scaling beside the multi-core score, once', async () => {
+  test('prints multi-core scaling in the graph column beside the multi-core score, once', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
     document.body.insertAdjacentHTML(
       'beforeend',
-      '<table class="table benchmark-table"><thead><tr class="stacked-heading"><th class="name">Multi-Core Score</th><th class="score">14500</th></tr></thead><tbody></tbody></table>',
+      '<table class="table benchmark-table"><thead><tr class="stacked-heading"><th class="name">Multi-Core Score</th><th class="score">14500</th><th class="graph"></th></tr></thead><tbody></tbody></table>',
     );
     const preview = model('Intel CPU', 'Intel', 'x86');
     preview.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
-    const enabled = settings(true, { showCoreTopology: true, showMultiCoreScaling: true });
+    preview.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
+    preview.reference = {
+      singleCore: 1900,
+      multiCore: 14000,
+      generation: 'Geekbench 7',
+    };
+    const enabled = settings(true, {
+      showCoreTopology: true,
+      showMultiCoreScaling: true,
+      showReferenceComparison: true,
+    });
 
     renderSingleProcessorContext(preview, enabled);
     renderSingleProcessorContext(preview, enabled);
 
     const notes = document.querySelectorAll('[data-geeklens-preview-scaling]');
     expect(notes).toHaveLength(1);
-    expect(notes[0]?.parentElement?.className).toBe('score');
+    expect(notes[0]?.parentElement?.className).toBe('graph');
     expect(notes[0]?.firstChild?.textContent).toBe('7.25× single-core');
     expect(notes[0]?.getAttribute('aria-label')).toBe(
       'Multi-core score is 7.25× the single-core score of 2,000.',
@@ -361,6 +455,11 @@ describe('processor context DOM integration', () => {
     expect(notes[0]?.querySelector('.geeklens-preview-scaling-tooltip')?.textContent).toContain(
       'poor comparison against the core count',
     );
+    expect(
+      notes[0]?.parentElement?.parentElement
+        ?.querySelector('.score')
+        ?.querySelector('[data-geeklens-preview-reference]'),
+    ).not.toBeNull();
     expect(document.querySelector('.geeklens-preview-topology')?.textContent).not.toContain('7.25');
   });
 

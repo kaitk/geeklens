@@ -75,6 +75,27 @@ describe('resolveProcessorIdentity', () => {
     ).toBeUndefined();
   });
 
+  test('disputes the reported L3 total only on the asymmetric dual-die X3D parts', () => {
+    const disputed = PROCESSOR_CATALOGUE.filter((entry) => entry.l3CacheDispute).map(
+      (entry) => entry.key,
+    );
+
+    // Keyed by SKU rather than an `X3D` name match, because the name does not
+    // say how many dies carry V-Cache. The single-die parts below report their
+    // L3 correctly, and flagging them would invent a problem.
+    expect(disputed.toSorted()).toEqual([
+      'amd-ryzen-9-7900x3d',
+      'amd-ryzen-9-7950x3d',
+      'amd-ryzen-9-9900x3d',
+      'amd-ryzen-9-9950x3d',
+    ]);
+    for (const key of ['amd-ryzen-7-9800x3d', 'amd-ryzen-7-7800x3d', 'amd-ryzen-7-5800x3d']) {
+      expect(
+        PROCESSOR_CATALOGUE.find((entry) => entry.key === key)?.l3CacheDispute,
+      ).toBeUndefined();
+    }
+  });
+
   test('gives exact Mac and processor paths precedence over aliases', async () => {
     const cached = await context('1248');
     cached.processorLinks = {
