@@ -1,3 +1,11 @@
+/** Reviewed processor facts and the sources that state them.
+ *
+ * Publisher tiers, the hosts that block automated retrieval, and what to do with
+ * a citation that has rotted are in `docs/processor-catalogue-sources.md`. Read
+ * it before re-dating a `retrievedOn` or swapping a URL: the date means the page
+ * was read and still stated the claim, so moving it forward without re-reading
+ * removes the only check these facts have.
+ */
 import type { ProcessorArchitecture, ProcessorVendor } from '../geekbench/resultPayload';
 import { GENERATED_PROCESSOR_IDENTITIES } from './processorCatalogue.generated';
 import { GENERATED_MAC_IDENTITIES } from './macCatalogue.generated';
@@ -37,13 +45,17 @@ export interface ReportedValueDispute {
  *
  * `count` is nominal, so it is an upper bound rather than an observation: a
  * result may report fewer cores in this group when some are disabled. `label` is
- * recorded in the source's own wording and is never normalized into a shared
- * big/little or performance/efficiency taxonomy. Zen 5c is the case that makes
- * this a correctness rule rather than a style choice: it is the same
- * microarchitecture at the same IPC as Zen 5, differing in peak clock and L3 per
- * CCX, so filing it under "efficiency" would state something false. Intel's Low
- * Power Efficient-cores are likewise not its Efficient-cores, and Apple uses
- * neither vocabulary. */
+ * recorded in the vendor's own wording and is never normalized across vendors.
+ * Zen 5c is the case that makes this a correctness rule rather than a style
+ * choice: it is the same microarchitecture at the same IPC as Zen 5, differing
+ * in peak clock and L3 per CCX, so filing it under "efficiency" would state
+ * something false. Intel's Low Power Efficient-cores are likewise not its
+ * Efficient-cores, and Apple uses neither vocabulary.
+ *
+ * Within one vendor the wording is settled to the terms that vendor's current
+ * range uses, rather than reproducing every phrasing its older announcements
+ * happened to carry. Apple is the only range this applies to today: see
+ * `APPLE_CORE_TIERS` for the three terms it is held to and what that costs. */
 export interface CoreCompositionGroup {
   count: number;
   label: string;
@@ -208,6 +220,16 @@ const APPLE_M5_PRO_MAX_SOURCE: CatalogueSource = {
   publisher: 'Apple',
 };
 
+/** Apple publishes only the headline bin of each chip in its newsroom posts, so
+ * the binned configurations come from this per-generation summary, which cites
+ * the primary sources. It also records the M5 rename that the October 2025 M5
+ * post predates. */
+const WIKIPEDIA_APPLE_M5_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Apple_M5',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
 /** Apple publishes unified-memory bandwidth only for chips it chose to headline,
  * and never publishes memory type, transfer rate, or bus width for any of them.
  * These pages carry the remaining figures. They are a weaker tier than the
@@ -215,6 +237,12 @@ const APPLE_M5_PRO_MAX_SOURCE: CatalogueSource = {
  * the provenance tooltip rather than blended into an `Apple` attribution. */
 const WIKIPEDIA_APPLE_M1_SOURCE: CatalogueSource = {
   url: 'https://en.wikipedia.org/wiki/Apple_M1',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+const WIKIPEDIA_APPLE_M2_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Apple_M2',
   retrievedOn: '2026-08-01',
   publisher: 'Wikipedia',
 };
@@ -293,6 +321,32 @@ const QUALCOMM_X2_SOURCE: CatalogueSource = {
   url: 'https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/Snapdragon-X2-Elite-Product-Brief.pdf',
   retrievedOn: '2026-08-01',
   publisher: 'Qualcomm',
+};
+
+/** The X Series product briefs state each SKU's core count in a single `Cores`
+ * column with no tier rows, which is how they record that these parts are
+ * uniform Oryon designs rather than hybrids. The X2 brief above adds separate
+ * `Prime Cores` and `Performance Cores` rows, which is the split this
+ * generation introduced. */
+const QUALCOMM_X1_ELITE_BRIEF_SOURCE: CatalogueSource = {
+  url: 'https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/Product-Brief-Snapdragon-X-Elite.pdf',
+  retrievedOn: '2026-08-01',
+  publisher: 'Qualcomm',
+};
+
+const QUALCOMM_X1_PLUS_BRIEF_SOURCE: CatalogueSource = {
+  url: 'https://www.qualcomm.com/content/dam/qcomm-martech/dm-assets/documents/Snapdragon-X-Plus-Product-Brief.pdf',
+  retrievedOn: '2026-08-01',
+  publisher: 'Qualcomm',
+};
+
+/** Qualcomm publishes no retrievable brief for the entry-level Snapdragon X:
+ * the product page 404s and the brief PDF carries its specification table as
+ * unextractable artwork. This list states the core count for that one part. */
+const WIKIPEDIA_SNAPDRAGON_X_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips#Snapdragon_X_series',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
 };
 
 /** Qualcomm publishes memory type and peak bandwidth for the X Series but not
@@ -661,10 +715,41 @@ function intelHybrid(
   return groups;
 }
 
-/** Apple writes these lowercase and unhyphenated, and is not using Intel's
- * vocabulary, so the wording is kept as Apple states it. */
-function appleHybrid(performance: number, efficiency: number): CoreCompositionGroup[] {
-  return [coreGroup(performance, 'performance cores'), coreGroup(efficiency, 'efficiency cores')];
+/** The three terms Apple's current range uses, written lowercase and unhyphenated
+ * as Apple writes them. They are not Intel's vocabulary and must not be folded
+ * into it.
+ *
+ * Apple's older announcements say `high-performance`, `high-efficiency`, and
+ * `energy-efficient` for what its current pages call performance and efficiency
+ * cores. Those are phrasings of the same two tiers rather than distinct designs,
+ * so every Apple entry is held to these terms instead.
+ *
+ * `super` is the exception that has to survive that settling, because it marks a
+ * real design boundary rather than a phrasing. Apple introduced the M5's top
+ * core as a performance core and renamed it to a super core when M5 Pro and
+ * M5 Max shipped a genuinely different second tier under the older name. So an
+ * M5 Pro `performance core` is not an M4 Pro `performance core`, and the source
+ * on each row is what separates them. */
+const APPLE_CORE_TIERS = {
+  super: 'super cores',
+  performance: 'performance cores',
+  efficiency: 'efficiency cores',
+} as const;
+
+type AppleCoreTier = keyof typeof APPLE_CORE_TIERS;
+
+/** Apple has shipped two tiers per chip throughout, but not the same two: which
+ * pair a part holds is a fact about that part and is passed in per entry. */
+function appleHybrid(
+  first: number,
+  firstTier: AppleCoreTier,
+  second: number,
+  secondTier: AppleCoreTier,
+): CoreCompositionGroup[] {
+  return [
+    coreGroup(first, APPLE_CORE_TIERS[firstTier]),
+    coreGroup(second, APPLE_CORE_TIERS[secondTier]),
+  ];
 }
 
 const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
@@ -788,24 +873,202 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
     intelHybrid(4, 8, 4),
     WIKIPEDIA_PANTHER_LAKE_SOURCE,
   ),
+  // Qualcomm's X2 brief is the first to state a split: separate `Prime Cores`
+  // and `Performance Cores` rows against the single `Cores` column the X1
+  // briefs carry. Both 18-core parts hold the same 12 + 6.
+  ...sharedCoreComposition(
+    ['snapdragon-x2-elite-extreme-x2e-94-100', 'snapdragon-x2-elite-x2e-88-100'],
+    [coreGroup(12, 'Prime cores'), coreGroup(6, 'Performance cores')],
+    QUALCOMM_X2_SOURCE,
+  ),
+  // Every X1 part is one uniform group, so these state that the part has no
+  // split rather than naming one. A single group cannot label the reported
+  // clusters — there is nothing to tell apart — and renders as the sentence
+  // alone, which is the point: two reported clusters of Oryon cores otherwise
+  // leave a reader guessing at a hybrid that does not exist.
+  ...sharedCoreComposition(
+    [
+      'snapdragon-x-elite-x1e-84-100',
+      'snapdragon-x-elite-x1e-80-100',
+      'snapdragon-x-elite-x1e-78-100',
+    ],
+    [coreGroup(12, 'Qualcomm Oryon CPU cores')],
+    QUALCOMM_X1_ELITE_BRIEF_SOURCE,
+  ),
+  'snapdragon-x-plus-x1p-64-100': {
+    groups: [coreGroup(10, 'Qualcomm Oryon CPU cores')],
+    source: QUALCOMM_X1_PLUS_BRIEF_SOURCE,
+  },
+  'snapdragon-x-plus-x1p-42-100': {
+    groups: [coreGroup(8, 'Qualcomm Oryon CPU cores')],
+    source: QUALCOMM_X1_PLUS_BRIEF_SOURCE,
+  },
+  'snapdragon-x-x1-26-100': {
+    groups: [coreGroup(8, 'Oryon cores')],
+    source: WIKIPEDIA_SNAPDRAGON_X_SOURCE,
+  },
+  // Apple, oldest first. The processor-keyed entries below are paired with
+  // `mac-*` entries further down: those resolve by Mac path rather than by
+  // processor name, so they need their own composition even where the split is
+  // the same.
+  'apple-m1-pro-8c': {
+    groups: appleHybrid(6, 'performance', 2, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M1_SOURCE,
+  },
   'apple-m1-pro-10c': {
-    groups: appleHybrid(8, 2),
+    groups: appleHybrid(8, 'performance', 2, 'efficiency'),
     source: APPLE_M1_PRO_MEMORY_SOURCE,
   },
+  'apple-m2-8c': {
+    groups: appleHybrid(4, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M2_SOURCE,
+  },
+  // Apple's M2 Pro post states only the 12-core bin ("up to eight
+  // high-performance cores and four high-efficiency cores"), so the 10-core
+  // bin's 6 + 4 comes from the summary instead.
+  'apple-m2-pro-10c': {
+    groups: appleHybrid(6, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M2_SOURCE,
+  },
+  'apple-m2-pro-12c': {
+    groups: appleHybrid(8, 'performance', 4, 'efficiency'),
+    source: APPLE_M2_PRO_MAX_SOURCE,
+  },
+  'apple-m2-max-12c': {
+    groups: appleHybrid(8, 'performance', 4, 'efficiency'),
+    source: APPLE_M2_PRO_MAX_SOURCE,
+  },
+  'apple-m2-ultra-24c': {
+    groups: appleHybrid(16, 'performance', 8, 'efficiency'),
+    source: APPLE_M2_ULTRA_SOURCE,
+  },
+  'apple-m3-8c': {
+    groups: appleHybrid(4, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M3_SOURCE,
+  },
+  'apple-m3-pro-11c': {
+    groups: appleHybrid(5, 'performance', 6, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M3_SOURCE,
+  },
+  'apple-m3-pro-12c': {
+    groups: appleHybrid(6, 'performance', 6, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M3_SOURCE,
+  },
+  'apple-m3-max-14c': {
+    groups: appleHybrid(10, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M3_SOURCE,
+  },
+  'apple-m3-max-16c': {
+    groups: appleHybrid(12, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M3_SOURCE,
+  },
+  'apple-m3-ultra-28c': {
+    groups: appleHybrid(20, 'performance', 8, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M3_SOURCE,
+  },
+  'apple-m3-ultra-32c': {
+    groups: appleHybrid(24, 'performance', 8, 'efficiency'),
+    source: APPLE_M3_ULTRA_SOURCE,
+  },
+  // The 8-core M4 has no single answer and so has no entry: it is 4 + 4 in the
+  // two-port iMac and the MacBook Air, and 3 + 5 in the iPad Air. A result
+  // matching `Apple M4` at 8 cores could be either, so only the Mac-path entry
+  // below, where the machine is known, states a split.
+  'apple-m4-9c': {
+    groups: appleHybrid(3, 'performance', 6, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M4_SOURCE,
+  },
+  'apple-m4-10c': {
+    groups: appleHybrid(4, 'performance', 6, 'efficiency'),
+    source: APPLE_M4_FAMILY_SOURCE,
+  },
   'apple-m4-pro-12c': {
-    groups: appleHybrid(8, 4),
+    groups: appleHybrid(8, 'performance', 4, 'efficiency'),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
   'apple-m4-pro-14c': {
-    groups: appleHybrid(10, 4),
+    groups: appleHybrid(10, 'performance', 4, 'efficiency'),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
   'apple-m4-max-14c': {
-    groups: appleHybrid(10, 4),
+    groups: appleHybrid(10, 'performance', 4, 'efficiency'),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
   'apple-m4-max-16c': {
-    groups: appleHybrid(12, 4),
+    groups: appleHybrid(12, 'performance', 4, 'efficiency'),
+    source: APPLE_M4_PRO_MAX_SOURCE,
+  },
+  // The base M5 pairs super cores with efficiency cores; M5 Pro and M5 Max
+  // replace the efficiency cores with a second tier Apple calls performance
+  // cores. The two chips genuinely differ here, so the terms differ with them.
+  'apple-m5-9c': {
+    groups: appleHybrid(3, 'super', 6, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M5_SOURCE,
+  },
+  'apple-m5-10c': {
+    groups: appleHybrid(4, 'super', 6, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M5_SOURCE,
+  },
+  'apple-m5-pro-15c': {
+    groups: appleHybrid(5, 'super', 10, 'performance'),
+    source: WIKIPEDIA_APPLE_M5_SOURCE,
+  },
+  ...sharedCoreComposition(
+    ['apple-m5-pro-18c', 'apple-m5-max-18c'],
+    appleHybrid(6, 'super', 12, 'performance'),
+    APPLE_M5_PRO_MAX_SOURCE,
+  ),
+  // Mac-path entries. Each states the split of the chip that machine ships.
+  ...sharedCoreComposition(
+    [
+      'mac-mac-mini-late-2020',
+      'mac-imac-24-inch-mid-2021',
+      'mac-imac-24-inch-mid-2021-apple-m1-3-2-ghz-8-cores',
+    ],
+    appleHybrid(4, 'performance', 4, 'efficiency'),
+    WIKIPEDIA_APPLE_M1_SOURCE,
+  ),
+  'mac-mac-studio-apple-m1-max': {
+    groups: appleHybrid(8, 'performance', 2, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M1_SOURCE,
+  },
+  'mac-mac-studio-apple-m1-ultra': {
+    groups: appleHybrid(16, 'performance', 4, 'efficiency'),
+    source: APPLE_M1_ULTRA_SOURCE,
+  },
+  'mac-mac-mini-2023-8c-cpu': {
+    groups: appleHybrid(4, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M2_SOURCE,
+  },
+  'mac-mac-mini-2023-10c-cpu': {
+    groups: appleHybrid(6, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M2_SOURCE,
+  },
+  'mac-mac-mini-2023-12c-cpu': {
+    groups: appleHybrid(8, 'performance', 4, 'efficiency'),
+    source: APPLE_M2_PRO_MAX_SOURCE,
+  },
+  // Both 2023 iMac entries are the 8-core M3; they differ in GPU cores only.
+  ...sharedCoreComposition(
+    ['mac-imac-24-inch-2023-8c-gpu', 'mac-imac-24-inch-2023-10c-gpu'],
+    appleHybrid(4, 'performance', 4, 'efficiency'),
+    WIKIPEDIA_APPLE_M3_SOURCE,
+  ),
+  'mac-imac-24-inch-2024-8c-cpu': {
+    groups: appleHybrid(4, 'performance', 4, 'efficiency'),
+    source: WIKIPEDIA_APPLE_M4_SOURCE,
+  },
+  ...sharedCoreComposition(
+    ['mac-mac-mini-2024-10c-cpu', 'mac-imac-24-inch-2024-10c-cpu'],
+    appleHybrid(4, 'performance', 6, 'efficiency'),
+    APPLE_M4_FAMILY_SOURCE,
+  ),
+  'mac-mac-mini-2024-12c-cpu': {
+    groups: appleHybrid(8, 'performance', 4, 'efficiency'),
+    source: APPLE_M4_PRO_MAX_SOURCE,
+  },
+  'mac-mac-mini-2024-14c-cpu': {
+    groups: appleHybrid(10, 'performance', 4, 'efficiency'),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
 };

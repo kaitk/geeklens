@@ -7,6 +7,10 @@ result and comparison pages with the instruction sets used by each workload.
 
 - Read [docs/architecture.md](docs/architecture.md) before changing page parsing,
   benchmark metadata, caching, or browser manifests.
+- Read [docs/processor-catalogue-sources.md](docs/processor-catalogue-sources.md)
+  before citing, re-dating, or replacing a source in the processor catalogue. It
+  records the publisher tiers, which hosts block automated retrieval, and what to
+  do when a link rots.
 - Check [docs/tasks/](docs/tasks/) for known open questions and deferred work.
 - Treat Geekbench HTML, URLs, benchmark names, and version-specific metadata as
   external interfaces. Keep version-specific assumptions explicit.

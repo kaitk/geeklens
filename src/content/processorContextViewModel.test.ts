@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { CachedResultContext } from '../cache/ResultsCache';
 import { extractResultMetadata } from '../geekbench/resultPayload';
+import { PROCESSOR_CATALOGUE } from '../catalogue/processorCatalogue';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
 
 async function context(resultId: string): Promise<CachedResultContext> {
@@ -13,6 +14,13 @@ async function context(resultId: string): Promise<CachedResultContext> {
     processorLinks: { processorPath: null, macPath: null },
     timestamp: 1,
   };
+}
+
+/** The tier names one catalogue entry records, in the source's own order. */
+function labels(key: string): string[] {
+  const entry = PROCESSOR_CATALOGUE.find((candidate) => candidate.key === key);
+  if (!entry) throw new Error(`no catalogue entry for ${key}`);
+  return (entry.coreComposition?.groups ?? []).map((group) => group.label);
 }
 
 describe('buildProcessorContextViewModel', () => {
@@ -134,6 +142,107 @@ describe('buildProcessorContextViewModel', () => {
     // leave the topology row exactly as the payload described it.
     expect(buildProcessorContextViewModel(await context('1248'))?.coreComposition).toBeNull();
     expect(buildProcessorContextViewModel(await context('58949'))?.coreComposition).toBeNull();
+  });
+
+  test('names Apple and Qualcomm clusters from their own reviewed splits', async () => {
+    // M5 Max is the generation whose tier names changed: Apple pairs super cores
+    // with a second tier it also calls performance cores, which an M4 Pro
+    // performance core is not. The fixture reports 6 and 12, so both are named.
+    const appleM5Max = buildProcessorContextViewModel(await context('64810'));
+    expect(appleM5Max?.topology?.clusters).toEqual([
+      { cores: 6, maxGHz: null, label: 'super cores' },
+      { cores: 12, maxGHz: null, label: 'performance cores' },
+    ]);
+    expect(appleM5Max?.coreComposition).toEqual({
+      value: '6 super cores + 12 performance cores',
+      provenance: 'published',
+      source: {
+        url: 'https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/',
+        label: 'Apple, retrieved 2026-08-01',
+      },
+    });
+
+    // Qualcomm's X2 brief states the split as prime and performance cores, which
+    // are its own tier names and not the Oryon generation before it. This part
+    // reports its 12-core cluster first, as the brief lists it.
+    const snapdragonX2 = buildProcessorContextViewModel(await context('59394'));
+    expect(snapdragonX2?.topology?.clusters).toEqual([
+      { cores: 12, maxGHz: null, label: 'Prime cores' },
+      { cores: 6, maxGHz: null, label: 'Performance cores' },
+    ]);
+    expect(snapdragonX2?.coreComposition).toMatchObject({
+      value: '12 Prime cores + 6 Performance cores',
+      source: { label: 'Qualcomm, retrieved 2026-08-01' },
+    });
+  });
+
+  test('states a uniform part as a sentence and leaves its clusters unnamed', async () => {
+    // Snapdragon X1 resolves by the catalogue link on the result page rather
+    // than by processor name: Geekbench reports these in a `Snapdragon(R) X
+    // Elite - X1E80100 - ...` form that no reviewed alias covers.
+    const cached = await context('59394');
+    cached.processorLinks = {
+      processorPath: '/processors/snapdragon-x-elite-x1e-80-100',
+      macPath: null,
+    };
+    cached.metadata!.topology.physicalCores = { value: 12, source: 'test' };
+    cached.metadata!.topology.clusters = [4, 4, 4].map((cores, index) => ({
+      index: index + 1,
+      label: null,
+      cores: { value: cores, source: 'test' },
+      minMHz: null,
+      maxMHz: null,
+    }));
+
+    const viewModel = buildProcessorContextViewModel(cached);
+    expect(viewModel?.coreComposition?.value).toBe('12 Qualcomm Oryon CPU cores');
+    // One group cannot be assigned to three clusters, and there is nothing to
+    // tell apart in a uniform design anyway.
+    expect(viewModel?.topology?.clusters.map((cluster) => cluster.label)).toEqual([
+      null,
+      null,
+      null,
+    ]);
+  });
+
+  /** Tier wording is a fact about a generation, not a house style, so it is
+   * asserted against the catalogue directly: a bulk edit that flattened one
+   * generation's terms into another's would leave every fixture above passing. */
+  describe('core tier wording per generation', () => {
+    const appleEntries = PROCESSOR_CATALOGUE.filter(
+      (entry) => entry.vendor === 'apple' && entry.coreComposition,
+    );
+
+    test('keeps M5 Pro and M5 Max out of the earlier M-series terms', () => {
+      expect(labels('apple-m5-pro-15c')).toEqual(['super cores', 'performance cores']);
+      expect(labels('apple-m5-pro-18c')).toEqual(['super cores', 'performance cores']);
+      expect(labels('apple-m5-max-18c')).toEqual(['super cores', 'performance cores']);
+      // The base M5 pairs the same top core with efficiency cores instead, so it
+      // is not simply the M5 wording applied family-wide.
+      expect(labels('apple-m5-10c')).toEqual(['super cores', 'efficiency cores']);
+      expect(labels('apple-m4-max-16c')).toEqual(['performance cores', 'efficiency cores']);
+      expect(labels('apple-m1-pro-10c')).toEqual(['performance cores', 'efficiency cores']);
+    });
+
+    test('names a super core only where Apple ships one', () => {
+      const superCored = appleEntries
+        .filter((entry) => entry.coreComposition!.groups.some((g) => g.label === 'super cores'))
+        .map((entry) => entry.key);
+      expect(superCored.every((key) => key.startsWith('apple-m5'))).toBeTrue();
+      expect(superCored).toHaveLength(5);
+    });
+
+    test('records Snapdragon X as one uniform group and X2 as a split', () => {
+      // X1 is a single Oryon tier, so this states that the part has no split
+      // rather than naming one. The lone group cannot label a cluster, which is
+      // the correct outcome: there is nothing to tell apart.
+      expect(labels('snapdragon-x-elite-x1e-84-100')).toEqual(['Qualcomm Oryon CPU cores']);
+      expect(labels('snapdragon-x-plus-x1p-42-100')).toEqual(['Qualcomm Oryon CPU cores']);
+      expect(labels('snapdragon-x2-elite-x2e-88-100')).toEqual([
+        'Prime cores',
+        'Performance cores',
+      ]);
+    });
   });
 
   describe('matching reported clusters to named core groups', () => {

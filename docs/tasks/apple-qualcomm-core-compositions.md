@@ -1,6 +1,22 @@
 # Apple and Qualcomm core compositions
 
-**Status:** ready to start.
+**Status:** done, 2026-08-01. Coverage is now 48 of 49 Apple and Qualcomm
+entries. Three decisions differ from what this note assumed:
+
+- **Apple wording is settled to three terms**, not kept per source: `super`,
+  `performance`, and `efficiency` cores. Apple's older posts say
+  `high-performance`, `high-efficiency`, and `energy-efficient` for the same two
+  tiers, and reproducing each phrasing made rows differ where the silicon does
+  not. `super` stays distinct because it marks a real design boundary. See
+  `APPLE_CORE_TIERS`.
+- **The base M5 is recorded as super + efficiency cores**, from the Wikipedia
+  page, not as the performance + efficiency cores Apple's October 2025 post
+  states. Apple renamed that core when M5 Pro shipped a different tier under the
+  old name, so the launch wording now denotes the wrong core.
+- **`apple-m4-8c` has no entry.** The 8-core M4 is 4 + 4 in the two-port iMac and
+  the MacBook Air but 3 + 5 in the iPad Air, and a processor-keyed match cannot
+  tell them apart. The Mac-path iMac entry states 4 + 4.
+
 **Raised:** 2026-08-01.
 
 Extend `REVIEWED_CORE_COMPOSITIONS` in `src/catalogue/processorCatalogue.ts` to
