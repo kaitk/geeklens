@@ -3,7 +3,7 @@
   "name": "GeekLens",
   "version": "0.5.0",
   "description": "Enhances Geekbench CPU benchmark results with instruction set information",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage"],
   "{{chrome}}.host_permissions": ["*://browser.geekbench.com/*"],
   "{{chrome}}.minimum_chrome_version": "111",
   "icons": {

@@ -13,6 +13,10 @@ result and comparison pages with the instruction sets used by each workload.
 - Make source changes under `src/`. `dist/` and `GeekLens-*.zip` are generated.
 - Preserve compatibility with both Chrome and Firefox. Both are Manifest V3, but
   the background differs: service worker on Chrome, event page on Firefox.
+- Do not add the `activeTab` permission for the popup's active-tab query or
+  settings-triggered reload; those flows work through the declared Geekbench
+  host access. Add it only if a new capability demonstrably requires the
+  temporary user-gesture grant, and verify that need in both browsers.
 - Follow the existing TypeScript and Svelte style; avoid unrelated cleanup.
 
 ## Validate
