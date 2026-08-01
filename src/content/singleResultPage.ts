@@ -24,7 +24,7 @@ import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
 import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache, type CachedResultContext } from '../cache/ResultsCache';
 import { loadSettings } from '../settings/settings';
-import { markAddedRowLabel } from './addedRowMarker';
+import { markRowLabel } from './rowMarker';
 import {
   applyProcessorContextPreferences,
   renderSingleProcessorContext,
@@ -131,6 +131,12 @@ function annotateSystemInstructionSets(generation: GeekbenchGeneration, instruct
     generation === 6 ? findInstructionSetValueCell() : insertGeekbench7InstructionSetRow();
   if (!valueCell || valueCell.querySelector('[data-geeklens-system-info]')) return;
 
+  // Geekbench 6 renders this row itself and we replace its contents; the
+  // Geekbench 7 row above is one we inserted, and marks itself as added.
+  if (generation === 6 && valueCell.previousElementSibling) {
+    markRowLabel(valueCell.previousElementSibling, 'changed');
+  }
+
   valueCell.textContent = '';
   mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets));
 }
@@ -149,7 +155,7 @@ function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
   const labelCell = document.createElement('td');
   labelCell.className = 'name';
   labelCell.textContent = 'Instruction Sets';
-  markAddedRowLabel(labelCell);
+  markRowLabel(labelCell, 'added');
   const valueCell = document.createElement('td');
   valueCell.className = 'value';
   row.append(labelCell, valueCell);

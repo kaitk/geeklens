@@ -17,6 +17,7 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
     frequency: null,
     topology: null,
     scaling: null,
+    coreComposition: null,
     reference: null,
     memory: [],
   };
@@ -120,7 +121,7 @@ describe('processor context DOM integration', () => {
 
     const row = document.querySelector('[data-geeklens-preview-detail="frequency"]');
     expect(row?.previousElementSibling?.firstElementChild?.textContent?.trim()).toBe('Topology');
-    expect(row?.textContent).toContain('4.45–4.54 GHz · mean 4.50');
+    expect(row?.textContent).toContain('4.45–4.54 GHz');
     expect(row?.querySelector('.geeklens-preview-distribution')?.getAttribute('aria-label')).toBe(
       'Frequency samples: minimum 4.45 GHz, median 4.49 GHz, mean 4.50 GHz, maximum 4.54 GHz.',
     );
@@ -163,6 +164,52 @@ describe('processor context DOM integration', () => {
     ).toEqual(['8 cores · up to 5.50 GHz', '12 cores · up to 4.20 GHz']);
     expect(topology?.textContent).not.toMatch(/performance|efficiency|P-core|E-core/i);
     expect(topology?.textContent).not.toContain('×');
+  });
+
+  test('states core types as a sourced fact, without labelling any segment', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('AMD CPU', 'AMD', 'x86');
+    // Strix Point's shape: totals but no clusters, so the composition line is the
+    // only place core types can appear at all.
+    preview.topology = { cores: 12, threads: 24, clusters: [] };
+    preview.coreComposition = {
+      value: '4 Zen 5 + 8 Zen 5c',
+      provenance: 'published',
+      source: { url: 'https://example.com/amd', label: 'AMD, retrieved 2026-08-01' },
+    };
+
+    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+
+    const composition = document.querySelector('[data-geeklens-preview-composition]');
+    expect(composition?.firstElementChild?.textContent).toBe('4 Zen 5 + 8 Zen 5c');
+    expect(document.querySelector('.geeklens-preview-topology-bar')).toBeNull();
+
+    const badge = composition?.querySelector('a.geeklens-preview-provenance');
+    expect(badge?.textContent).toContain('published');
+    expect(badge?.getAttribute('href')).toBe('https://example.com/amd');
+    expect(badge?.getAttribute('aria-label')).toContain(
+      'Source: AMD, retrieved 2026-08-01. Click to open source.',
+    );
+  });
+
+  test('omits the composition line when no catalogue entry supplies one', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('Intel CPU', 'Intel', 'x86');
+    preview.topology = {
+      cores: 8,
+      threads: 8,
+      clusters: [
+        { cores: 4, maxGHz: 5 },
+        { cores: 4, maxGHz: 3 },
+      ],
+    };
+
+    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+
+    expect(document.querySelector('[data-geeklens-preview-composition]')).toBeNull();
+    expect(document.querySelector('.geeklens-preview-topology')?.textContent).not.toMatch(
+      /performance|efficiency/i,
+    );
   });
 
   test('gates the topology row and the scaling note independently', async () => {
@@ -304,7 +351,7 @@ describe('processor context DOM integration', () => {
       Array.from(row?.querySelectorAll('.geeklens-preview-frequency-values') ?? []).map(
         (values) => values.textContent,
       ),
-    ).toEqual(['4.00–5.00 GHz · mean 4.60', '2.00–4.00 GHz · mean 3.20']);
+    ).toEqual(['4.00–5.00 GHz', '2.00–4.00 GHz']);
 
     globalThis.document = await fixture('geekbench7-comparison.html');
     renderComparisonProcessorContext(

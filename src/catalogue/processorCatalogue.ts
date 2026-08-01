@@ -17,7 +17,28 @@ export interface ProcessorCatalogueEntry {
     modelIdentifier?: string;
   };
   hardware?: HardwareSpecification;
+  coreComposition?: CoreComposition;
   scoreReferences?: readonly GeekbenchScoreReference[];
+}
+
+/** What kinds of core a heterogeneous processor holds.
+ *
+ * The payload cannot supply this. Its per-cluster label only ever restates a
+ * size (`6 Cores`), and neither cluster size nor cluster order identifies a
+ * role: the 13900K's larger cluster is its E-cores, and vendors list clusters
+ * fastest-first or slowest-first with no consistency between them.
+ *
+ * `description` is recorded in the source's own wording and is never normalized
+ * into a shared big/little or performance/efficiency taxonomy. Zen 5c is the
+ * case that makes this a correctness rule rather than a style choice: it is the
+ * same microarchitecture at the same IPC as Zen 5, differing in peak clock and
+ * L3 per CCX, so filing it under "efficiency" would state something false.
+ * Intel's Low Power Efficient-cores are likewise not its Efficient-cores, and
+ * Apple uses neither vocabulary.
+ */
+export interface CoreComposition {
+  description: string;
+  source: CatalogueSource;
 }
 
 export interface GeekbenchScoreReference {
@@ -176,6 +197,32 @@ const WIKIPEDIA_APPLE_M3_SOURCE: CatalogueSource = {
 
 const WIKIPEDIA_APPLE_M4_SOURCE: CatalogueSource = {
   url: 'https://en.wikipedia.org/wiki/Apple_M4',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+/** Core-type splits for x86 hybrids come from the same weaker tier.
+ *
+ * AMD markets Strix Point as a flat core count and does not publish the
+ * Zen 5 / Zen 5c division on its product pages. Intel ARK does list P-core and
+ * E-core counts as separate fields, but serves 403 to automated retrieval, and a
+ * page that cannot be retrieved must not be cited as though it had been. These
+ * tables state the split for both vendors and the publisher stays visible in the
+ * provenance tooltip. */
+const WIKIPEDIA_ZEN_5_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Zen_5',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+const WIKIPEDIA_RAPTOR_LAKE_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Raptor_Lake',
+  retrievedOn: '2026-08-01',
+  publisher: 'Wikipedia',
+};
+
+const WIKIPEDIA_ARROW_LAKE_SOURCE: CatalogueSource = {
+  url: 'https://en.wikipedia.org/wiki/Arrow_Lake_(microprocessor)',
   retrievedOn: '2026-08-01',
   publisher: 'Wikipedia',
 };
@@ -506,9 +553,61 @@ const REVIEWED_PROCESSOR_IDENTITIES: readonly ProcessorCatalogueEntry[] = [
   ),
 ];
 
+/** Core compositions, keyed like `REVIEWED_HARDWARE`.
+ *
+ * The Apple entries reuse a source already reviewed for this catalogue; each of
+ * those pages states the CPU core split alongside the memory figures it was
+ * originally captured for. Absent entries render exactly as before, so partial
+ * coverage is a valid shipping state.
+ */
+const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
+  // Zen 5c is a density-optimized Zen 5, not an efficiency core: same
+  // microarchitecture and IPC, lower peak clock and less L3 per CCX. AMD's own
+  // naming is therefore the only accurate wording available.
+  'amd-ryzen-ai-9-hx-370': {
+    description: '4 Zen 5 + 8 Zen 5c',
+    source: WIKIPEDIA_ZEN_5_SOURCE,
+  },
+  'amd-ryzen-ai-9-365': {
+    description: '6 Zen 5 + 4 Zen 5c',
+    source: WIKIPEDIA_ZEN_5_SOURCE,
+  },
+  'intel-core-i9-13900k': {
+    description: '8 Performance-cores + 16 Efficient-cores',
+    source: WIKIPEDIA_RAPTOR_LAKE_SOURCE,
+  },
+  'intel-core-ultra-9-285k': {
+    description: '8 Performance-cores + 16 Efficient-cores',
+    source: WIKIPEDIA_ARROW_LAKE_SOURCE,
+  },
+  'apple-m1-pro-10c': {
+    description: '8 performance cores + 2 efficiency cores',
+    source: APPLE_M1_PRO_MEMORY_SOURCE,
+  },
+  'apple-m4-pro-12c': {
+    description: '8 performance cores + 4 efficiency cores',
+    source: APPLE_M4_PRO_MAX_SOURCE,
+  },
+  'apple-m4-pro-14c': {
+    description: '10 performance cores + 4 efficiency cores',
+    source: APPLE_M4_PRO_MAX_SOURCE,
+  },
+  'apple-m4-max-14c': {
+    description: '10 performance cores + 4 efficiency cores',
+    source: APPLE_M4_PRO_MAX_SOURCE,
+  },
+  'apple-m4-max-16c': {
+    description: '12 performance cores + 4 efficiency cores',
+    source: APPLE_M4_PRO_MAX_SOURCE,
+  },
+};
+
 /** Reviewed chart identities plus explicitly observed device catalogue links. */
 export const PROCESSOR_CATALOGUE: readonly ProcessorCatalogueEntry[] = [
   ...GENERATED_CATALOGUE,
   ...GENERATED_MAC_CATALOGUE,
   ...REVIEWED_PROCESSOR_IDENTITIES,
-];
+].map((entry) => {
+  const coreComposition = REVIEWED_CORE_COMPOSITIONS[entry.key];
+  return coreComposition ? { ...entry, coreComposition } : entry;
+});

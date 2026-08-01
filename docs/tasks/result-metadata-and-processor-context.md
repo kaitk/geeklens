@@ -829,7 +829,7 @@ all today. Before shipping a generic cache row, settle the ARM caveat recorded
 under _Other payload candidates_: sampled ARM payloads report zero or per-cluster
 cache values that do not describe the whole CPU.
 
-### 10. Published core-type composition (deferred, not scheduled)
+### 10. Published core-type composition
 
 **Raised:** 2026-08-01. The topology row states cluster sizes but never says what
 kind of cores a cluster holds, which is the fact readers actually want on a
@@ -877,6 +877,46 @@ Scope for the initial slice:
   result; do not attempt coverage across all 264 catalogue processors.
 - Degrades to today's output whenever the field is absent, so partial coverage is
   a valid shipping state.
+
+**Implemented 2026-08-01**, with one deviation from the sketch above:
+`coreComposition` is its own optional field on `ProcessorCatalogueEntry` rather
+than a field on `HardwareSpecification`. That interface requires `bandwidthGBs`,
+so hanging core types off it would force a fabricated memory figure onto every
+Intel and AMD part. Compositions are overlaid by entry key from
+`REVIEWED_CORE_COMPOSITIONS`, mirroring `REVIEWED_HARDWARE`, and applied once
+over the assembled catalogue so generated, Mac, and reviewed identities are all
+covered by one mechanism. The view model exposes the fact in the same shape as a
+memory fact, and the renderer shares one `provenanceBadge` helper with the memory
+rows, so both carry identical badge, tooltip, link, and accessible-label
+behaviour.
+
+Nine entries are seeded. The five Apple ones reuse sources already reviewed for
+this catalogue, each of which states the CPU core split alongside the memory
+figures it was originally captured for: `apple-m1-pro-10c`, `apple-m4-pro-12c`,
+`apple-m4-pro-14c`, `apple-m4-max-14c`, `apple-m4-max-16c`. Fixtures `1262` and
+`64820` cover the first two end to end; M4 Pro's published 8 + 4 split agrees
+with the clusters the same payload reports.
+
+The four x86 entries — `amd-ryzen-ai-9-hx-370` (4 Zen 5 + 8 Zen 5c),
+`amd-ryzen-ai-9-365` (6 Zen 5 + 4 Zen 5c), `intel-core-i9-13900k` and
+`intel-core-ultra-9-285k` (8 Performance-cores + 16 Efficient-cores each) — cite
+the Zen 5, Raptor Lake, and Arrow Lake tables, retrieved 2026-08-01. That is the
+weaker publisher tier, named in the provenance tooltip, and it was chosen over a
+first-party citation for two separate reasons: AMD markets Strix Point as a flat
+core count and does not publish the Zen 5 / Zen 5c division at all, and Intel ARK
+does list P-core and E-core counts as separate fields but serves 403 to automated
+retrieval. A page that cannot be retrieved must not be cited as though it had
+been. Upgrading the two Intel entries to ARK is a worthwhile follow-up for anyone
+retrieving it by hand.
+
+Fixture `61473` covers the 13900K end to end and is the sharpest demonstration of
+why the split cannot be inferred: its two reported clusters are 8 and 16, and the
+larger one is the Efficient-core group.
+
+**Correction during implementation:** an earlier draft of this section recorded
+the Ryzen AI 9 365 as 4 Zen 5 + 6 Zen 5c. It is 6 Zen 5 + 4 Zen 5c, 10 cores and
+20 threads. The error was caught by retrieving the source rather than trusting
+the recalled figure, which is the entire argument for citing one.
 
 **Follow-up option, explicitly out of this slice: labelling individual bar
 segments.** The rule would be a join of catalogue core-type counts against

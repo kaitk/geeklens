@@ -33,7 +33,7 @@ import { resultsCache } from '../cache/ResultsCache';
 import type { CachedResultContext } from '../cache/ResultsCache';
 import { withClearedComparisonBaseline } from './comparisonBaseline';
 import { loadSettings } from '../settings/settings';
-import { markAddedRowLabel } from './addedRowMarker';
+import { markRowLabel } from './rowMarker';
 import {
   applyProcessorContextPreferences,
   renderComparisonProcessorContext,
@@ -320,7 +320,7 @@ function annotateSystemInstructionSets(
 
   const labelCell = document.createElement('td');
   labelCell.textContent = 'Instruction Sets';
-  markAddedRowLabel(labelCell);
+  markRowLabel(labelCell, 'added');
   newRow.appendChild(labelCell);
 
   // One cell per compared result, in the page's primary-then-baseline order.

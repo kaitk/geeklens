@@ -5,7 +5,7 @@
  * detached from runtime until the real result-context view model is implemented.
  */
 import type { Settings } from '../settings/settings';
-import { createAddedRowMarker } from './addedRowMarker';
+import { createRowMarker, markRowLabel, type RowMarkerKind } from './rowMarker';
 import { scoreDelta } from './scoreDelta';
 
 export interface ProcessorContextViewModel {
@@ -31,21 +31,28 @@ export interface ProcessorContextViewModel {
     clusters: Array<{ cores: number; maxGHz: number | null }>;
   } | null;
   scaling: { ratio: number; singleCore: number; multiCore: number } | null;
+  /** What kinds of core the processor holds, in the source's own wording. Only
+   * an exact catalogue match supplies this; the payload never does. */
+  coreComposition: ProvenanceFact | null;
   reference: {
     singleCore: number;
     multiCore: number;
     generation: 'Geekbench 7';
     minimumUniqueResults?: number;
   } | null;
-  memory: Array<{
-    value: string;
-    provenance: 'reported' | 'computed' | 'published';
-    detail?: string;
-    source?: {
-      url: string;
-      label: string;
-    };
-  }>;
+  memory: ProvenanceFact[];
+}
+
+/** One stated fact plus where it came from. Shared by every value that carries a
+ * provenance badge, so they all read and behave identically. */
+export interface ProvenanceFact {
+  value: string;
+  provenance: 'reported' | 'computed' | 'published';
+  detail?: string;
+  source?: {
+    url: string;
+    label: string;
+  };
 }
 
 const MEMORY_PROVENANCE_HELP = {
@@ -114,12 +121,17 @@ type FrequencyStatistics = NonNullable<ProcessorContextViewModel['frequency']>;
  */
 const PLOT_EDGE_INSET = 0.04;
 
+/** The endpoints only.
+ *
+ * These are what a plot cannot convey once a shared scale compresses it to a
+ * few pixels, so they earn their place beside the chart. The mean does not: its
+ * position relative to the box is the readable part and the diamond already
+ * shows that, with the exact figure in the tooltip.
+ */
 function frequencyValues(statistics: FrequencyStatistics): HTMLElement {
   const values = document.createElement('span');
   values.className = 'geeklens-preview-frequency-values';
-  values.textContent =
-    `${statistics.minGHz.toFixed(2)}–${statistics.maxGHz.toFixed(2)} GHz · ` +
-    `mean ${statistics.meanGHz.toFixed(2)}`;
+  values.textContent = `${statistics.minGHz.toFixed(2)}–${statistics.maxGHz.toFixed(2)} GHz`;
   return values;
 }
 
@@ -399,11 +411,12 @@ function annotateSinglePerformanceReferences(preview: ProcessorContextViewModel)
   }
 }
 
-/** Memory tooltips carry a provenance definition, an optional payload/derivation
- * note, and an optional source line. Rendering them as separate blocks rather
- * than one concatenated string keeps exact payload values and source attribution
- * legible instead of running together in a centred paragraph. */
-function memoryTooltip(fact: ProcessorContextViewModel['memory'][number]): HTMLElement {
+/** Provenance tooltips carry a provenance definition, an optional
+ * payload/derivation note, and an optional source line. Rendering them as
+ * separate blocks rather than one concatenated string keeps exact payload values
+ * and source attribution legible instead of running together in a centred
+ * paragraph. */
+function provenanceTooltip(fact: ProvenanceFact): HTMLElement {
   const tooltip = document.createElement('span');
   tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-memory-tooltip';
 
@@ -437,6 +450,27 @@ function memoryTooltip(fact: ProcessorContextViewModel['memory'][number]): HTMLE
   return tooltip;
 }
 
+function provenanceBadge(fact: ProvenanceFact): HTMLElement {
+  const provenance = document.createElement(fact.source ? 'a' : 'span');
+  provenance.className = `geeklens-preview-provenance is-${fact.provenance}`;
+  provenance.textContent = fact.provenance;
+  provenance.tabIndex = 0;
+  if (fact.source) {
+    const link = provenance as HTMLAnchorElement;
+    link.href = fact.source.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+  const factDetail = fact.detail ? ` ${fact.detail}` : '';
+  const sourceDetail = fact.source ? ` Source: ${fact.source.label}. Click to open source.` : '';
+  provenance.setAttribute(
+    'aria-label',
+    `${fact.provenance}: ${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`,
+  );
+  provenance.appendChild(provenanceTooltip(fact));
+  return provenance;
+}
+
 function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel): void {
   if (cell.querySelector('[data-geeklens-preview-memory]')) return;
   const details = document.createElement('div');
@@ -449,35 +483,17 @@ function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel):
     const value = document.createElement('span');
     value.textContent = fact.value;
 
-    const provenance = document.createElement(fact.source ? 'a' : 'span');
-    provenance.className = `geeklens-preview-provenance is-${fact.provenance}`;
-    provenance.textContent = fact.provenance;
-    provenance.tabIndex = 0;
-    if (fact.source) {
-      const link = provenance as HTMLAnchorElement;
-      link.href = fact.source.url;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-    }
-    const factDetail = fact.detail ? ` ${fact.detail}` : '';
-    const sourceDetail = fact.source ? ` Source: ${fact.source.label}. Click to open source.` : '';
-    provenance.setAttribute(
-      'aria-label',
-      `${fact.provenance}: ${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`,
-    );
-    provenance.appendChild(memoryTooltip(fact));
-
-    line.append(value, provenance);
+    line.append(value, provenanceBadge(fact));
     details.appendChild(line);
   }
   cell.replaceChildren(details);
 }
 
-function rowLabel(label: string): DocumentFragment {
+function rowLabel(label: string, kind: RowMarkerKind = 'added'): DocumentFragment {
   const content = document.createDocumentFragment();
   const labelText = document.createElement('span');
   labelText.textContent = label;
-  const marker = createAddedRowMarker();
+  const marker = createRowMarker(kind);
   content.append(labelText, marker);
   return content;
 }
@@ -520,6 +536,20 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
   summary.textContent =
     totals.length > 0 ? totals.join(' · ') : nativeTopology || 'Topology unavailable';
   value.appendChild(summary);
+
+  // Stated separately from the bar rather than attached to its segments: naming
+  // a specific cluster would require matching catalogue counts against payload
+  // clusters, which this deliberately does not attempt. It also has to render on
+  // the parts that report no clusters at all, which is every AMD result sampled.
+  if (preview.coreComposition) {
+    const composition = document.createElement('div');
+    composition.dataset.geeklensPreviewComposition = '';
+    composition.className = 'geeklens-preview-topology-composition';
+    const text = document.createElement('span');
+    text.textContent = preview.coreComposition.value;
+    composition.append(text, provenanceBadge(preview.coreComposition));
+    value.appendChild(composition);
+  }
 
   const clusters = preview.topology?.clusters ?? [];
   if (clusters.length === 0) return value;
@@ -672,15 +702,17 @@ export function renderSingleProcessorContext(
   const cpuTable = Array.from(document.querySelectorAll('table.system-table')).find(
     (table) => table.querySelector('th')?.textContent?.trim() === 'CPU Information',
   );
-  const nameCell = Array.from(cpuTable?.querySelectorAll('tbody tr') ?? []).find((row) =>
+  const nameRow = Array.from(cpuTable?.querySelectorAll('tbody tr') ?? []).find((row) =>
     /^(Name|Processor)$/.test(row.firstElementChild?.textContent?.trim() ?? ''),
-  )?.lastElementChild;
+  );
+  const nameCell = nameRow?.lastElementChild;
   if (!nameCell || nameCell.querySelector('[data-geeklens-preview-processor]')) return;
 
   if (settings.showProcessorSummary) {
     const block = identity(preview.name, preview);
     block.dataset.geeklensPreviewProcessor = '';
     nameCell.replaceChildren(block);
+    if (nameRow?.firstElementChild) markRowLabel(nameRow.firstElementChild, 'changed');
   }
 
   const topologyRow = Array.from(cpuTable?.querySelectorAll('tbody tr') ?? []).find(
@@ -691,7 +723,7 @@ export function renderSingleProcessorContext(
     const valueCell = topologyRow.lastElementChild;
     const nativeTopology = valueCell?.textContent?.trim() ?? '';
     if (settings.showCoreTopology) {
-      labelCell?.replaceChildren(rowLabel('Topology'));
+      labelCell?.replaceChildren(rowLabel('Topology', 'changed'));
       valueCell?.replaceChildren(topologyDetails(nativeTopology, preview));
     }
 
@@ -725,7 +757,7 @@ export function renderSingleProcessorContext(
   );
   const sizeCell = memoryTable?.querySelector('tbody tr td:last-child');
   if (settings.showMemoryDetails && preview.memory.length > 0 && sizeCell) {
-    sizeCell.parentElement?.firstElementChild?.replaceChildren('Details');
+    sizeCell.parentElement?.firstElementChild?.replaceChildren(rowLabel('Details', 'changed'));
     appendMemoryDetails(sizeCell, preview);
   }
 }
@@ -755,6 +787,9 @@ export function renderComparisonProcessorContext(
         cell.replaceChildren(block);
       }
     });
+  if (settings.showProcessorSummary && previews.some(Boolean) && processorRow.firstElementChild) {
+    markRowLabel(processorRow.firstElementChild, 'changed');
+  }
 
   const detailRows: HTMLTableRowElement[] = [];
   if (
@@ -792,12 +827,20 @@ export function renderComparisonProcessorContext(
     (row) => row.firstElementChild?.textContent?.trim() === 'Memory',
   );
   if (settings.showMemoryDetails) {
+    let annotated = false;
     Array.from(memoryRow?.children ?? [])
       .slice(1, 3)
       .forEach((cell, index) => {
         const preview = previews[index];
-        if (preview?.memory.length) appendMemoryDetails(cell, preview);
+        if (!preview?.memory.length) return;
+        appendMemoryDetails(cell, preview);
+        annotated = true;
       });
+    // Only claim the row once something was actually added to it: with no
+    // matched memory facts the native row stands untouched.
+    if (annotated && memoryRow?.firstElementChild) {
+      markRowLabel(memoryRow.firstElementChild, 'changed');
+    }
   }
   if (settings.showReferenceComparison && previews[0] && previews[1]) {
     annotateComparisonReferences([previews[0], previews[1]]);

@@ -75,6 +75,24 @@ function topology(metadata: ResultMetadata): ProcessorContextViewModel['topology
   return { cores, threads, clusters: ordered };
 }
 
+/** Core types are never inferred from the payload; only an exact catalogue match
+ * can name them. An alias or configuration mismatch resolves to unmatched, which
+ * leaves the topology row exactly as the payload described it. */
+function coreComposition(
+  identity: ProcessorIdentityMatch,
+): ProcessorContextViewModel['coreComposition'] {
+  if (identity.kind === 'unmatched' || !identity.entry.coreComposition) return null;
+  const { description, source } = identity.entry.coreComposition;
+  return {
+    value: description,
+    provenance: 'published',
+    source: {
+      url: source.url,
+      label: `${source.publisher}, retrieved ${source.retrievedOn}`,
+    },
+  };
+}
+
 function scoreScaling(metadata: ResultMetadata): ProcessorContextViewModel['scaling'] {
   const single = metadata.scores.singleCore?.value;
   const multi = metadata.scores.multiCore?.value;
@@ -234,6 +252,7 @@ export function buildProcessorContextViewModel(
     cataloguePath: identity.kind === 'unmatched' ? null : identity.entry.pageUrl,
     frequency: frequency(context.metadata),
     topology: topology(context.metadata),
+    coreComposition: coreComposition(identity),
     scaling: scoreScaling(context.metadata),
     reference: reference(context.metadata, identity),
     memory: memory(context.metadata, identity),

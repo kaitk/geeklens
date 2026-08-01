@@ -139,6 +139,14 @@ table.system-information td {
   background: #4b5563;
 }
 
+.geeklens-preview-topology-composition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 6px;
+  margin-top: 2px;
+}
+
 .geeklens-preview-topology-clusters {
   display: flex;
   flex-wrap: wrap;

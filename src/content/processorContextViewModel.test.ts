@@ -85,6 +85,38 @@ describe('buildProcessorContextViewModel', () => {
     ]);
   });
 
+  test('names core types only from an exact catalogue match', async () => {
+    // The payload cannot supply core types, so this is a published fact carrying
+    // the source's own wording. M4 Pro's 8 + 4 split agrees with the clusters the
+    // same fixture reports, which is the only cross-check available.
+    expect(buildProcessorContextViewModel(await context('64820'))?.coreComposition).toEqual({
+      value: '8 performance cores + 4 efficiency cores',
+      provenance: 'published',
+      source: {
+        url: 'https://www.apple.com/newsroom/2024/10/apple-introduces-m4-pro-and-m4-max/',
+        label: 'Apple, retrieved 2026-08-01',
+      },
+    });
+    expect(buildProcessorContextViewModel(await context('1262'))?.coreComposition).toMatchObject({
+      value: '8 performance cores + 2 efficiency cores',
+      provenance: 'published',
+    });
+
+    // The 13900K states the case the payload cannot: its two reported clusters
+    // are 8 and 16, and the larger one is the Efficient-core group.
+    const raptorLake = buildProcessorContextViewModel(await context('61473'));
+    expect(raptorLake?.coreComposition?.value).toBe('8 Performance-cores + 16 Efficient-cores');
+    expect(raptorLake?.topology?.clusters).toEqual([
+      { cores: 8, maxGHz: null },
+      { cores: 16, maxGHz: null },
+    ]);
+
+    // Matched entries without a reviewed composition, and unmatched results, both
+    // leave the topology row exactly as the payload described it.
+    expect(buildProcessorContextViewModel(await context('1248'))?.coreComposition).toBeNull();
+    expect(buildProcessorContextViewModel(await context('58949'))?.coreComposition).toBeNull();
+  });
+
   test('omits score scaling for missing, zero, and malformed scores', async () => {
     const cached = await context('1248');
     if (!cached.metadata) throw new Error('fixture metadata unavailable');
