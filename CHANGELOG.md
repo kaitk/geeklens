@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.5.0] - 2026-08-01
+
 ### Added
 
 - Added optional processor context to CPU result and comparison pages: processor
@@ -11,6 +13,13 @@
   systems. All processor-context views can be toggled in settings and default
   to enabled.
 - Added a setting to hide unconfirmed-mapping warnings.
+- Added a direct sign-in action when Geekbench 7 instruction data requires
+  authentication.
+
+### Changed
+
+- Simplified the system instruction-set summary to focus on modern,
+  workload-relevant features instead of legacy baseline instructions.
 
 ## [v0.4.0] - 2026-07-28
 
