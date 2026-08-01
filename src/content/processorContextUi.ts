@@ -5,6 +5,7 @@
  * detached from runtime until the real result-context view model is implemented.
  */
 import type { Settings } from '../settings/settings';
+import { createIcon } from './icons';
 import { createRowMarker, markRowLabel, type RowMarkerKind } from './rowMarker';
 import { scoreDelta } from './scoreDelta';
 
@@ -40,7 +41,7 @@ export interface ProcessorContextViewModel {
     generation: 'Geekbench 7';
     minimumUniqueResults?: number;
   } | null;
-  memory: ProvenanceFact[];
+  memory: MemoryFact[];
 }
 
 /** One stated fact plus where it came from. Shared by every value that carries a
@@ -55,11 +56,62 @@ export interface ProvenanceFact {
   };
 }
 
+export interface MemoryFact extends ProvenanceFact {
+  kind: 'capacity' | 'specification' | 'interface' | 'bandwidth';
+}
+
 const MEMORY_PROVENANCE_HELP = {
   reported: 'Reported by the Geekbench result payload.',
-  computed: 'Theoretical peak calculated from the reported memory configuration; not measured.',
+  computed: 'Calculated from the reported memory configuration; not measured.',
   published: 'Published for the matched processor or device; not measured by this result.',
 } as const;
+
+/** Host of an absolute URL, for naming where a link goes. Catalogue entries are
+ * expected to carry absolute URLs; anything else simply goes unlabelled. */
+function linkHost(url: string): string | undefined {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return undefined;
+  }
+}
+
+/** A source affordance: hovering says where the fact came from, clicking opens
+ * it. The custom tooltip replaces the browser's `title` popup, which appears
+ * only after a delay and cannot state that the icon is clickable. */
+function sourceLink(options: {
+  href: string;
+  title: string;
+  detail?: string;
+  ariaLabel: string;
+}): HTMLAnchorElement {
+  const link = document.createElement('a');
+  link.className = 'geeklens-preview-external-link';
+  link.href = options.href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', options.ariaLabel);
+  link.appendChild(createIcon('info'));
+
+  const tooltip = document.createElement('span');
+  tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-source-tooltip';
+  const title = document.createElement('strong');
+  title.className = 'geeklens-preview-source-tooltip-title';
+  title.textContent = options.title;
+  tooltip.appendChild(title);
+  if (options.detail) {
+    const detail = document.createElement('span');
+    detail.textContent = options.detail;
+    tooltip.appendChild(detail);
+  }
+  const hint = document.createElement('span');
+  hint.className = 'geeklens-preview-source-tooltip-hint';
+  hint.textContent = 'Click to open in a new tab.';
+  tooltip.appendChild(hint);
+
+  link.appendChild(tooltip);
+  return link;
+}
 
 function nameWithoutVendor(name: string, vendor: string): string {
   return name.replace(new RegExp(`^${vendor}\\s+`, 'i'), '');
@@ -98,13 +150,14 @@ function identity(name: string, preview: ProcessorContextViewModel): HTMLElement
   heading.append(vendorBadge, nameElement, architectureBadge);
 
   if (preview.cataloguePath) {
-    const catalogue = document.createElement('a');
-    catalogue.className = 'geeklens-preview-catalogue';
-    catalogue.href = preview.cataloguePath;
-    catalogue.target = '_blank';
-    catalogue.rel = 'noopener noreferrer';
-    catalogue.textContent = 'Catalogue ↗';
-    heading.appendChild(catalogue);
+    heading.appendChild(
+      sourceLink({
+        href: preview.cataloguePath,
+        title: 'Processor page',
+        detail: linkHost(preview.cataloguePath),
+        ariaLabel: 'Open processor page in a new tab.',
+      }),
+    );
   }
   wrapper.appendChild(heading);
   return wrapper;
@@ -416,59 +469,94 @@ function annotateSinglePerformanceReferences(preview: ProcessorContextViewModel)
  * separate blocks rather than one concatenated string keeps exact payload values
  * and source attribution legible instead of running together in a centred
  * paragraph. */
-function provenanceTooltip(fact: ProvenanceFact): HTMLElement {
+const MEMORY_FACT_LABELS: Record<MemoryFact['kind'], string> = {
+  capacity: 'Capacity',
+  specification: 'Memory',
+  interface: 'Interface',
+  bandwidth: 'Bandwidth',
+};
+
+function memoryFactLabel(fact: MemoryFact): string {
+  if (fact.kind !== 'bandwidth') return MEMORY_FACT_LABELS[fact.kind];
+  if (fact.provenance === 'computed') return 'Calculated bandwidth';
+  if (fact.provenance === 'published') return 'Published bandwidth';
+  return 'Bandwidth';
+}
+
+function memoryTooltip(facts: readonly MemoryFact[]): HTMLElement {
   const tooltip = document.createElement('span');
   tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-memory-tooltip';
 
   const title = document.createElement('strong');
   title.className = 'geeklens-preview-memory-tooltip-title';
-  title.textContent = fact.provenance;
+  title.textContent = 'Memory details';
   tooltip.appendChild(title);
 
-  for (const text of [MEMORY_PROVENANCE_HELP[fact.provenance], fact.detail]) {
-    if (!text) continue;
-    const line = document.createElement('span');
-    line.className = 'geeklens-preview-memory-tooltip-line';
-    line.textContent = text;
-    tooltip.appendChild(line);
-  }
+  for (const provenance of ['reported', 'computed', 'published'] as const) {
+    const group = facts.filter((fact) => fact.provenance === provenance);
+    if (group.length === 0) continue;
+    const heading = document.createElement('span');
+    heading.className = 'geeklens-preview-memory-tooltip-group';
+    heading.textContent = provenance === 'computed' ? 'Calculated' : provenance;
+    tooltip.appendChild(heading);
 
-  if (fact.source) {
-    const source = document.createElement('span');
-    source.className = 'geeklens-preview-memory-tooltip-source';
-    const label = document.createElement('span');
-    label.textContent = 'Source';
-    const value = document.createElement('strong');
-    value.textContent = fact.source.label;
-    source.append(label, value);
-
-    const action = document.createElement('span');
-    action.className = 'geeklens-preview-memory-tooltip-note';
-    action.textContent = 'Click to open source';
-    tooltip.append(source, action);
+    for (const fact of group) {
+      const row = document.createElement('span');
+      row.className = 'geeklens-preview-memory-tooltip-row';
+      const label = document.createElement('span');
+      label.textContent = memoryFactLabel(fact);
+      const value = document.createElement('strong');
+      value.textContent = fact.value;
+      row.append(label, value);
+      if (fact.source) {
+        const source = document.createElement('a');
+        source.className = 'geeklens-preview-memory-source';
+        source.href = fact.source.url;
+        source.target = '_blank';
+        source.rel = 'noopener noreferrer';
+        source.appendChild(createIcon('external-link'));
+        source.title = `View source: ${fact.source.label}`;
+        source.setAttribute('aria-label', `View source: ${fact.source.label}. Opens in a new tab.`);
+        row.appendChild(source);
+      }
+      tooltip.appendChild(row);
+      if (fact.detail) {
+        const detail = document.createElement('span');
+        detail.className = 'geeklens-preview-memory-tooltip-line';
+        detail.textContent = fact.detail;
+        tooltip.appendChild(detail);
+      }
+    }
   }
   return tooltip;
 }
 
-function provenanceBadge(fact: ProvenanceFact): HTMLElement {
-  const provenance = document.createElement(fact.source ? 'a' : 'span');
-  provenance.className = `geeklens-preview-provenance is-${fact.provenance}`;
-  provenance.textContent = fact.provenance;
-  provenance.tabIndex = 0;
-  if (fact.source) {
-    const link = provenance as HTMLAnchorElement;
-    link.href = fact.source.url;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-  }
-  const factDetail = fact.detail ? ` ${fact.detail}` : '';
-  const sourceDetail = fact.source ? ` Source: ${fact.source.label}. Click to open source.` : '';
-  provenance.setAttribute(
-    'aria-label',
-    `${fact.provenance}: ${MEMORY_PROVENANCE_HELP[fact.provenance]}${factDetail}${sourceDetail}`,
-  );
-  provenance.appendChild(provenanceTooltip(fact));
-  return provenance;
+function memoryHeadline(facts: readonly MemoryFact[]): string {
+  const capacity = facts.find((fact) => fact.kind === 'capacity');
+  const specification =
+    facts.find((fact) => fact.kind === 'specification' && fact.provenance === 'published') ??
+    facts.find((fact) => fact.kind === 'specification');
+  const headline = [capacity?.value, specification?.value].filter(Boolean);
+  return headline.length > 0 ? headline.join(' · ') : (facts[0]?.value ?? 'Memory details');
+}
+
+/** Bandwidth is the fact most worth reading without opening the tooltip, so it
+ * gets its own line. A published figure outranks one we calculated. */
+function memoryBandwidthLine(facts: readonly MemoryFact[]): HTMLElement | null {
+  const bandwidth =
+    facts.find((fact) => fact.kind === 'bandwidth' && fact.provenance === 'published') ??
+    facts.find((fact) => fact.kind === 'bandwidth');
+  if (!bandwidth) return null;
+
+  const line = document.createElement('span');
+  line.className = 'geeklens-preview-memory-bandwidth';
+  const label = document.createElement('span');
+  label.className = 'geeklens-preview-memory-bandwidth-label';
+  label.textContent = memoryFactLabel(bandwidth);
+  const value = document.createElement('span');
+  value.textContent = bandwidth.value;
+  line.append(label, value);
+  return line;
 }
 
 function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel): void {
@@ -476,16 +564,22 @@ function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel):
   const details = document.createElement('div');
   details.dataset.geeklensPreviewMemory = '';
   details.className = 'geeklens-preview-memory';
-  for (const fact of preview.memory) {
-    const line = document.createElement('div');
-    line.className = 'geeklens-preview-memory-line';
+  const value = document.createElement('span');
+  value.className = 'geeklens-preview-memory-summary';
+  value.textContent = memoryHeadline(preview.memory);
 
-    const value = document.createElement('span');
-    value.textContent = fact.value;
-
-    line.append(value, provenanceBadge(fact));
-    details.appendChild(line);
-  }
+  const info = document.createElement('span');
+  info.className = 'geeklens-preview-memory-info';
+  info.tabIndex = 0;
+  info.setAttribute('role', 'img');
+  info.setAttribute(
+    'aria-label',
+    `Memory details. ${preview.memory.map((fact) => `${memoryFactLabel(fact)}: ${fact.value}. ${MEMORY_PROVENANCE_HELP[fact.provenance]}`).join(' ')}`,
+  );
+  info.append(createIcon('info'), memoryTooltip(preview.memory));
+  details.append(value, info);
+  const bandwidth = memoryBandwidthLine(preview.memory);
+  if (bandwidth) details.appendChild(bandwidth);
   cell.replaceChildren(details);
 }
 
@@ -563,17 +657,14 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
     text.textContent = preview.coreComposition.value;
     composition.appendChild(text);
     if (preview.coreComposition.source) {
-      const source = document.createElement('a');
-      source.className = 'geeklens-preview-catalogue';
-      source.href = preview.coreComposition.source.url;
-      source.target = '_blank';
-      source.rel = 'noopener noreferrer';
-      source.textContent = 'Source ↗';
-      source.setAttribute(
-        'aria-label',
-        `Core composition source: ${preview.coreComposition.source.label}. Opens in a new tab.`,
+      composition.appendChild(
+        sourceLink({
+          href: preview.coreComposition.source.url,
+          title: 'Core composition source',
+          detail: preview.coreComposition.source.label,
+          ariaLabel: `View core composition source: ${preview.coreComposition.source.label}. Opens in a new tab.`,
+        }),
       );
-      composition.appendChild(source);
     }
     value.appendChild(composition);
   }

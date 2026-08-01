@@ -37,6 +37,7 @@ describe('loadSettings', () => {
     const settings = await loadSettings();
 
     expect(settings.coloredBadges).toBe(false);
+    expect(settings.enabled).toBe(true);
     expect(settings.tooltips).toBe(true);
     expect(settings.showProcessorSummary).toBe(true);
     expect(settings.showFrequencyDistribution).toBe(true);
@@ -47,6 +48,12 @@ describe('loadSettings', () => {
     stored = { geekLensSettings: { coloredBadges: true, tooltips: true } };
 
     expect((await loadSettings()).mappingWarnings).toBe(true);
+  });
+
+  test('preserves a disabled global setting', async () => {
+    stored = { geekLensSettings: { enabled: false } };
+
+    expect((await loadSettings()).enabled).toBe(false);
   });
 
   test('enables all implemented context controls', async () => {

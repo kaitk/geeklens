@@ -139,10 +139,15 @@ function memory(
   );
 
   if (payload.capacityBytes) {
-    facts.push({ value: formatCapacity(payload.capacityBytes.value), provenance: 'reported' });
+    facts.push({
+      kind: 'capacity',
+      value: formatCapacity(payload.capacityBytes.value),
+      provenance: 'reported',
+    });
   }
   if (systemMemory) {
     facts.push({
+      kind: 'specification',
       value: `${systemMemory.memoryType}-${systemMemory.transferRateMTs}`,
       provenance: 'published',
       detail: `The payload reported ${payload.type?.value ?? 'an unknown type'} at ${payload.transferRateMTs?.value ?? 'an unknown rate'} MT/s.`,
@@ -161,6 +166,7 @@ function memory(
       // the general soldered-LPDDR case; an exact system entry above supersedes
       // it whenever one exists.
       facts.push({
+        kind: 'specification',
         value: `${type}-class (rate unverified)`,
         provenance: 'reported',
         detail:
@@ -171,6 +177,7 @@ function memory(
       });
     } else {
       facts.push({
+        kind: 'specification',
         value: `${type}${displayedRate ? `-${displayedRate}` : ''}`,
         provenance: 'reported',
         detail:
@@ -186,6 +193,7 @@ function memory(
     // secondary detail rather than a competing vocabulary.
     const channelKind = payload.channelWidthBits === 32 ? 'subchannels' : 'channels';
     facts.push({
+      kind: 'interface',
       value: `${payload.busWidthBits}-bit bus`,
       provenance: 'reported',
       detail:
@@ -196,8 +204,11 @@ function memory(
   }
   if (!systemMemory && payload.theoreticalBandwidthGBs !== null) {
     facts.push({
-      value: `${payload.theoreticalBandwidthGBs.toFixed(1)} GB/s theoretical peak`,
+      kind: 'bandwidth',
+      value: `${payload.theoreticalBandwidthGBs.toFixed(1)} GB/s`,
       provenance: 'computed',
+      detail:
+        'Maximum bandwidth calculated from the reported memory rate and bus width; not measured.',
     });
   }
 
@@ -205,6 +216,7 @@ function memory(
     const hardware = identity.entry.hardware;
     if (hardware.memoryType || hardware.transferRateMTs) {
       facts.push({
+        kind: 'specification',
         value: `${hardware.memoryType ?? 'Memory'}${hardware.transferRateMTs ? `-${hardware.transferRateMTs}` : ''}`,
         provenance: 'published',
         source: {
@@ -215,6 +227,7 @@ function memory(
     }
     if (hardware.busWidthBits) {
       facts.push({
+        kind: 'interface',
         value: `${hardware.busWidthBits}-bit bus`,
         provenance: 'published',
         source: {
@@ -224,7 +237,8 @@ function memory(
       });
     }
     facts.push({
-      value: `${hardware.bandwidthQualifier === 'up-to' ? 'Up to ' : ''}${hardware.bandwidthGBs} GB/s ${hardware.bandwidthQualifier === 'up-to' ? 'published maximum' : 'published bandwidth'}`,
+      kind: 'bandwidth',
+      value: `${hardware.bandwidthQualifier === 'up-to' ? 'Up to ' : ''}${hardware.bandwidthGBs} GB/s`,
       provenance: 'published',
       source: {
         url: hardware.source.url,

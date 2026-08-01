@@ -143,23 +143,34 @@ describe('buildProcessorContextViewModel', () => {
 
   test('keeps reported and computed DDR memory facts separate', async () => {
     expect(buildProcessorContextViewModel(await context('1248'))?.memory).toEqual([
-      { value: '32 GB', provenance: 'reported' },
+      { kind: 'capacity', value: '32 GB', provenance: 'reported' },
       {
+        kind: 'specification',
         value: 'DDR4-3600',
         provenance: 'reported',
         detail: 'Exact payload value: 3598 MT/s.',
       },
       {
+        kind: 'interface',
         value: '128-bit bus',
         provenance: 'reported',
         detail: 'Reported as 2 × 64-bit channels.',
       },
-      { value: '57.6 GB/s theoretical peak', provenance: 'computed' },
+      {
+        kind: 'bandwidth',
+        value: '57.6 GB/s',
+        provenance: 'computed',
+        detail:
+          'Maximum bandwidth calculated from the reported memory rate and bus width; not measured.',
+      },
     ]);
-    expect(buildProcessorContextViewModel(await context('64437'))?.memory).toContainEqual({
-      value: '102.4 GB/s theoretical peak',
-      provenance: 'computed',
-    });
+    expect(buildProcessorContextViewModel(await context('64437'))?.memory).toContainEqual(
+      expect.objectContaining({
+        kind: 'bandwidth',
+        value: '102.4 GB/s',
+        provenance: 'computed',
+      }),
+    );
   });
 
   test('adds published facts only for exact catalogue matches', async () => {
@@ -168,7 +179,7 @@ describe('buildProcessorContextViewModel', () => {
       ['48 GB', 'reported'],
       ['LPDDR5x-9523', 'published'],
       ['192-bit bus', 'published'],
-      ['228 GB/s published bandwidth', 'published'],
+      ['228 GB/s', 'published'],
     ]);
     expect(qualcomm?.memory[1]?.source).toMatchObject({
       url: expect.stringContaining('Snapdragon-X2-Elite-Product-Brief.pdf'),
@@ -184,7 +195,7 @@ describe('buildProcessorContextViewModel', () => {
     );
     expect(apple?.memory).toContainEqual(
       expect.objectContaining({
-        value: 'Up to 200 GB/s published maximum',
+        value: 'Up to 200 GB/s',
         provenance: 'published',
       }),
     );
@@ -194,12 +205,12 @@ describe('buildProcessorContextViewModel', () => {
     expect(appleM5Max?.memory.map((fact) => [fact.value, fact.provenance])).toEqual([
       ['48 GB', 'reported'],
       ['Unified memory', 'published'],
-      ['Up to 614 GB/s published maximum', 'published'],
+      ['Up to 614 GB/s', 'published'],
     ]);
 
     // Absent identities still add nothing beyond the reported capacity.
     expect(buildProcessorContextViewModel(await context('58949'))?.memory).toEqual([
-      { value: '121.7 GB', provenance: 'reported' },
+      { kind: 'capacity', value: '121.7 GB', provenance: 'reported' },
     ]);
   });
 
@@ -225,7 +236,7 @@ describe('buildProcessorContextViewModel', () => {
         detail: 'The payload reported DDR5 SDRAM at 1596 MT/s.',
       }),
     );
-    expect(memory.some((fact) => fact.value.includes('theoretical peak'))).toBeFalse();
+    expect(memory.some((fact) => fact.kind === 'bandwidth')).toBeFalse();
   });
 
   test('flags a self-contradicting rate instead of printing it for unlisted systems', async () => {
@@ -250,7 +261,7 @@ describe('buildProcessorContextViewModel', () => {
     ]);
     // The old behaviour printed a confident 25.5 GB/s here, understating the
     // real figure by exactly the LPDDR5 4:1 WCK:CK ratio.
-    expect(memory.some((fact) => fact.value.includes('theoretical peak'))).toBeFalse();
+    expect(memory.some((fact) => fact.kind === 'bandwidth')).toBeFalse();
     expect(memory[1]?.detail).toContain('1596 MT/s');
   });
 

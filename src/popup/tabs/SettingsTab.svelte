@@ -39,6 +39,17 @@
 
 <div class="settings-panel">
   <section class="settings-group">
+    <label class="setting-row global-toggle">
+      <span
+        ><strong>Enable GeekLens</strong><small
+          >Show GeekLens additions on Geekbench result pages</small
+        ></span
+      >
+      <input type="checkbox" bind:checked={settings.enabled} />
+    </label>
+  </section>
+
+  <section class="settings-group">
     <div class="settings-group-heading">
       <h2>Data shown</h2>
       <p>Choose which GeekLens additions appear on result pages.</p>

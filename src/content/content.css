@@ -107,10 +107,54 @@ table.system-information td {
   color: #33418f;
 }
 
-.geeklens-preview-catalogue {
-  margin-left: 2px;
-  font-size: 11px;
+/* Shared by every inline SVG icon; see src/content/icons.ts. */
+.geeklens-icon {
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+
+.geeklens-preview-external-link,
+.geeklens-preview-external-link:visited {
+  position: relative;
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* Same optical centring nudge as the memory info icon. */
+  transform: translateY(-0.14em);
+  /* Geekbench colours anchors per column — the baseline comparison cell turns
+   * them blue — and the icon strokes in currentColor, so the grey is forced. */
+  color: #6f7680 !important;
+  /* No font-size of its own: the icon is sized in px, and the nudge above needs
+   * to resolve against the text it sits beside. */
+  line-height: 1;
+  text-decoration: none;
   white-space: nowrap;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.geeklens-preview-external-link:hover,
+.geeklens-preview-external-link:focus-visible {
+  background-color: rgb(52 52 56 / 8%);
+  color: #2f3238 !important;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .geeklens-preview-external-link {
+    transition: none;
+  }
+}
+
+.geeklens-preview-external-link:focus-visible {
+  outline: 2px solid #737373;
+  outline-offset: 1px;
 }
 
 .geeklens-preview-topology,
@@ -446,50 +490,70 @@ table.system-information td {
 }
 
 .geeklens-preview-memory {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
   color: inherit;
   font-size: inherit;
 }
 
-.geeklens-preview-memory-line {
+/* Full-basis so it always starts its own line, leaving the info icon beside the
+ * capacity summary above it. */
+.geeklens-preview-memory-bandwidth {
   display: flex;
-  flex-wrap: wrap;
+  flex-basis: 100%;
   align-items: baseline;
   gap: 5px;
+  /* Matches the capacity summary above it; only the label is muted. */
+  color: inherit;
+  font-size: inherit;
+  line-height: 1.3;
 }
 
-.geeklens-preview-provenance {
+.geeklens-preview-memory-bandwidth-label {
+  color: #737373;
+}
+
+.geeklens-preview-memory-info {
   position: relative;
   display: inline-flex;
-  box-sizing: border-box;
   align-items: center;
-  min-height: 18px;
-  padding: 2px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: #eef0f2;
-  color: #59616a;
-  font-size: 10px;
-  font-weight: 500;
-  line-height: 12px;
-  text-transform: uppercase;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* Centring against the line box lands the icon low: the font reserves descender
+   * space below the baseline that digits and caps never use, so the text's visual
+   * centre sits above the box centre. The em-relative nudge tracks font size. */
+  transform: translateY(-0.14em);
+  color: #6f7680;
   cursor: help;
+  line-height: 1;
   outline: none;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
 }
 
-.geeklens-preview-provenance.is-computed {
-  background: #eceff6;
-  color: #536b9c;
+.geeklens-preview-memory-info:hover,
+.geeklens-preview-memory-info:focus-visible,
+.geeklens-preview-memory-info:focus-within {
+  background-color: rgba(52, 52, 56, 0.08);
+  color: #2f3238;
 }
 
-.geeklens-preview-provenance.is-published {
-  background: #f7f0df;
-  color: #8a641b;
+.geeklens-preview-memory-info:focus-visible {
+  box-shadow: 0 0 0 2px rgba(52, 52, 56, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .geeklens-preview-memory-info {
+    transition: none;
+  }
 }
 
 .geeklens-uncolored-badges .geeklens-preview-badge,
-.geeklens-uncolored-badges .geeklens-preview-provenance,
 .geeklens-uncolored-badges .gb-instruction-badge {
   background: #eef0f2 !important;
   color: #59616a !important;
@@ -572,6 +636,10 @@ table.system-information td {
   line-height: 1.35;
   text-align: center;
   text-transform: none;
+  /* Geekbench's table styles set aggressive word breaking; tooltip copy is short
+   * enough that it should only ever break between words. */
+  word-break: normal;
+  overflow-wrap: break-word;
   white-space: normal;
 }
 
@@ -585,10 +653,26 @@ table.system-information td {
   border-top-color: #6c757d;
 }
 
+/* Bridges the gap between the trigger and the tooltip. Without it the pointer
+ * leaves the trigger on the way up and the tooltip closes before links inside it
+ * can be clicked. */
+.geeklens-preview-row-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 6px;
+}
+
 .geeklens-preview-row-marker:hover .geeklens-preview-row-tooltip,
 .geeklens-preview-row-marker:focus .geeklens-preview-row-tooltip,
-.geeklens-preview-provenance:hover .geeklens-preview-row-tooltip,
-.geeklens-preview-provenance:focus .geeklens-preview-row-tooltip,
+.geeklens-preview-memory-info:hover .geeklens-preview-row-tooltip,
+.geeklens-preview-memory-info:focus .geeklens-preview-row-tooltip,
+.geeklens-preview-memory-info:focus-within .geeklens-preview-row-tooltip,
+.geeklens-preview-external-link:hover .geeklens-preview-row-tooltip,
+.geeklens-preview-external-link:focus .geeklens-preview-row-tooltip,
+.geeklens-preview-external-link:focus-visible .geeklens-preview-row-tooltip,
 .geeklens-preview-comparison-reference:hover .geeklens-preview-row-tooltip,
 .geeklens-preview-comparison-reference:focus .geeklens-preview-row-tooltip,
 .geeklens-preview-scaling:hover .geeklens-preview-row-tooltip,
@@ -628,6 +712,27 @@ table.system-information td {
   text-align: left;
 }
 
+.geeklens-preview-source-tooltip {
+  display: grid;
+  gap: 2px;
+  max-width: 16rem;
+  text-align: left;
+}
+
+/* Geekbench colours `strong` inside its tables, which would otherwise leave the
+ * heading dark against the tooltip's grey. */
+.geeklens-preview-source-tooltip-title,
+.geeklens-preview-memory-tooltip-title {
+  color: white !important;
+  font-weight: 600;
+}
+
+.geeklens-preview-source-tooltip-hint {
+  margin-top: 2px;
+  color: rgb(255 255 255 / 80%);
+  font-size: 11px;
+}
+
 .geeklens-preview-memory-tooltip {
   display: grid;
   gap: 4px;
@@ -636,32 +741,58 @@ table.system-information td {
   text-decoration: none;
 }
 
-.geeklens-preview-memory-tooltip-title {
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
 .geeklens-preview-memory-tooltip-line {
-  text-align: left;
-}
-
-.geeklens-preview-memory-tooltip-source {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding-top: 3px;
-  border-top: 1px solid rgb(255 255 255 / 25%);
-  text-align: left;
-}
-
-.geeklens-preview-memory-tooltip-source strong {
-  font-weight: 600;
-}
-
-.geeklens-preview-memory-tooltip-note {
   color: #f2f2f2;
   text-align: left;
+}
+
+.geeklens-preview-memory-tooltip-group {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: 1px solid rgb(255 255 255 / 25%);
+  color: #f2f2f2;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  /* letter-spacing adds a trailing gap after the last character that max-content
+   * sizing does not measure, which pushes that character onto its own line. */
+  white-space: nowrap;
+}
+
+.geeklens-preview-memory-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  text-align: left;
+}
+
+.geeklens-preview-memory-tooltip-row strong {
+  color: white !important;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.geeklens-preview-memory-source,
+.geeklens-preview-memory-source:visited {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255 255 255 / 75%) !important;
+  text-decoration: none;
+}
+
+.geeklens-preview-memory-source .geeklens-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.geeklens-preview-memory-source:hover,
+.geeklens-preview-memory-source:focus-visible {
+  color: white;
+  text-decoration: none;
 }
 
 .geeklens-preview-detail-value .geeklens-preview-topology {

@@ -323,6 +323,16 @@ main {
   min-height: 34px;
 }
 
+.setting-row.global-toggle {
+  min-height: 48px;
+  background: #f9fafb;
+}
+
+.setting-row.global-toggle strong {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 .settings-actions {
   position: sticky;
   bottom: 0;

@@ -25,6 +25,7 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
 
 function settings(showProcessorSummary: boolean, overrides: Partial<Settings> = {}): Settings {
   return {
+    enabled: true,
     showProcessorSummary,
     showCoreTopology: false,
     showMultiCoreScaling: false,
@@ -70,6 +71,7 @@ describe('processor context DOM integration', () => {
   test('replaces the native single-result processor cell once', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
     const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    preview.cataloguePath = 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x3d';
 
     renderSingleProcessorContext(preview, settings(true));
     renderSingleProcessorContext(preview, settings(true));
@@ -81,6 +83,13 @@ describe('processor context DOM integration', () => {
     expect(cell?.textContent).toContain('AMD');
     expect(cell?.textContent).toContain('Ryzen 7 5800X3D');
     expect(cell?.textContent).toContain('x86');
+    const processorLink = cell?.querySelector('a.geeklens-preview-external-link');
+    expect(processorLink?.querySelector('svg.geeklens-icon-info')).not.toBeNull();
+    expect(processorLink?.querySelector('.geeklens-preview-source-tooltip')?.textContent).toBe(
+      'Processor pagebrowser.geekbench.comClick to open in a new tab.',
+    );
+    expect(processorLink?.getAttribute('title')).toBeNull();
+    expect(processorLink?.getAttribute('aria-label')).toBe('Open processor page in a new tab.');
   });
 
   test('preserves primary/baseline order and a native missing side', async () => {
@@ -185,11 +194,14 @@ describe('processor context DOM integration', () => {
     expect(document.querySelector('.geeklens-preview-topology-bar')).toBeNull();
 
     expect(composition?.querySelector('.geeklens-preview-provenance')).toBeNull();
-    const source = composition?.querySelector('a.geeklens-preview-catalogue');
-    expect(source?.textContent).toBe('Source ↗');
+    const source = composition?.querySelector('a.geeklens-preview-external-link');
+    expect(source?.querySelector('svg.geeklens-icon-info')).not.toBeNull();
     expect(source?.getAttribute('href')).toBe('https://example.com/amd');
+    expect(source?.querySelector('.geeklens-preview-source-tooltip')?.textContent).toBe(
+      'Core composition sourceAMD, retrieved 2026-08-01Click to open in a new tab.',
+    );
     expect(source?.getAttribute('aria-label')).toBe(
-      'Core composition source: AMD, retrieved 2026-08-01. Opens in a new tab.',
+      'View core composition source: AMD, retrieved 2026-08-01. Opens in a new tab.',
     );
   });
 
@@ -419,7 +431,7 @@ describe('processor context DOM integration', () => {
     expect(lanes[1]?.textContent).toBe('Snapdragon X EliteNot available');
   });
 
-  test('renders one memory fact per line with accessible provenance', async () => {
+  test('renders a compact memory summary with accessible details', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
     document.body.insertAdjacentHTML(
       'beforeend',
@@ -427,15 +439,23 @@ describe('processor context DOM integration', () => {
     );
     const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
     preview.memory = [
-      { value: '32 GB', provenance: 'reported' },
+      { kind: 'capacity', value: '32 GB', provenance: 'reported' },
       {
+        kind: 'specification',
         value: 'DDR4-3600',
         provenance: 'reported',
         detail: 'Exact payload value: 3598 MT/s.',
       },
-      { value: '57.6 GB/s theoretical peak', provenance: 'computed' },
       {
-        value: '200 GB/s published maximum',
+        kind: 'bandwidth',
+        value: '57.6 GB/s',
+        provenance: 'computed',
+        detail:
+          'Maximum bandwidth calculated from the reported memory rate and bus width; not measured.',
+      },
+      {
+        kind: 'bandwidth',
+        value: 'Up to 200 GB/s',
         provenance: 'published',
         source: { url: 'https://example.com/source', label: 'Example, retrieved 2026-08-01' },
       },
@@ -443,18 +463,23 @@ describe('processor context DOM integration', () => {
 
     renderSingleProcessorContext(preview, settings(true, { showMemoryDetails: true }));
 
-    const lines = document.querySelectorAll('.geeklens-preview-memory-line');
-    expect(lines).toHaveLength(4);
-    expect(Array.from(lines).map((line) => line.firstElementChild?.textContent)).toEqual([
-      '32 GB',
-      'DDR4-3600',
-      '57.6 GB/s theoretical peak',
-      '200 GB/s published maximum',
-    ]);
-    const published = lines[3]?.querySelector('a.geeklens-preview-provenance');
-    expect(
-      lines[1]?.querySelector('.geeklens-preview-provenance')?.getAttribute('aria-label'),
-    ).toContain('Exact payload value: 3598 MT/s.');
+    const memory = document.querySelector('[data-geeklens-preview-memory]');
+    expect(memory?.querySelector('.geeklens-preview-memory-summary')?.textContent).toBe(
+      '32 GB · DDR4-3600',
+    );
+    expect(document.querySelectorAll('.geeklens-preview-memory-info')).toHaveLength(1);
+    expect(memory?.querySelector('.geeklens-preview-memory-bandwidth')?.textContent).toBe(
+      'Published bandwidthUp to 200 GB/s',
+    );
+    expect(document.querySelector('.geeklens-preview-provenance')).toBeNull();
+    const tooltip = memory?.querySelector('.geeklens-preview-memory-tooltip');
+    expect(tooltip?.textContent).toContain('Calculated bandwidth57.6 GB/s');
+    expect(tooltip?.textContent).toContain(
+      'Maximum bandwidth calculated from the reported memory rate and bus width; not measured.',
+    );
+    expect(tooltip?.textContent).toContain('Published bandwidthUp to 200 GB/s');
+    expect(tooltip?.textContent).toContain('Exact payload value: 3598 MT/s.');
+    const published = tooltip?.querySelector('a.geeklens-preview-memory-source');
     const memoryTable = Array.from(document.querySelectorAll('table.system-table')).find(
       (table) => table.querySelector('th')?.textContent === 'Memory Information',
     );
@@ -462,8 +487,43 @@ describe('processor context DOM integration', () => {
     expect(memoryLabel?.firstElementChild?.textContent).toBe('Details');
     expect(memoryLabel?.querySelector('[data-geeklens-row-marker="changed"]')).not.toBeNull();
     expect(published?.getAttribute('href')).toBe('https://example.com/source');
-    expect(published?.getAttribute('aria-label')).toContain(
-      'Source: Example, retrieved 2026-08-01. Click to open source.',
+    expect(published?.getAttribute('aria-label')).toBe(
+      'View source: Example, retrieved 2026-08-01. Opens in a new tab.',
+    );
+  });
+
+  test('omits the bandwidth line when no bandwidth fact is available', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<table class="system-table"><thead><tr><th>Memory Information</th></tr></thead><tbody><tr><td>Size</td><td>32 GB</td></tr></tbody></table>',
+    );
+    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    preview.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
+
+    renderSingleProcessorContext(preview, settings(true, { showMemoryDetails: true }));
+
+    const memory = document.querySelector('[data-geeklens-preview-memory]');
+    expect(memory?.querySelector('.geeklens-preview-memory-summary')?.textContent).toBe('32 GB');
+    expect(memory?.querySelector('.geeklens-preview-memory-bandwidth')).toBeNull();
+  });
+
+  test('falls back to the calculated bandwidth when nothing is published', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<table class="system-table"><thead><tr><th>Memory Information</th></tr></thead><tbody><tr><td>Size</td><td>32 GB</td></tr></tbody></table>',
+    );
+    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    preview.memory = [
+      { kind: 'capacity', value: '32 GB', provenance: 'reported' },
+      { kind: 'bandwidth', value: '57.6 GB/s', provenance: 'computed' },
+    ];
+
+    renderSingleProcessorContext(preview, settings(true, { showMemoryDetails: true }));
+
+    expect(document.querySelector('.geeklens-preview-memory-bandwidth')?.textContent).toBe(
+      'Calculated bandwidth57.6 GB/s',
     );
   });
 
@@ -476,9 +536,9 @@ describe('processor context DOM integration', () => {
         '<tr><td>Memory</td><td>Primary native memory</td><td>Baseline native memory</td></tr>',
       );
     const primary = model('AMD CPU', 'AMD', 'x86');
-    primary.memory = [{ value: '32 GB', provenance: 'reported' }];
+    primary.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
     const baseline = model('Intel CPU', 'Intel', 'x86');
-    baseline.memory = [{ value: '64 GB', provenance: 'reported' }];
+    baseline.memory = [{ kind: 'capacity', value: '64 GB', provenance: 'reported' }];
 
     renderComparisonProcessorContext([primary, baseline], settings(true));
     let cells = document.querySelectorAll('table.system-information tbody tr:last-child td');
