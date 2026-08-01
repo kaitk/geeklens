@@ -5,6 +5,7 @@ import {
   PROCESSOR_CATALOGUE,
   PROCESSOR_CATALOGUE_SOURCE,
   MAC_CATALOGUE_SOURCE,
+  coreCompositionDescription,
   type ProcessorCatalogueEntry,
 } from './processorCatalogue';
 import { resolveProcessorIdentity } from './processorIdentity';
@@ -54,22 +55,20 @@ describe('resolveProcessorIdentity', () => {
         'intel-core-ultra-9-185h',
         'intel-core-ultra-9-285h',
         'intel-core-ultra-7-258v',
-      ].map((key) => [
-        key,
-        PROCESSOR_CATALOGUE.find((entry) => entry.key === key)?.coreComposition,
-      ]),
+      ].map((key) => {
+        const composition = PROCESSOR_CATALOGUE.find((entry) => entry.key === key)?.coreComposition;
+        return [key, composition && coreCompositionDescription(composition)];
+      }),
     );
 
-    expect(compositions).toMatchObject({
-      'intel-core-i9-12900k': { description: '8 Performance-cores + 8 Efficient-cores' },
-      'intel-core-i7-14700k': { description: '8 Performance-cores + 12 Efficient-cores' },
-      'intel-core-ultra-9-185h': {
-        description: '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
-      },
-      'intel-core-ultra-9-285h': {
-        description: '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
-      },
-      'intel-core-ultra-7-258v': { description: '4 Performance-cores + 4 Efficient-cores' },
+    expect(compositions).toEqual({
+      'intel-core-i9-12900k': '8 Performance-cores + 8 Efficient-cores',
+      'intel-core-i7-14700k': '8 Performance-cores + 12 Efficient-cores',
+      'intel-core-ultra-9-185h':
+        '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+      'intel-core-ultra-9-285h':
+        '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+      'intel-core-ultra-7-258v': '4 Performance-cores + 4 Efficient-cores',
     });
     expect(
       PROCESSOR_CATALOGUE.find((entry) => entry.key === 'intel-core-i5-12400')?.coreComposition,
@@ -146,7 +145,11 @@ describe('resolveProcessorIdentity', () => {
       evidence: 'Intel(R) Core(TM) Ultra X9 388H',
       entry: {
         coreComposition: {
-          description: '4 Performance-cores + 8 Efficient-cores + 4 Low Power Efficient-cores',
+          groups: [
+            { count: 4, label: 'Performance-cores' },
+            { count: 8, label: 'Efficient-cores' },
+            { count: 4, label: 'Low Power Efficient-cores' },
+          ],
         },
       },
     });

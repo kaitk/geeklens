@@ -26,14 +26,18 @@ export interface ProcessorContextViewModel {
   topology: {
     cores: number | null;
     threads: number | null;
-    /** Ordered fastest first when every cluster reports a maximum frequency,
-     * otherwise left in payload order. The payload never names a cluster as a
-     * performance or efficiency group, so neither does this model. */
-    clusters: Array<{ cores: number; maxGHz: number | null }>;
+    /** `label` names the core type from the catalogue, and is set only when every
+     * cluster could be matched to a group unambiguously; `cores` stays the
+     * reported count either way. Labelled clusters follow the source's group
+     * order. Unlabelled ones are ordered fastest first when every cluster
+     * reports a maximum frequency, otherwise left in payload order — the payload
+     * itself never names a cluster as a performance or efficiency group. */
+    clusters: Array<{ cores: number; maxGHz: number | null; label: string | null }>;
   } | null;
   scaling: { ratio: number; singleCore: number; multiCore: number } | null;
   /** What kinds of core the processor holds, in the source's own wording. Only
-   * an exact catalogue match supplies this; the payload never does. */
+   * an exact catalogue match supplies this; the payload never does. Stated on its
+   * own line only when the clusters could not carry the same names themselves. */
   coreComposition: ProvenanceFact | null;
   reference: {
     singleCore: number;
@@ -300,9 +304,6 @@ function comparisonFrequency(
 
   const axis = document.createElement('div');
   axis.className = 'geeklens-preview-frequency-axis';
-  const axisLabel = document.createElement('span');
-  axisLabel.className = 'geeklens-preview-frequency-axis-label';
-  axisLabel.textContent = 'Shared scale';
   const ticks = document.createElement('span');
   ticks.className = 'geeklens-preview-frequency-ticks';
   const minimum = document.createElement('span');
@@ -310,7 +311,7 @@ function comparisonFrequency(
   const maximum = document.createElement('span');
   maximum.textContent = `${scale.maxGHz.toFixed(2)} GHz`;
   ticks.append(minimum, maximum);
-  axis.append(axisLabel, ticks);
+  axis.appendChild(ticks);
   wrapper.appendChild(axis);
 
   return wrapper;
@@ -645,31 +646,18 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
     totals.length > 0 ? totals.join(' · ') : nativeTopology || 'Topology unavailable';
   value.appendChild(summary);
 
-  // Stated separately from the bar rather than attached to its segments: naming
-  // a specific cluster would require matching catalogue counts against payload
-  // clusters, which this deliberately does not attempt. It also has to render on
-  // the parts that report no clusters at all, which is every AMD result sampled.
-  if (preview.coreComposition) {
-    const composition = document.createElement('div');
-    composition.dataset.geeklensPreviewComposition = '';
-    composition.className = 'geeklens-preview-topology-composition';
-    const text = document.createElement('span');
-    text.textContent = preview.coreComposition.value;
-    composition.appendChild(text);
-    if (preview.coreComposition.source) {
-      composition.appendChild(
-        sourceLink({
-          href: preview.coreComposition.source.url,
-          title: 'Core composition source',
-          detail: preview.coreComposition.source.label,
-          ariaLabel: `View core composition source: ${preview.coreComposition.source.label}. Opens in a new tab.`,
-        }),
-      );
-    }
-    value.appendChild(composition);
+  const clusters = preview.topology?.clusters ?? [];
+  // Every cluster carries a name, or none does: the view model only labels a
+  // clean assignment, so the legend below states the composition by itself and
+  // repeating it as a sentence would print the same fact twice.
+  const named = clusters.length > 0 && clusters.every((cluster) => cluster.label !== null);
+
+  // Named or not, the sentence is the only place core types can appear on the
+  // parts that report no clusters at all, which is every AMD result sampled.
+  if (preview.coreComposition && !named) {
+    value.appendChild(compositionLine(preview.coreComposition));
   }
 
-  const clusters = preview.topology?.clusters ?? [];
   if (clusters.length === 0) return value;
 
   // The bar carries the core split proportionally; the legend below carries the
@@ -679,6 +667,7 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
   bar.setAttribute('aria-hidden', 'true');
   const legend = document.createElement('div');
   legend.className = 'geeklens-preview-topology-clusters';
+  if (named) legend.dataset.geeklensPreviewComposition = '';
 
   for (const [index, cluster] of clusters.entries()) {
     const shade = clusterShade(index);
@@ -695,15 +684,50 @@ function topologyDetails(nativeTopology: string, preview: ProcessorContextViewMo
     swatch.className = 'geeklens-preview-topology-swatch';
     swatch.style.setProperty('opacity', shade);
     const text = document.createElement('span');
-    text.textContent = `${pluralCores(cluster.cores)}${
-      cluster.maxGHz ? ` · up to ${cluster.maxGHz.toFixed(2)} GHz` : ''
-    }`;
+    const peak = cluster.maxGHz ? `up to ${cluster.maxGHz.toFixed(2)} GHz` : null;
+    if (cluster.label) {
+      // The core type is the more useful of the two in a cell this narrow, and
+      // the frequency row below already states the range for the whole part, so
+      // a per-cluster maximum stays available without spending a line on it.
+      text.textContent = `${cluster.cores} ${cluster.label}`;
+      if (peak) entry.title = peak;
+    } else {
+      text.textContent = `${pluralCores(cluster.cores)}${peak ? ` · ${peak}` : ''}`;
+    }
     entry.append(swatch, text);
     legend.appendChild(entry);
   }
 
+  // One source covers every group, so it trails the legend rather than repeating
+  // against each name.
+  if (named && preview.coreComposition?.source) {
+    legend.appendChild(compositionSourceLink(preview.coreComposition.source));
+  }
+
   value.append(bar, legend);
   return value;
+}
+
+function compositionSourceLink(source: NonNullable<ProvenanceFact['source']>): HTMLAnchorElement {
+  return sourceLink({
+    href: source.url,
+    title: 'Core composition source',
+    detail: source.label,
+    ariaLabel: `View core composition source: ${source.label}. Opens in a new tab.`,
+  });
+}
+
+/** The composition as a sentence, for the parts whose clusters could not carry
+ * the names themselves. */
+function compositionLine(composition: ProvenanceFact): HTMLElement {
+  const line = document.createElement('div');
+  line.dataset.geeklensPreviewComposition = '';
+  line.className = 'geeklens-preview-topology-composition';
+  const text = document.createElement('span');
+  text.textContent = composition.value;
+  line.appendChild(text);
+  if (composition.source) line.appendChild(compositionSourceLink(composition.source));
+  return line;
 }
 
 /** Multi-core scaling belongs beside the score it divides. It is printed as a

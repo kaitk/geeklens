@@ -46,15 +46,14 @@ describe('buildProcessorContextViewModel', () => {
     expect(buildProcessorContextViewModel(await context('4469'))?.frequency).toBeNull();
   });
 
-  test('maps totals, anonymous clusters, and the multi-core score ratio', async () => {
+  test('maps totals, clusters, and the multi-core score ratio', async () => {
     const raptorLake = buildProcessorContextViewModel(await context('61473'));
     expect(raptorLake?.topology).toEqual({
       cores: 24,
       threads: 24,
-      // No per-cluster frequency is reported, so the payload's own order stands.
       clusters: [
-        { cores: 8, maxGHz: null },
-        { cores: 16, maxGHz: null },
+        { cores: 8, maxGHz: null, label: 'Performance-cores' },
+        { cores: 16, maxGHz: null, label: 'Efficient-cores' },
       ],
     });
     expect(raptorLake?.scaling).toMatchObject({ ratio: expect.any(Number) });
@@ -65,23 +64,30 @@ describe('buildProcessorContextViewModel', () => {
     expect(zen2?.topology?.cores).toBeGreaterThan(0);
   });
 
-  test('orders clusters fastest first only when every cluster reports a maximum', async () => {
+  test('orders unnamed clusters fastest first only when every one reports a maximum', async () => {
     // Tensor lists its clusters slowest first; Apple and Intel list theirs
     // fastest first. Reported maxima are the only thing that makes the order
-    // comparable between the two.
+    // comparable between the two. No catalogue entry names Tensor's cores, so
+    // this is also the shape a cluster stays in when nothing can label it.
     expect(buildProcessorContextViewModel(await context('64629'))?.topology).toEqual({
       cores: 8,
       threads: 8,
       clusters: [
-        { cores: 1, maxGHz: 3.78 },
-        { cores: 5, maxGHz: 3.05 },
-        { cores: 2, maxGHz: 2.25 },
+        { cores: 1, maxGHz: 3.78, label: null },
+        { cores: 5, maxGHz: 3.05, label: null },
+        { cores: 2, maxGHz: 2.25, label: null },
       ],
     });
 
-    expect(buildProcessorContextViewModel(await context('64820'))?.topology?.clusters).toEqual([
-      { cores: 8, maxGHz: null },
-      { cores: 4, maxGHz: null },
+    // Same part, stripped of the identity that names it: with no maxima to sort
+    // on and no labels to order by, the payload's own order stands.
+    const unnamed = await context('64820');
+    unnamed.metadata!.processor.name = { value: 'Unlisted CPU', source: 'test' };
+    unnamed.metadata!.processor.rawName = null;
+    unnamed.metadata!.processor.identifier = null;
+    expect(buildProcessorContextViewModel(unnamed)?.topology?.clusters).toEqual([
+      { cores: 8, maxGHz: null, label: null },
+      { cores: 4, maxGHz: null, label: null },
     ]);
   });
 
@@ -107,8 +113,8 @@ describe('buildProcessorContextViewModel', () => {
     const raptorLake = buildProcessorContextViewModel(await context('61473'));
     expect(raptorLake?.coreComposition?.value).toBe('8 Performance-cores + 16 Efficient-cores');
     expect(raptorLake?.topology?.clusters).toEqual([
-      { cores: 8, maxGHz: null },
-      { cores: 16, maxGHz: null },
+      { cores: 8, maxGHz: null, label: 'Performance-cores' },
+      { cores: 16, maxGHz: null, label: 'Efficient-cores' },
     ]);
 
     const pantherLake = await context('61473');
@@ -128,6 +134,97 @@ describe('buildProcessorContextViewModel', () => {
     // leave the topology row exactly as the payload described it.
     expect(buildProcessorContextViewModel(await context('1248'))?.coreComposition).toBeNull();
     expect(buildProcessorContextViewModel(await context('58949'))?.coreComposition).toBeNull();
+  });
+
+  describe('matching reported clusters to named core groups', () => {
+    /** The 13900K fixture, re-reported as `name` with the given cluster sizes. */
+    async function reported(name: string, sizes: readonly number[]) {
+      const cached = await context('61473');
+      cached.metadata!.processor.name = { value: name, source: 'test' };
+      cached.metadata!.topology.physicalCores = {
+        value: sizes.reduce((sum, size) => sum + size, 0),
+        source: 'test',
+      };
+      cached.metadata!.topology.clusters = sizes.map((cores, index) => ({
+        index: index + 1,
+        label: null,
+        cores: { value: cores, source: 'test' },
+        minMHz: null,
+        maxMHz: null,
+      }));
+      return buildProcessorContextViewModel(cached)?.topology?.clusters ?? [];
+    }
+
+    const RAPTOR_LAKE_I9 = 'Intel Core i9-13900K';
+
+    test('names both groups when the reported sizes match the part as it ships', async () => {
+      expect(await reported(RAPTOR_LAKE_I9, [8, 16])).toMatchObject([
+        { cores: 8, label: 'Performance-cores' },
+        { cores: 16, label: 'Efficient-cores' },
+      ]);
+    });
+
+    test('names groups from a count the catalogue only bounds', async () => {
+      // Cores disabled in firmware to emulate a smaller part: 12 cannot be the
+      // 8-core Performance group, so the assignment stays forced and the labels
+      // carry the reported counts rather than the catalogue's.
+      expect(await reported(RAPTOR_LAKE_I9, [8, 12])).toMatchObject([
+        { cores: 8, label: 'Performance-cores' },
+        { cores: 12, label: 'Efficient-cores' },
+      ]);
+      expect(await reported(RAPTOR_LAKE_I9, [2, 16])).toMatchObject([
+        { cores: 2, label: 'Performance-cores' },
+        { cores: 16, label: 'Efficient-cores' },
+      ]);
+    });
+
+    test('orders named clusters by the source, whichever order they arrive in', async () => {
+      expect(await reported(RAPTOR_LAKE_I9, [16, 8])).toMatchObject([
+        { cores: 8, label: 'Performance-cores' },
+        { cores: 16, label: 'Efficient-cores' },
+      ]);
+    });
+
+    test('leaves clusters unnamed when more than one assignment fits', async () => {
+      // Both groups of a 12900K are 8 cores, so nothing in the reported sizes
+      // says which cluster is which.
+      expect(await reported('Intel Core i9-12900K', [8, 8])).toMatchObject([
+        { cores: 8, label: null },
+        { cores: 8, label: null },
+      ]);
+      // The same 13900K split once enough E-cores are off to tie the two.
+      expect(await reported(RAPTOR_LAKE_I9, [8, 8])).toMatchObject([
+        { cores: 8, label: null },
+        { cores: 8, label: null },
+      ]);
+    });
+
+    test('leaves clusters unnamed when no assignment fits at all', async () => {
+      // 20 exceeds both groups, so the identity and the report disagree about
+      // what this part is; naming either cluster would state something false.
+      expect(await reported(RAPTOR_LAKE_I9, [20, 4])).toMatchObject([
+        { cores: 20, label: null },
+        { cores: 4, label: null },
+      ]);
+    });
+
+    test('leaves clusters unnamed when the report and the source disagree on group count', async () => {
+      // Three reported clusters against the two groups Raptor Lake is described
+      // in: there is no assignment to be unique about.
+      expect(await reported(RAPTOR_LAKE_I9, [8, 8, 8])).toMatchObject([
+        { cores: 8, label: null },
+        { cores: 8, label: null },
+        { cores: 8, label: null },
+      ]);
+    });
+
+    test('names all three groups of a part described in three', async () => {
+      expect(await reported('Intel Core Ultra 9 185H', [6, 8, 2])).toMatchObject([
+        { cores: 6, label: 'Performance-cores' },
+        { cores: 8, label: 'Efficient-cores' },
+        { cores: 2, label: 'Low Power Efficient-cores' },
+      ]);
+    });
   });
 
   test('omits score scaling for missing, zero, and malformed scores', async () => {

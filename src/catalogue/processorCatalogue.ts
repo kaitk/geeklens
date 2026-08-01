@@ -21,6 +21,22 @@ export interface ProcessorCatalogueEntry {
   scoreReferences?: readonly GeekbenchScoreReference[];
 }
 
+/** One named group of cores, at the count the source states for the full part.
+ *
+ * `count` is nominal, so it is an upper bound rather than an observation: a
+ * result may report fewer cores in this group when some are disabled. `label` is
+ * recorded in the source's own wording and is never normalized into a shared
+ * big/little or performance/efficiency taxonomy. Zen 5c is the case that makes
+ * this a correctness rule rather than a style choice: it is the same
+ * microarchitecture at the same IPC as Zen 5, differing in peak clock and L3 per
+ * CCX, so filing it under "efficiency" would state something false. Intel's Low
+ * Power Efficient-cores are likewise not its Efficient-cores, and Apple uses
+ * neither vocabulary. */
+export interface CoreCompositionGroup {
+  count: number;
+  label: string;
+}
+
 /** What kinds of core a heterogeneous processor holds.
  *
  * The payload cannot supply this. Its per-cluster label only ever restates a
@@ -28,17 +44,19 @@ export interface ProcessorCatalogueEntry {
  * role: the 13900K's larger cluster is its E-cores, and vendors list clusters
  * fastest-first or slowest-first with no consistency between them.
  *
- * `description` is recorded in the source's own wording and is never normalized
- * into a shared big/little or performance/efficiency taxonomy. Zen 5c is the
- * case that makes this a correctness rule rather than a style choice: it is the
- * same microarchitecture at the same IPC as Zen 5, differing in peak clock and
- * L3 per CCX, so filing it under "efficiency" would state something false.
- * Intel's Low Power Efficient-cores are likewise not its Efficient-cores, and
- * Apple uses neither vocabulary.
+ * Groups are held apart rather than as one sentence so a reported cluster can be
+ * matched to the group it belongs to. They stay in the source's own order, which
+ * is the order they are presented in.
  */
 export interface CoreComposition {
-  description: string;
+  groups: readonly CoreCompositionGroup[];
   source: CatalogueSource;
+}
+
+/** The composition as a sentence, used wherever the groups cannot be attached to
+ * individual clusters. */
+export function coreCompositionDescription(composition: CoreComposition): string {
+  return composition.groups.map((group) => `${group.count} ${group.label}`).join(' + ');
 }
 
 export interface GeekbenchScoreReference {
@@ -597,10 +615,36 @@ const REVIEWED_PROCESSOR_IDENTITIES: readonly ProcessorCatalogueEntry[] = [
  */
 function sharedCoreComposition(
   keys: readonly string[],
-  description: string,
+  groups: readonly CoreCompositionGroup[],
   source: CatalogueSource,
 ): Record<string, CoreComposition> {
-  return Object.fromEntries(keys.map((key) => [key, { description, source }]));
+  return Object.fromEntries(keys.map((key) => [key, { groups, source }]));
+}
+
+function coreGroup(count: number, label: string): CoreCompositionGroup {
+  return { count, label };
+}
+
+/** Intel's own naming, in its own order. Low Power Efficient-cores sit on the
+ * SoC tile and are not the same group as the Efficient-cores beside them, which
+ * is why they are counted separately rather than folded in. */
+function intelHybrid(
+  performance: number,
+  efficient: number,
+  lowPowerEfficient?: number,
+): CoreCompositionGroup[] {
+  const groups = [
+    coreGroup(performance, 'Performance-cores'),
+    coreGroup(efficient, 'Efficient-cores'),
+  ];
+  if (lowPowerEfficient) groups.push(coreGroup(lowPowerEfficient, 'Low Power Efficient-cores'));
+  return groups;
+}
+
+/** Apple writes these lowercase and unhyphenated, and is not using Intel's
+ * vocabulary, so the wording is kept as Apple states it. */
+function appleHybrid(performance: number, efficiency: number): CoreCompositionGroup[] {
+  return [coreGroup(performance, 'performance cores'), coreGroup(efficiency, 'efficiency cores')];
 }
 
 const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
@@ -608,38 +652,34 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
   // microarchitecture and IPC, lower peak clock and less L3 per CCX. AMD's own
   // naming is therefore the only accurate wording available.
   'amd-ryzen-ai-9-hx-370': {
-    description: '4 Zen 5 + 8 Zen 5c',
+    groups: [coreGroup(4, 'Zen 5'), coreGroup(8, 'Zen 5c')],
     source: WIKIPEDIA_ZEN_5_SOURCE,
   },
   'amd-ryzen-ai-9-365': {
-    description: '6 Zen 5 + 4 Zen 5c',
+    groups: [coreGroup(6, 'Zen 5'), coreGroup(4, 'Zen 5c')],
     source: WIKIPEDIA_ZEN_5_SOURCE,
   },
   ...sharedCoreComposition(
     ['intel-core-i9-12900k', 'intel-core-i9-12900kf'],
-    '8 Performance-cores + 8 Efficient-cores',
+    intelHybrid(8, 8),
     WIKIPEDIA_ALDER_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-i7-12700k', 'intel-core-i7-12700kf', 'intel-core-i7-12700f'],
-    '8 Performance-cores + 4 Efficient-cores',
+    intelHybrid(8, 4),
     WIKIPEDIA_ALDER_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-i5-12600k', 'intel-core-i5-12600kf'],
-    '6 Performance-cores + 4 Efficient-cores',
+    intelHybrid(6, 4),
     WIKIPEDIA_ALDER_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-i7-1265u', 'intel-core-i5-1235u'],
-    '2 Performance-cores + 8 Efficient-cores',
+    intelHybrid(2, 8),
     WIKIPEDIA_ALDER_LAKE_SOURCE,
   ),
-  ...sharedCoreComposition(
-    ['intel-core-i3-1215u'],
-    '2 Performance-cores + 4 Efficient-cores',
-    WIKIPEDIA_ALDER_LAKE_SOURCE,
-  ),
+  ...sharedCoreComposition(['intel-core-i3-1215u'], intelHybrid(2, 4), WIKIPEDIA_ALDER_LAKE_SOURCE),
   ...sharedCoreComposition(
     [
       'intel-core-i9-13900ks',
@@ -651,12 +691,12 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
       'intel-core-i9-14900',
       'intel-core-i9-14900hx',
     ],
-    '8 Performance-cores + 16 Efficient-cores',
+    intelHybrid(8, 16),
     WIKIPEDIA_RAPTOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-i7-13700k', 'intel-core-i7-13700kf', 'intel-core-i7-13700'],
-    '8 Performance-cores + 8 Efficient-cores',
+    intelHybrid(8, 8),
     WIKIPEDIA_RAPTOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
@@ -667,12 +707,12 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
       'intel-core-i7-14700f',
       'intel-core-i7-14700hx',
     ],
-    '8 Performance-cores + 12 Efficient-cores',
+    intelHybrid(8, 12),
     WIKIPEDIA_RAPTOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-i7-14650hx'],
-    '8 Performance-cores + 8 Efficient-cores',
+    intelHybrid(8, 8),
     WIKIPEDIA_RAPTOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
@@ -685,67 +725,67 @@ const REVIEWED_CORE_COMPOSITIONS: Readonly<Record<string, CoreComposition>> = {
       'intel-core-i5-14500',
       'intel-core-i5-14500t',
     ],
-    '6 Performance-cores + 8 Efficient-cores',
+    intelHybrid(6, 8),
     WIKIPEDIA_RAPTOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-i5-13400f', 'intel-core-i5-14400', 'intel-core-i5-14400f'],
-    '6 Performance-cores + 4 Efficient-cores',
+    intelHybrid(6, 4),
     WIKIPEDIA_RAPTOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-9-185h'],
-    '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+    intelHybrid(6, 8, 2),
     WIKIPEDIA_METEOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-7-165u'],
-    '2 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+    intelHybrid(2, 8, 2),
     WIKIPEDIA_METEOR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-9-285k', 'intel-core-ultra-9-275hx'],
-    '8 Performance-cores + 16 Efficient-cores',
+    intelHybrid(8, 16),
     WIKIPEDIA_ARROW_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-7-265k'],
-    '8 Performance-cores + 12 Efficient-cores',
+    intelHybrid(8, 12),
     WIKIPEDIA_ARROW_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-9-285h', 'intel-core-ultra-7-255h'],
-    '6 Performance-cores + 8 Efficient-cores + 2 Low Power Efficient-cores',
+    intelHybrid(6, 8, 2),
     WIKIPEDIA_ARROW_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-7-258v', 'intel-core-ultra-7-256v'],
-    '4 Performance-cores + 4 Efficient-cores',
+    intelHybrid(4, 4),
     WIKIPEDIA_LUNAR_LAKE_SOURCE,
   ),
   ...sharedCoreComposition(
     ['intel-core-ultra-x9-388h'],
-    '4 Performance-cores + 8 Efficient-cores + 4 Low Power Efficient-cores',
+    intelHybrid(4, 8, 4),
     WIKIPEDIA_PANTHER_LAKE_SOURCE,
   ),
   'apple-m1-pro-10c': {
-    description: '8 performance cores + 2 efficiency cores',
+    groups: appleHybrid(8, 2),
     source: APPLE_M1_PRO_MEMORY_SOURCE,
   },
   'apple-m4-pro-12c': {
-    description: '8 performance cores + 4 efficiency cores',
+    groups: appleHybrid(8, 4),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
   'apple-m4-pro-14c': {
-    description: '10 performance cores + 4 efficiency cores',
+    groups: appleHybrid(10, 4),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
   'apple-m4-max-14c': {
-    description: '10 performance cores + 4 efficiency cores',
+    groups: appleHybrid(10, 4),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
   'apple-m4-max-16c': {
-    description: '12 performance cores + 4 efficiency cores',
+    groups: appleHybrid(12, 4),
     source: APPLE_M4_PRO_MAX_SOURCE,
   },
 };

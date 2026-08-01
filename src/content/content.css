@@ -124,13 +124,9 @@ table.system-information td {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  /* Same optical centring nudge as the memory info icon. */
-  transform: translateY(-0.14em);
   /* Geekbench colours anchors per column — the baseline comparison cell turns
    * them blue — and the icon strokes in currentColor, so the grey is forced. */
   color: #6f7680 !important;
-  /* No font-size of its own: the icon is sized in px, and the nudge above needs
-   * to resolve against the text it sits beside. */
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
@@ -167,6 +163,10 @@ table.system-information td {
 .geeklens-preview-topology-summary {
   color: #212529;
   font-size: 12px;
+}
+
+.geeklens-preview-topology .geeklens-preview-external-link {
+  transform: translateY(-0.14em);
 }
 
 /* One bar of the full row width split by core count, so two systems compared
@@ -417,13 +417,6 @@ table.system-information td {
   font-size: 11px;
 }
 
-.geeklens-preview-frequency-axis-label {
-  grid-column: 1;
-  color: #737373;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
 .geeklens-preview-frequency-ticks {
   display: flex;
   grid-column: 2;
@@ -526,7 +519,7 @@ table.system-information td {
   /* Centring against the line box lands the icon low: the font reserves descender
    * space below the baseline that digits and caps never use, so the text's visual
    * centre sits above the box centre. The em-relative nudge tracks font size. */
-  transform: translateY(-0.14em);
+  transform: translateY(-0.2em);
   color: #6f7680;
   cursor: help;
   line-height: 1;
@@ -806,11 +799,11 @@ table.system-information td {
   font-size: 12px;
 }
 
-/* Comparison cells are narrower than the single-result row, so the legend
- * stacks instead of wrapping mid-cluster. */
+/* Comparison cells are narrower than the single-result row, so the legend gets
+ * a tighter column gap. Each cluster entry is nowrap, so entries sit on one
+ * line where they fit and move whole to the next line where they do not. */
 .geeklens-preview-detail-value .geeklens-preview-topology-clusters {
-  flex-direction: column;
-  gap: 2px;
+  gap: 2px 8px;
 }
 
 @media (max-width: 700px) {

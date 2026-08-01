@@ -7,7 +7,11 @@ import type {
 import type { ProcessorContextViewModel } from './processorContextUi';
 import { resolveProcessorIdentity } from '../catalogue/processorIdentity';
 import type { ProcessorIdentityMatch } from '../catalogue/processorIdentity';
-import { SYSTEM_MEMORY_SPECIFICATIONS } from '../catalogue/processorCatalogue';
+import {
+  SYSTEM_MEMORY_SPECIFICATIONS,
+  coreCompositionDescription,
+} from '../catalogue/processorCatalogue';
+import type { CoreComposition, CoreCompositionGroup } from '../catalogue/processorCatalogue';
 
 const ARCHITECTURE_LABELS: Record<ProcessorArchitecture, string> = {
   x86: 'x86',
@@ -50,7 +54,62 @@ function frequency(metadata: ResultMetadata): ProcessorContextViewModel['frequen
   };
 }
 
-function topology(metadata: ResultMetadata): ProcessorContextViewModel['topology'] {
+function permutations<T>(items: readonly T[]): T[][] {
+  if (items.length <= 1) return [items.slice()];
+  return items.flatMap((item, index) =>
+    permutations([...items.slice(0, index), ...items.slice(index + 1)]).map((rest) => [
+      item,
+      ...rest,
+    ]),
+  );
+}
+
+function sameLabels(
+  first: readonly CoreCompositionGroup[],
+  second: readonly CoreCompositionGroup[],
+): boolean {
+  return first.every((group, index) => group.label === second[index].label);
+}
+
+/** Assign each reported cluster to the catalogue group it belongs to.
+ *
+ * The catalogue count is nominal, so it bounds a cluster rather than equalling
+ * it: a result with cores disabled in firmware reports fewer than the part
+ * ships. An assignment is feasible when every cluster fits inside the group it
+ * is given, and the true assignment is always feasible, because disabling cores
+ * only ever lowers a count. So when exactly one assignment is feasible it is
+ * necessarily the true one — which is what lets this name a cluster without
+ * assuming anything about cluster order or clock speed.
+ *
+ * Anything short of one feasible assignment returns null and leaves the clusters
+ * anonymous, which is the same state parts with no catalogue entry are in.
+ */
+function assignCoreGroups(
+  clusters: readonly { cores: number }[],
+  groups: readonly CoreCompositionGroup[],
+): CoreCompositionGroup[] | null {
+  if (clusters.length === 0 || clusters.length !== groups.length) return null;
+
+  let assignment: CoreCompositionGroup[] | null = null;
+  for (const candidate of permutations(groups)) {
+    if (!clusters.every((cluster, index) => cluster.cores <= candidate[index].count)) continue;
+    // Two feasible assignments that name the same groups in the same order say
+    // the same thing; only ones that disagree make the labelling ambiguous.
+    if (assignment && !sameLabels(assignment, candidate)) return null;
+    assignment ??= candidate;
+  }
+  return assignment;
+}
+
+function catalogueComposition(identity: ProcessorIdentityMatch): CoreComposition | null {
+  if (identity.kind === 'unmatched') return null;
+  return identity.entry.coreComposition ?? null;
+}
+
+function topology(
+  metadata: ResultMetadata,
+  identity: ProcessorIdentityMatch,
+): ProcessorContextViewModel['topology'] {
   const cores = metadata.topology.physicalCores?.value ?? null;
   const threads = metadata.topology.logicalThreads?.value ?? null;
   const clusters = metadata.topology.clusters
@@ -63,13 +122,32 @@ function topology(metadata: ResultMetadata): ProcessorContextViewModel['topology
   // A single cluster restates the core count, and a partial split contradicts
   // it; neither is worth drawing.
   const usable = clusters.length > 1 && (!cores || clusterTotal === cores) ? clusters : [];
-  // Cluster order in the payload is vendor-defined: Apple and Intel list their
-  // fastest cluster first, Tensor its slowest, and no vendor labels clusters as
-  // performance or efficiency. Only a reported per-cluster maximum frequency
-  // justifies reordering, so anything less keeps the payload order as captured.
-  const ordered = usable.every((cluster) => cluster.maxGHz !== null)
-    ? usable.toSorted((first, second) => second.maxGHz! - first.maxGHz!)
-    : usable;
+
+  const composition = catalogueComposition(identity);
+  const assignment = composition ? assignCoreGroups(usable, composition.groups) : null;
+
+  let ordered: NonNullable<ProcessorContextViewModel['topology']>['clusters'];
+  if (assignment && composition) {
+    // Named clusters follow the source's own group order. It stays put between
+    // results in a way neither the payload order nor a clock-speed sort does.
+    ordered = usable
+      .map((cluster, index) => ({ cluster, group: assignment[index] }))
+      .toSorted(
+        (first, second) =>
+          composition.groups.indexOf(first.group) - composition.groups.indexOf(second.group),
+      )
+      .map(({ cluster, group }) => ({ ...cluster, label: group.label }));
+  } else {
+    // Cluster order in the payload is vendor-defined: Apple and Intel list their
+    // fastest cluster first, Tensor its slowest, and no vendor labels clusters
+    // as performance or efficiency. Only a reported per-cluster maximum
+    // frequency justifies reordering, so anything less keeps the payload order
+    // as captured.
+    const anonymous = usable.every((cluster) => cluster.maxGHz !== null)
+      ? usable.toSorted((first, second) => second.maxGHz! - first.maxGHz!)
+      : usable;
+    ordered = anonymous.map((cluster) => ({ ...cluster, label: null }));
+  }
 
   if (cores === null && threads === null && ordered.length === 0) return null;
   return { cores, threads, clusters: ordered };
@@ -81,10 +159,11 @@ function topology(metadata: ResultMetadata): ProcessorContextViewModel['topology
 function coreComposition(
   identity: ProcessorIdentityMatch,
 ): ProcessorContextViewModel['coreComposition'] {
-  if (identity.kind === 'unmatched' || !identity.entry.coreComposition) return null;
-  const { description, source } = identity.entry.coreComposition;
+  const composition = catalogueComposition(identity);
+  if (!composition) return null;
+  const { source } = composition;
   return {
-    value: description,
+    value: coreCompositionDescription(composition),
     provenance: 'published',
     source: {
       url: source.url,
@@ -265,7 +344,7 @@ export function buildProcessorContextViewModel(
     architecture: ARCHITECTURE_LABELS[context.metadata.architecture.value],
     cataloguePath: identity.kind === 'unmatched' ? null : identity.entry.pageUrl,
     frequency: frequency(context.metadata),
-    topology: topology(context.metadata),
+    topology: topology(context.metadata, identity),
     coreComposition: coreComposition(identity),
     scaling: scoreScaling(context.metadata),
     reference: reference(context.metadata, identity),

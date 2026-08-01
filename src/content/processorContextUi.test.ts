@@ -144,8 +144,8 @@ describe('processor context DOM integration', () => {
       cores: 20,
       threads: 28,
       clusters: [
-        { cores: 8, maxGHz: 5.5 },
-        { cores: 12, maxGHz: 4.2 },
+        { cores: 8, maxGHz: 5.5, label: null },
+        { cores: 12, maxGHz: 4.2, label: null },
       ],
     };
 
@@ -205,6 +205,85 @@ describe('processor context DOM integration', () => {
     );
   });
 
+  test('names the clusters in the legend instead of repeating them as a line', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('Intel CPU', 'Intel', 'x86');
+    // The 13900K's shape: named clusters carry the composition themselves, so
+    // the sentence below the bar would be the same fact stated twice.
+    preview.topology = {
+      cores: 24,
+      threads: 32,
+      clusters: [
+        { cores: 8, maxGHz: 5.5, label: 'Performance-cores' },
+        { cores: 16, maxGHz: 4.3, label: 'Efficient-cores' },
+      ],
+    };
+    preview.coreComposition = {
+      value: '8 Performance-cores + 16 Efficient-cores',
+      provenance: 'published',
+      source: { url: 'https://example.com/intel', label: 'Wikipedia, retrieved 2026-08-01' },
+    };
+
+    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+
+    const topology = document.querySelector('.geeklens-preview-topology');
+    const entries = Array.from(
+      topology?.querySelectorAll('.geeklens-preview-topology-cluster') ?? [],
+    );
+    expect(entries.map((entry) => entry.textContent)).toEqual([
+      '8 Performance-cores',
+      '16 Efficient-cores',
+    ]);
+    // The frequency stays reachable without spending a line on it.
+    expect(entries.map((entry) => entry.getAttribute('title'))).toEqual([
+      'up to 5.50 GHz',
+      'up to 4.30 GHz',
+    ]);
+
+    // The sentence is gone, and the legend itself is what now carries it.
+    expect(document.querySelector('.geeklens-preview-topology-composition')).toBeNull();
+    expect(topology?.textContent).not.toContain('8 Performance-cores + 16 Efficient-cores');
+    const composition = document.querySelector('[data-geeklens-preview-composition]');
+    expect(composition?.className).toBe('geeklens-preview-topology-clusters');
+
+    // One source for the whole composition, trailing the legend.
+    const sources = topology?.querySelectorAll('a.geeklens-preview-external-link') ?? [];
+    expect(sources.length).toBe(1);
+    expect(sources[0]?.getAttribute('href')).toBe('https://example.com/intel');
+    expect(sources[0]?.getAttribute('aria-label')).toBe(
+      'View core composition source: Wikipedia, retrieved 2026-08-01. Opens in a new tab.',
+    );
+    expect(composition?.lastElementChild).toBe(sources[0]!);
+  });
+
+  test('keeps the composition line when only some clusters could be named', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('Intel CPU', 'Intel', 'x86');
+    preview.topology = {
+      cores: 16,
+      threads: 24,
+      clusters: [
+        { cores: 8, maxGHz: 5.5, label: 'Performance-cores' },
+        { cores: 8, maxGHz: 4.3, label: null },
+      ],
+    };
+    preview.coreComposition = {
+      value: '8 Performance-cores + 8 Efficient-cores',
+      provenance: 'published',
+      source: { url: 'https://example.com/intel', label: 'Wikipedia, retrieved 2026-08-01' },
+    };
+
+    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+
+    const line = document.querySelector('.geeklens-preview-topology-composition');
+    expect(line?.firstElementChild?.textContent).toBe('8 Performance-cores + 8 Efficient-cores');
+    expect(
+      document
+        .querySelector('.geeklens-preview-topology-clusters')
+        ?.hasAttribute('data-geeklens-preview-composition'),
+    ).toBe(false);
+  });
+
   test('omits the composition line when no catalogue entry supplies one', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
     const preview = model('Intel CPU', 'Intel', 'x86');
@@ -212,8 +291,8 @@ describe('processor context DOM integration', () => {
       cores: 8,
       threads: 8,
       clusters: [
-        { cores: 4, maxGHz: 5 },
-        { cores: 4, maxGHz: 3 },
+        { cores: 4, maxGHz: 5, label: null },
+        { cores: 4, maxGHz: 3, label: null },
       ],
     };
 
@@ -387,7 +466,7 @@ describe('processor context DOM integration', () => {
     expect(document.querySelector('[data-geeklens-preview-detail="frequency"]')).toBeNull();
   });
 
-  test('uses one labeled shared comparison scale and preserves a missing frequency lane', async () => {
+  test('uses one shared comparison scale and preserves a missing frequency lane', async () => {
     globalThis.document = await fixture('geekbench7-comparison.html');
     const primary = withFrequency(model('AMD Ryzen 7 5800X3D', 'AMD', 'x86'), 4, 5);
     const baseline = withFrequency(model('Apple M1 Pro', 'Apple', 'ARM'), 2, 4);
@@ -411,8 +490,8 @@ describe('processor context DOM integration', () => {
         (label) => label.textContent,
       ),
     ).toEqual(['Ryzen 7 5800X3D', 'M1 Pro']);
-    expect(row?.querySelector('.geeklens-preview-frequency-axis')?.textContent).toContain(
-      'Shared scale2.00 GHz5.00 GHz',
+    expect(row?.querySelector('.geeklens-preview-frequency-axis')?.textContent).toBe(
+      '2.00 GHz5.00 GHz',
     );
     // The readout stays beside each plot: a lane compressed by the shared scale
     // would otherwise be unreadable without hovering.
