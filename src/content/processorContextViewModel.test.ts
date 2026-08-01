@@ -46,13 +46,43 @@ describe('buildProcessorContextViewModel', () => {
     expect(buildProcessorContextViewModel(await context('4469'))?.frequency).toBeNull();
   });
 
-  test('maps totals, anonymous clusters, and the MT/ST score ratio', async () => {
+  test('maps totals, anonymous clusters, and the multi-core score ratio', async () => {
     const raptorLake = buildProcessorContextViewModel(await context('61473'));
-    expect(raptorLake?.clusters).toMatch(/^\d+ cores · \d+ threads · clusters: \d+ \+ \d+ cores$/);
-    expect(raptorLake?.scaling).toMatch(/^MT\/ST score ratio \d+\.\d{2}×$/);
+    expect(raptorLake?.topology).toEqual({
+      cores: 24,
+      threads: 24,
+      // No per-cluster frequency is reported, so the payload's own order stands.
+      clusters: [
+        { cores: 8, maxGHz: null },
+        { cores: 16, maxGHz: null },
+      ],
+    });
+    expect(raptorLake?.scaling).toMatchObject({ ratio: expect.any(Number) });
 
+    // A lone "0 Cores" cluster describes nothing and is dropped, totals survive.
     const zen2 = buildProcessorContextViewModel(await context('40339'));
-    expect(zen2?.clusters).not.toContain('0');
+    expect(zen2?.topology?.clusters).toEqual([]);
+    expect(zen2?.topology?.cores).toBeGreaterThan(0);
+  });
+
+  test('orders clusters fastest first only when every cluster reports a maximum', async () => {
+    // Tensor lists its clusters slowest first; Apple and Intel list theirs
+    // fastest first. Reported maxima are the only thing that makes the order
+    // comparable between the two.
+    expect(buildProcessorContextViewModel(await context('64629'))?.topology).toEqual({
+      cores: 8,
+      threads: 8,
+      clusters: [
+        { cores: 1, maxGHz: 3.78 },
+        { cores: 5, maxGHz: 3.05 },
+        { cores: 2, maxGHz: 2.25 },
+      ],
+    });
+
+    expect(buildProcessorContextViewModel(await context('64820'))?.topology?.clusters).toEqual([
+      { cores: 8, maxGHz: null },
+      { cores: 4, maxGHz: null },
+    ]);
   });
 
   test('omits score scaling for missing, zero, and malformed scores', async () => {

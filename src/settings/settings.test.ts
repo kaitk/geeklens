@@ -55,7 +55,8 @@ describe('loadSettings', () => {
         coloredBadges: true,
         tooltips: true,
         showProcessorSummary: true,
-        showTopologyScaling: true,
+        showCoreTopology: true,
+        showMultiCoreScaling: true,
         showFrequencyDistribution: true,
         showMemoryDetails: true,
         showReferenceComparison: true,
@@ -64,7 +65,8 @@ describe('loadSettings', () => {
     const settings = await loadSettings();
 
     expect(settings.showProcessorSummary).toBe(true);
-    expect(settings.showTopologyScaling).toBe(true);
+    expect(settings.showCoreTopology).toBe(true);
+    expect(settings.showMultiCoreScaling).toBe(true);
     expect(settings.showFrequencyDistribution).toBe(true);
     expect(settings.showMemoryDetails).toBe(true);
     expect(settings.showReferenceComparison).toBe(true);

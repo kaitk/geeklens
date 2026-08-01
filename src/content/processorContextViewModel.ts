@@ -50,26 +50,36 @@ function frequency(metadata: ResultMetadata): ProcessorContextViewModel['frequen
   };
 }
 
-function topology(metadata: ResultMetadata): string | null {
-  const cores = metadata.topology.physicalCores?.value;
-  const threads = metadata.topology.logicalThreads?.value;
-  const totals = [cores ? `${cores} cores` : null, threads ? `${threads} threads` : null].filter(
-    Boolean,
-  );
+function topology(metadata: ResultMetadata): ProcessorContextViewModel['topology'] {
+  const cores = metadata.topology.physicalCores?.value ?? null;
+  const threads = metadata.topology.logicalThreads?.value ?? null;
   const clusters = metadata.topology.clusters
-    .map((cluster) => cluster.cores?.value)
-    .filter((count): count is number => typeof count === 'number' && count > 0);
-  const clusterTotal = clusters.reduce((sum, count) => sum + count, 0);
-  const usableClusters = clusters.length > 1 && (!cores || clusterTotal === cores) ? clusters : [];
-  if (usableClusters.length > 0) totals.push(`clusters: ${usableClusters.join(' + ')} cores`);
-  return totals.length > 0 ? totals.join(' · ') : null;
+    .map((cluster) => ({
+      cores: cluster.cores?.value ?? 0,
+      maxGHz: cluster.maxMHz ? cluster.maxMHz.value / 1000 : null,
+    }))
+    .filter((cluster) => cluster.cores > 0);
+  const clusterTotal = clusters.reduce((sum, cluster) => sum + cluster.cores, 0);
+  // A single cluster restates the core count, and a partial split contradicts
+  // it; neither is worth drawing.
+  const usable = clusters.length > 1 && (!cores || clusterTotal === cores) ? clusters : [];
+  // Cluster order in the payload is vendor-defined: Apple and Intel list their
+  // fastest cluster first, Tensor its slowest, and no vendor labels clusters as
+  // performance or efficiency. Only a reported per-cluster maximum frequency
+  // justifies reordering, so anything less keeps the payload order as captured.
+  const ordered = usable.every((cluster) => cluster.maxGHz !== null)
+    ? usable.toSorted((first, second) => second.maxGHz! - first.maxGHz!)
+    : usable;
+
+  if (cores === null && threads === null && ordered.length === 0) return null;
+  return { cores, threads, clusters: ordered };
 }
 
-function scoreScaling(metadata: ResultMetadata): string | null {
+function scoreScaling(metadata: ResultMetadata): ProcessorContextViewModel['scaling'] {
   const single = metadata.scores.singleCore?.value;
   const multi = metadata.scores.multiCore?.value;
   if (!single || !multi || !Number.isFinite(single) || !Number.isFinite(multi)) return null;
-  return `MT/ST score ratio ${(multi / single).toFixed(2)}×`;
+  return { ratio: multi / single, singleCore: single, multiCore: multi };
 }
 
 function reference(
@@ -223,7 +233,7 @@ export function buildProcessorContextViewModel(
     architecture: ARCHITECTURE_LABELS[context.metadata.architecture.value],
     cataloguePath: identity.kind === 'unmatched' ? null : identity.entry.pageUrl,
     frequency: frequency(context.metadata),
-    clusters: topology(context.metadata),
+    topology: topology(context.metadata),
     scaling: scoreScaling(context.metadata),
     reference: reference(context.metadata, identity),
     memory: memory(context.metadata, identity),

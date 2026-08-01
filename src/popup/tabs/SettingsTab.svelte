@@ -59,11 +59,16 @@
       <input type="checkbox" bind:checked={settings.showProcessorSummary} />
     </label>
     <label class="setting-row">
+      <span><strong>Core topology</strong><small>Core, thread, and cluster layout</small></span>
+      <input type="checkbox" bind:checked={settings.showCoreTopology} />
+    </label>
+    <label class="setting-row">
       <span
-        ><strong>Topology &amp; MT scaling</strong><small>Core layout and score scaling</small
+        ><strong>Multi-core scaling</strong><small
+          >Multi-core to single-core score ratio, beside the score</small
         ></span
       >
-      <input type="checkbox" bind:checked={settings.showTopologyScaling} />
+      <input type="checkbox" bind:checked={settings.showMultiCoreScaling} />
     </label>
     <label class="setting-row">
       <span

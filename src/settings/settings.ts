@@ -2,7 +2,8 @@ import browser from '../browserApi';
 
 export interface Settings {
   showProcessorSummary: boolean;
-  showTopologyScaling: boolean;
+  showCoreTopology: boolean;
+  showMultiCoreScaling: boolean;
   showFrequencyDistribution: boolean;
   showMemoryDetails: boolean;
   showReferenceComparison: boolean;
@@ -19,7 +20,8 @@ export interface Settings {
 
 export const defaultSettings: Readonly<Settings> = {
   showProcessorSummary: true,
-  showTopologyScaling: true,
+  showCoreTopology: true,
+  showMultiCoreScaling: true,
   showFrequencyDistribution: true,
   showMemoryDetails: true,
   showReferenceComparison: true,

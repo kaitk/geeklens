@@ -634,6 +634,23 @@ Acceptance criteria:
 - Comparison layout keeps primary/baseline association unambiguous and does not
   imply normalized per-core efficiency.
 
+**Presentation revised 2026-08-01.** The combined "Topology & scaling" row put
+two unrelated facts in one cell and restated Geekbench's own topology string. It
+was split:
+
+- The topology row keeps only the socket count parsed back out of the native
+  string, plus payload totals and a proportional cluster bar with a text legend.
+  The bar is decorative (`aria-hidden`); the legend carries the same facts.
+- Clusters are reordered fastest-first **only** when every cluster reports a
+  maximum frequency. Payload order is vendor-defined in opposite directions —
+  Apple, Intel, and Snapdragon list fastest first, Tensor lists slowest first —
+  and reported maxima are the only evidence that justifies reordering. Cluster
+  size does not imply role: the 13900K's larger cluster is its E-cores.
+- The score ratio moved beside the multi-core score on both page types, where the
+  values it divides actually appear.
+- The single `showTopologyScaling` setting became `showCoreTopology` and
+  `showMultiCoreScaling`. No migration: nothing was released with the old key.
+
 ### 7. Processor identity and reference catalogue (toggleable)
 
 **Already available:** result contexts cache explicit processor and Mac paths.
@@ -767,6 +784,51 @@ Acceptance criteria:
   available. Keep processor/vendor badges separate from workload instruction
   badges to avoid confusing CPU identity with acceleration used by a workload.
 
+### 9. Asymmetric L3 on dual-die X3D parts (deferred, not scheduled)
+
+**Raised:** 2026-08-01, while reworking stage 6's presentation. Deliberately not
+implemented with that change.
+
+Geekbench reports L3 as a size/count pair in metrics `23`/`24` and derives the
+count by replicating the largest cache it observes across dies. On a Ryzen X3D
+part that pairs one V-Cache die with a standard die, the pair is wrong, not
+merely incomplete. Measured against the bundled fixtures:
+
+| Fixture | Chip                    | Reported L3       | Actual               |
+| ------- | ----------------------- | ----------------- | -------------------- |
+| `1248`  | Ryzen 7 5800X3D (1 CCD) | `96.0 MB × 1`     | 96 MB                |
+| `40339` | Ryzen 9 3950X (4 CCX)   | `16.0 MB × 4`     | 64 MB                |
+| `61473` | Core i9-13900K          | `36.0 MB × 1`     | 36 MB                |
+| `64509` | **Ryzen 9 9950X3D**     | **`96.0 MB × 2`** | **96 + 32 = 128 MB** |
+
+The 9950X3D row states 192 MB of L3 on a 128 MB processor, and the native
+Geekbench page renders that figure today. This is the same class of defect as the
+soldered-LPDDR rate handled in stage 5: a payload value that contradicts itself
+and cannot be repaired from the payload alone.
+
+**Do not draw dies in the topology bar.** The affected parts report a _single_
+cluster (`64509` reports `16 Cores`, one cluster), and the payload carries no
+core-to-die mapping, so any segment split would be fabricated. It would also
+overload the bar, whose segments mean core clusters everywhere else. Cache
+belongs in its own row.
+
+Two options, smallest first:
+
+1. **Flag only.** Detect the contradiction generically — an `X3D` processor name
+   reporting `count > 1` — and mark the value unverified with a `reported`
+   provenance note, without asserting a corrected total. Requires parsing metrics
+   `17`–`24`; no catalogue work.
+2. **Published fact.** Add the true per-die split as a `published` catalogue fact
+   with a source link, rendered through the existing memory provenance
+   vocabulary, e.g. `128 MB · 96 MB + 32 MB across 2 dies`. The affected SKU list
+   is closed and small: 7900X3D, 7950X3D, 9900X3D, 9950X3D. Single-die X3D parts
+   (5800X3D, 7800X3D, 9800X3D) are symmetric and already report correctly.
+
+Either option requires cache parsing, which the payload module does not do at
+all today. Before shipping a generic cache row, settle the ARM caveat recorded
+under _Other payload candidates_: sampled ARM payloads report zero or per-cluster
+cache values that do not describe the whole CPU.
+
 ## Reference-data recommendation
 
 Ship a curated, versioned snapshot rather than fetching processor/Mac pages for
@@ -844,7 +906,8 @@ is confirmed across platforms:
 
 - Cache sizes/counts in metrics `17`–`24`. The sampled ARM payloads frequently
   report zero or per-cluster values that do not describe the whole CPU, so a
-  generic cache comparison would currently mislead.
+  generic cache comparison would currently mislead. On dual-die X3D parts the
+  reported L3 pair is additionally wrong rather than absent; see stage 9.
 - GPU name in metric `34`. This could support future system-context badges but is
   unrelated to CPU benchmark interpretation and should not expand this feature.
 - Run validity, Geekbench version/build, upload date, and runtime are safe to

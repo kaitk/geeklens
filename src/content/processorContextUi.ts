@@ -22,8 +22,15 @@ export interface ProcessorContextViewModel {
     q3GHz: number;
     maxGHz: number;
   } | null;
-  clusters: string | null;
-  scaling: string | null;
+  topology: {
+    cores: number | null;
+    threads: number | null;
+    /** Ordered fastest first when every cluster reports a maximum frequency,
+     * otherwise left in payload order. The payload never names a cluster as a
+     * performance or efficiency group, so neither does this model. */
+    clusters: Array<{ cores: number; maxGHz: number | null }>;
+  } | null;
+  scaling: { ratio: number; singleCore: number; multiCore: number } | null;
   reference: {
     singleCore: number;
     multiCore: number;
@@ -96,34 +103,45 @@ function identity(name: string, preview: ProcessorContextViewModel): HTMLElement
   return wrapper;
 }
 
-function frequency(
-  preview: ProcessorContextViewModel,
-  comparison: boolean,
+type FrequencyStatistics = NonNullable<ProcessorContextViewModel['frequency']>;
+
+/** Fraction of the plot width held back at each end of the domain.
+ *
+ * The caps and the mean diamond are centred on their coordinate, so a value
+ * sitting exactly on a domain edge renders half outside the plot box. Insetting
+ * the mapping keeps whichever result owns a scale extreme fully drawn, which
+ * under a shared comparison scale is always one of the two.
+ */
+const PLOT_EDGE_INSET = 0.04;
+
+function frequencyValues(statistics: FrequencyStatistics): HTMLElement {
+  const values = document.createElement('span');
+  values.className = 'geeklens-preview-frequency-values';
+  values.textContent =
+    `${statistics.minGHz.toFixed(2)}–${statistics.maxGHz.toFixed(2)} GHz · ` +
+    `mean ${statistics.meanGHz.toFixed(2)}`;
+  return values;
+}
+
+function distributionChart(
+  statistics: FrequencyStatistics,
   scale?: { minGHz: number; maxGHz: number },
 ): HTMLElement {
-  const { minGHz, q1GHz, medianGHz, meanGHz, q3GHz, maxGHz } = preview.frequency!;
+  const { minGHz, q1GHz, medianGHz, meanGHz, q3GHz, maxGHz } = statistics;
   const scaleMin = scale?.minGHz ?? minGHz;
   const scaleMax = scale?.maxGHz ?? maxGHz;
   const span = scaleMax - scaleMin || 1;
-  const position = (value: number) => `${((value - scaleMin) / span) * 100}%`;
-
-  const wrapper = document.createElement('div');
-  wrapper.className = `geeklens-preview-frequency${comparison ? ' is-comparison' : ''}`;
-
-  const heading = document.createElement('span');
-  heading.className = 'geeklens-preview-frequency-heading';
-
-  const values = document.createElement('span');
-  values.className = 'geeklens-preview-frequency-values';
-  values.textContent = `${minGHz.toFixed(2)}–${maxGHz.toFixed(2)} GHz · mean ${meanGHz.toFixed(2)}`;
-
-  heading.appendChild(values);
+  const position = (value: number) =>
+    `${(PLOT_EDGE_INSET + ((value - scaleMin) / span) * (1 - 2 * PLOT_EDGE_INSET)) * 100}%`;
 
   const chart = document.createElement('span');
   chart.className = 'geeklens-preview-distribution';
+  // The quartiles are left to the box itself: spelling them out crowds the
+  // tooltip without telling the reader anything the shape does not.
   const tooltipText =
     `Frequency samples: minimum ${minGHz.toFixed(2)} GHz, ` +
-    `mean ${meanGHz.toFixed(2)} GHz, maximum ${maxGHz.toFixed(2)} GHz.`;
+    `median ${medianGHz.toFixed(2)} GHz, mean ${meanGHz.toFixed(2)} GHz, ` +
+    `maximum ${maxGHz.toFixed(2)} GHz.`;
   chart.setAttribute('aria-label', tooltipText);
   chart.tabIndex = 0;
   chart.innerHTML =
@@ -132,6 +150,7 @@ function frequency(
   tooltip.className = 'geeklens-preview-frequency-tooltip';
   for (const [label, value] of [
     ['Minimum', minGHz],
+    ['Median', medianGHz],
     ['Mean', meanGHz],
     ['Maximum', maxGHz],
   ] as const) {
@@ -152,7 +171,83 @@ function frequency(
   chart.style.setProperty('--median', position(medianGHz));
   chart.style.setProperty('--mean', position(meanGHz));
 
-  wrapper.append(heading, chart);
+  return chart;
+}
+
+function frequency(preview: ProcessorContextViewModel): HTMLElement {
+  const statistics = preview.frequency!;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'geeklens-preview-frequency';
+
+  const heading = document.createElement('span');
+  heading.className = 'geeklens-preview-frequency-heading';
+  heading.appendChild(frequencyValues(statistics));
+
+  wrapper.append(heading, distributionChart(statistics));
+  return wrapper;
+}
+
+function comparisonFrequency(
+  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
+): HTMLElement {
+  const available = previews.filter((preview): preview is ProcessorContextViewModel =>
+    Boolean(preview?.frequency),
+  );
+  const scale = {
+    minGHz: Math.min(...available.map((preview) => preview.frequency!.minGHz)),
+    maxGHz: Math.max(...available.map((preview) => preview.frequency!.maxGHz)),
+  };
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'geeklens-preview-frequency-comparison';
+
+  for (const [index, preview] of previews.entries()) {
+    const role = index === 0 ? 'primary' : 'baseline';
+    const lane = document.createElement('div');
+    lane.className = `geeklens-preview-frequency-lane is-${role}`;
+
+    // Name each lane after its own processor rather than its role: the label is
+    // then self-describing, so nothing has to be mapped back to the column
+    // headers or to a colour swatch.
+    const label = document.createElement('span');
+    label.className = 'geeklens-preview-frequency-lane-label';
+    label.textContent = preview
+      ? nameWithoutVendor(preview.name, preview.vendor)
+      : role === 'primary'
+        ? 'Primary'
+        : 'Baseline';
+    label.title = label.textContent;
+    lane.appendChild(label);
+
+    if (preview?.frequency) {
+      // The numbers stay beside the plot in comparison view. Under a shared
+      // scale a narrow distribution legitimately compresses to a few pixels,
+      // and the readout is then the only way to read it without hovering.
+      lane.append(distributionChart(preview.frequency, scale), frequencyValues(preview.frequency));
+    } else {
+      const unavailable = document.createElement('span');
+      unavailable.className = 'geeklens-preview-frequency-unavailable';
+      unavailable.textContent = 'Not available';
+      lane.appendChild(unavailable);
+    }
+    wrapper.appendChild(lane);
+  }
+
+  const axis = document.createElement('div');
+  axis.className = 'geeklens-preview-frequency-axis';
+  const axisLabel = document.createElement('span');
+  axisLabel.className = 'geeklens-preview-frequency-axis-label';
+  axisLabel.textContent = 'Shared scale';
+  const ticks = document.createElement('span');
+  ticks.className = 'geeklens-preview-frequency-ticks';
+  const minimum = document.createElement('span');
+  minimum.textContent = `${scale.minGHz.toFixed(2)} GHz`;
+  const maximum = document.createElement('span');
+  maximum.textContent = `${scale.maxGHz.toFixed(2)} GHz`;
+  ticks.append(minimum, maximum);
+  axis.append(axisLabel, ticks);
+  wrapper.appendChild(axis);
+
   return wrapper;
 }
 
@@ -387,22 +482,164 @@ function rowLabel(label: string): DocumentFragment {
   return content;
 }
 
+/** Socket count is the one topology fact the payload does not carry, so it is
+ * read back out of the string Geekbench already renders. */
+function processorCount(nativeTopology: string): number | null {
+  const match = /(\d+)\s+Processors?\b/i.exec(nativeTopology);
+  const count = match ? Number(match[1]) : Number.NaN;
+  return Number.isInteger(count) && count > 0 ? count : null;
+}
+
+/** Cluster shades run dark to light in row order so a bar segment and its
+ * legend swatch stay paired without inventing a colour per cluster. */
+function clusterShade(index: number): string {
+  return String(Math.max(0.35, 1 - index * 0.25));
+}
+
+function pluralCores(count: number): string {
+  return `${count} ${count === 1 ? 'core' : 'cores'}`;
+}
+
 function topologyDetails(nativeTopology: string, preview: ProcessorContextViewModel): HTMLElement {
   const value = document.createElement('div');
   value.className = 'geeklens-preview-topology';
 
-  for (const [className, text] of [
-    ['geeklens-preview-native-topology', nativeTopology || 'Topology unavailable'],
-    ['', preview.clusters ?? ''],
-    ['', preview.scaling ?? ''],
-  ]) {
-    if (!text) continue;
-    const line = document.createElement('div');
-    if (className) line.className = className;
-    line.textContent = text;
-    value.appendChild(line);
+  const processors = processorCount(nativeTopology);
+  const totals = [
+    preview.topology?.cores ? pluralCores(preview.topology.cores) : null,
+    preview.topology?.threads ? `${preview.topology.threads} threads` : null,
+  ].filter((total): total is string => Boolean(total));
+  // Socket count alone is thinner than what Geekbench already prints, so the
+  // native string stands until the payload supplies a total to replace it with.
+  if (totals.length > 0 && processors) {
+    totals.unshift(`${processors} ${processors === 1 ? 'processor' : 'processors'}`);
   }
+
+  const summary = document.createElement('div');
+  summary.className = 'geeklens-preview-topology-summary';
+  summary.textContent =
+    totals.length > 0 ? totals.join(' · ') : nativeTopology || 'Topology unavailable';
+  value.appendChild(summary);
+
+  const clusters = preview.topology?.clusters ?? [];
+  if (clusters.length === 0) return value;
+
+  // The bar carries the core split proportionally; the legend below carries the
+  // same facts as text, so the bar itself is decorative.
+  const bar = document.createElement('div');
+  bar.className = 'geeklens-preview-topology-bar';
+  bar.setAttribute('aria-hidden', 'true');
+  const legend = document.createElement('div');
+  legend.className = 'geeklens-preview-topology-clusters';
+
+  for (const [index, cluster] of clusters.entries()) {
+    const shade = clusterShade(index);
+
+    const segment = document.createElement('span');
+    segment.className = 'geeklens-preview-topology-segment';
+    segment.style.setProperty('flex-grow', String(cluster.cores));
+    segment.style.setProperty('opacity', shade);
+    bar.appendChild(segment);
+
+    const entry = document.createElement('span');
+    entry.className = 'geeklens-preview-topology-cluster';
+    const swatch = document.createElement('span');
+    swatch.className = 'geeklens-preview-topology-swatch';
+    swatch.style.setProperty('opacity', shade);
+    const text = document.createElement('span');
+    text.textContent = `${pluralCores(cluster.cores)}${
+      cluster.maxGHz ? ` · up to ${cluster.maxGHz.toFixed(2)} GHz` : ''
+    }`;
+    entry.append(swatch, text);
+    legend.appendChild(entry);
+  }
+
+  value.append(bar, legend);
   return value;
+}
+
+/** Multi-core scaling belongs beside the scores it divides, not in the CPU
+ * topology table. It is printed as a bare ratio: comparing it against the core
+ * count reads as an efficiency figure, which heterogeneous clusters make
+ * meaningless. */
+function scalingNote(scaling: NonNullable<ProcessorContextViewModel['scaling']>): HTMLElement {
+  const ratio = `${scaling.ratio.toFixed(2)}×`;
+
+  const note = document.createElement('span');
+  note.dataset.geeklensPreviewScaling = '';
+  note.className = 'geeklens-preview-scaling';
+  note.tabIndex = 0;
+  note.textContent = `${ratio} single-core`;
+  note.setAttribute(
+    'aria-label',
+    `Multi-core score is ${ratio} the single-core score of ${scaling.singleCore.toLocaleString()}.`,
+  );
+
+  const tooltip = document.createElement('span');
+  tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-scaling-tooltip';
+  const title = document.createElement('strong');
+  title.className = 'geeklens-preview-reference-tooltip-title';
+  title.textContent = 'Multi-core scaling';
+  tooltip.appendChild(title);
+
+  for (const [label, text] of [
+    ['Single-core', scaling.singleCore.toLocaleString()],
+    ['Multi-core', scaling.multiCore.toLocaleString()],
+    ['Ratio', ratio],
+  ] as const) {
+    const row = document.createElement('span');
+    row.className = 'geeklens-preview-reference-tooltip-row';
+    const tooltipLabel = document.createElement('span');
+    tooltipLabel.textContent = label;
+    const rowValue = document.createElement('strong');
+    rowValue.textContent = text;
+    row.append(tooltipLabel, rowValue);
+    tooltip.appendChild(row);
+  }
+
+  const caveat = document.createElement('span');
+  caveat.className = 'geeklens-preview-reference-tooltip-note';
+  caveat.textContent =
+    'Multi-core score divided by single-core score. Mixed core clusters make this ratio a poor comparison against the core count.';
+  tooltip.appendChild(caveat);
+
+  note.appendChild(tooltip);
+  return note;
+}
+
+function appendScalingNote(cell: Element | null | undefined, preview: ProcessorContextViewModel) {
+  if (!cell || !preview.scaling || cell.querySelector('[data-geeklens-preview-scaling]')) return;
+  cell.appendChild(scalingNote(preview.scaling));
+}
+
+function multiCoreScoreCells(tableSelector: string): Element[] {
+  const cells: Element[] = [];
+  for (const table of Array.from(document.querySelectorAll(tableSelector))) {
+    const scoreRow = Array.from(table.querySelectorAll('thead tr, tbody tr')).find((row) =>
+      (row.firstElementChild?.textContent?.trim() ?? '').startsWith('Multi-Core Score'),
+    );
+    if (scoreRow) cells.push(...Array.from(scoreRow.querySelectorAll('.score')));
+  }
+  return cells;
+}
+
+function annotateSingleScaling(preview: ProcessorContextViewModel): void {
+  const desktopContainers = document.querySelectorAll('.score-container.desktop');
+  const scoreContainers = desktopContainers.length
+    ? desktopContainers
+    : document.querySelectorAll('.score-container');
+  appendScalingNote(scoreContainers[1]?.querySelector('.score'), preview);
+
+  for (const cell of multiCoreScoreCells('table.benchmark-table')) {
+    appendScalingNote(cell, preview);
+  }
+}
+
+function annotateComparisonScaling(previews: readonly (ProcessorContextViewModel | null)[]): void {
+  for (const [index, cell] of multiCoreScoreCells('table.comparison-benchmark-table').entries()) {
+    const preview = previews[index];
+    if (preview) appendScalingNote(cell, preview);
+  }
 }
 
 function comparisonDetailRow(
@@ -453,8 +690,8 @@ export function renderSingleProcessorContext(
     const labelCell = topologyRow.firstElementChild;
     const valueCell = topologyRow.lastElementChild;
     const nativeTopology = valueCell?.textContent?.trim() ?? '';
-    if (settings.showTopologyScaling) {
-      labelCell?.replaceChildren(rowLabel('Topology & scaling'));
+    if (settings.showCoreTopology) {
+      labelCell?.replaceChildren(rowLabel('Topology'));
       valueCell?.replaceChildren(topologyDetails(nativeTopology, preview));
     }
 
@@ -470,11 +707,13 @@ export function renderSingleProcessorContext(
       frequencyLabel.appendChild(rowLabel('Frequency'));
       const frequencyValue = document.createElement('td');
       frequencyValue.className = valueCell?.className ?? 'system-value';
-      frequencyValue.appendChild(frequency(preview, false));
+      frequencyValue.appendChild(frequency(preview));
       frequencyRow.append(frequencyLabel, frequencyValue);
       topologyRow.after(frequencyRow);
     }
   }
+
+  if (settings.showMultiCoreScaling) annotateSingleScaling(preview);
 
   if (settings.showReferenceComparison) {
     annotateSingleScoreReferences(preview);
@@ -519,26 +758,32 @@ export function renderComparisonProcessorContext(
 
   const detailRows: HTMLTableRowElement[] = [];
   if (
-    settings.showTopologyScaling &&
-    !table?.querySelector('[data-geeklens-preview-detail="topology-scaling"]')
+    settings.showCoreTopology &&
+    !table?.querySelector('[data-geeklens-preview-detail="topology"]')
   ) {
-    const topologyRow = comparisonDetailRow('Topology & scaling', previews, (preview, index) =>
+    const topologyRow = comparisonDetailRow('Topology', previews, (preview, index) =>
       topologyDetails(processorTopologies[index] ?? '', preview),
     );
     detailRows.push(topologyRow);
   }
+  if (settings.showMultiCoreScaling) annotateComparisonScaling(previews);
   if (
     settings.showFrequencyDistribution &&
     previews.some((preview) => preview?.frequency) &&
     !table?.querySelector('[data-geeklens-preview-detail="frequency"]')
   ) {
-    const frequencyPreviews: readonly [
-      ProcessorContextViewModel | null,
-      ProcessorContextViewModel | null,
-    ] = [previews[0]?.frequency ? previews[0] : null, previews[1]?.frequency ? previews[1] : null];
-    const frequencyRow = comparisonDetailRow('Frequency', frequencyPreviews, (preview) =>
-      frequency(preview, true),
-    );
+    const frequencyRow = document.createElement('tr');
+    frequencyRow.dataset.geeklensPreviewDetail = 'frequency';
+    const labelCell = document.createElement('td');
+    labelCell.className = 'geeklens-preview-detail-label';
+    labelCell.appendChild(rowLabel('Frequency'));
+    const chartCell = document.createElement('td');
+    chartCell.className = 'geeklens-preview-detail-value';
+    chartCell.colSpan = 2;
+    // Pass the unfiltered previews so a lane without frequency data still
+    // carries its processor name instead of falling back to its role.
+    chartCell.appendChild(comparisonFrequency(previews));
+    frequencyRow.append(labelCell, chartCell);
     detailRows.push(frequencyRow);
   }
   processorRow.after(...detailRows);

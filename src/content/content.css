@@ -110,12 +110,64 @@ table.system-information td {
   white-space: nowrap;
 }
 
-.geeklens-preview-native-topology,
 .geeklens-preview-topology,
 .geeklens-preview-memory {
   color: #737373;
   font-size: 11px;
   line-height: 1.35;
+}
+
+.geeklens-preview-topology-summary {
+  color: #212529;
+  font-size: 12px;
+}
+
+/* One bar of the full row width split by core count, so two systems compared
+ * side by side expose their cluster proportions at the same scale. */
+.geeklens-preview-topology-bar {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  max-width: 220px;
+  height: 6px;
+  margin: 4px 0 3px;
+}
+
+.geeklens-preview-topology-segment {
+  min-width: 3px;
+  border-radius: 2px;
+  background: #4b5563;
+}
+
+.geeklens-preview-topology-clusters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+}
+
+.geeklens-preview-topology-cluster {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.geeklens-preview-topology-swatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: #4b5563;
+}
+
+.geeklens-preview-scaling {
+  position: relative;
+  display: block;
+  color: #68717b;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  cursor: help;
 }
 
 .geeklens-preview-frequency {
@@ -140,6 +192,9 @@ table.system-information td {
 
 .geeklens-preview-frequency-values {
   color: #555;
+  /* Stated rather than inherited: in comparison view this sits directly in the
+     lane grid, outside `.geeklens-preview-frequency`. */
+  font-size: 11px;
   white-space: nowrap;
 }
 
@@ -184,6 +239,9 @@ table.system-information td {
 
 .geeklens-preview-distribution .box {
   left: var(--q1);
+  /* A shared comparison scale can squeeze a narrow interquartile range below a
+     pixel; keep it visible as a tick rather than letting it vanish. */
+  min-width: 3px;
   width: calc(var(--q3) - var(--q1));
   height: 10px;
   border: 1px solid #6378a7;
@@ -257,13 +315,114 @@ table.system-information td {
   visibility: visible;
 }
 
-.geeklens-preview-frequency.is-comparison {
-  gap: 3px;
+/* Lanes and the axis are one grid, not three, so the tick labels stay aligned
+   with the plot column no matter how wide the processor names run. Each lane
+   and the axis row contribute their cells via `display: contents`. */
+.geeklens-preview-frequency-comparison {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(120px, 1fr) max-content;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 5px;
+  width: 100%;
+  min-width: 260px;
 }
 
-.geeklens-preview-frequency.is-comparison .geeklens-preview-distribution {
+.geeklens-preview-frequency-lane,
+.geeklens-preview-frequency-axis {
+  display: contents;
+}
+
+.geeklens-preview-frequency-lane-label {
+  grid-column: 1;
+  overflow: hidden;
+  max-width: 150px;
+  color: #555;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.geeklens-preview-frequency-lane .geeklens-preview-distribution {
+  grid-column: 2;
+  flex: none;
   width: 100%;
+  min-width: 0;
   max-width: none;
+}
+
+.geeklens-preview-frequency-lane .geeklens-preview-frequency-values {
+  grid-column: 3;
+}
+
+.geeklens-preview-frequency-unavailable {
+  grid-column: 2 / -1;
+  color: #737373;
+  font-size: 11px;
+}
+
+.geeklens-preview-frequency-axis-label {
+  grid-column: 1;
+  color: #737373;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.geeklens-preview-frequency-ticks {
+  display: flex;
+  grid-column: 2;
+  justify-content: space-between;
+  /* Matches PLOT_EDGE_INSET so the ticks sit under the marks they label. */
+  padding: 0 4%;
+  color: #737373;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.geeklens-preview-frequency-lane.is-primary .geeklens-preview-distribution .whisker,
+.geeklens-preview-frequency-lane.is-primary .geeklens-preview-distribution .cap {
+  background: #526a9e;
+}
+
+/* The baseline differs by fill pattern as well as hue, so the two lanes stay
+   distinguishable without colour — uncoloured mode, or colour-vision
+   deficiency, where blue against amber is the weakest cue. */
+.geeklens-preview-frequency-lane.is-baseline .geeklens-preview-distribution .box {
+  border-color: #a66a2c;
+  background: repeating-linear-gradient(-45deg, #f8eddf 0 3px, #edd9bf 3px 6px);
+}
+
+.geeklens-preview-frequency-lane.is-baseline .geeklens-preview-distribution .median,
+.geeklens-preview-frequency-lane.is-baseline .geeklens-preview-distribution .whisker,
+.geeklens-preview-frequency-lane.is-baseline .geeklens-preview-distribution .cap {
+  background: #a66a2c;
+}
+
+.geeklens-preview-frequency-lane.is-baseline .geeklens-preview-distribution .mean {
+  border-color: #a66a2c;
+}
+
+.geeklens-uncolored-badges .geeklens-preview-distribution .whisker,
+.geeklens-uncolored-badges .geeklens-preview-distribution .cap,
+.geeklens-uncolored-badges .geeklens-preview-distribution .median {
+  background: #6c757d !important;
+}
+
+.geeklens-uncolored-badges .geeklens-preview-distribution .box {
+  border-color: #6c757d !important;
+  background: #eef0f2 !important;
+}
+
+.geeklens-uncolored-badges
+  .geeklens-preview-frequency-lane.is-baseline
+  .geeklens-preview-distribution
+  .box {
+  background: repeating-linear-gradient(-45deg, #eef0f2 0 3px, #d5d9dd 3px 6px) !important;
+}
+
+.geeklens-uncolored-badges .geeklens-preview-distribution .mean {
+  border-color: #6c757d !important;
 }
 
 .geeklens-preview-reference {
@@ -420,7 +579,9 @@ table.system-information td {
 .geeklens-preview-provenance:hover .geeklens-preview-row-tooltip,
 .geeklens-preview-provenance:focus .geeklens-preview-row-tooltip,
 .geeklens-preview-comparison-reference:hover .geeklens-preview-row-tooltip,
-.geeklens-preview-comparison-reference:focus .geeklens-preview-row-tooltip {
+.geeklens-preview-comparison-reference:focus .geeklens-preview-row-tooltip,
+.geeklens-preview-scaling:hover .geeklens-preview-row-tooltip,
+.geeklens-preview-scaling:focus .geeklens-preview-row-tooltip {
   visibility: visible;
 }
 
@@ -497,10 +658,17 @@ table.system-information td {
   font-size: 11px;
 }
 
-.geeklens-preview-detail-value .geeklens-preview-native-topology {
-  margin-bottom: 3px;
+.geeklens-preview-detail-value .geeklens-preview-topology-summary {
+  margin-bottom: 1px;
   color: #212529;
   font-size: 12px;
+}
+
+/* Comparison cells are narrower than the single-result row, so the legend
+ * stacks instead of wrapping mid-cluster. */
+.geeklens-preview-detail-value .geeklens-preview-topology-clusters {
+  flex-direction: column;
+  gap: 2px;
 }
 
 @media (max-width: 700px) {

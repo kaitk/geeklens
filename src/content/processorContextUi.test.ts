@@ -15,7 +15,7 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
     architecture,
     cataloguePath: null,
     frequency: null,
-    clusters: null,
+    topology: null,
     scaling: null,
     reference: null,
     memory: [],
@@ -25,7 +25,8 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
 function settings(showProcessorSummary: boolean, overrides: Partial<Settings> = {}): Settings {
   return {
     showProcessorSummary,
-    showTopologyScaling: false,
+    showCoreTopology: false,
+    showMultiCoreScaling: false,
     showFrequencyDistribution: false,
     showMemoryDetails: false,
     showReferenceComparison: false,
@@ -121,23 +122,135 @@ describe('processor context DOM integration', () => {
     expect(row?.previousElementSibling?.firstElementChild?.textContent?.trim()).toBe('Topology');
     expect(row?.textContent).toContain('4.45–4.54 GHz · mean 4.50');
     expect(row?.querySelector('.geeklens-preview-distribution')?.getAttribute('aria-label')).toBe(
-      'Frequency samples: minimum 4.45 GHz, mean 4.50 GHz, maximum 4.54 GHz.',
+      'Frequency samples: minimum 4.45 GHz, median 4.49 GHz, mean 4.50 GHz, maximum 4.54 GHz.',
     );
     expect(document.querySelectorAll('[data-geeklens-preview-detail="frequency"]')).toHaveLength(1);
   });
 
-  test('renders topology and score scaling without assigning cluster roles', async () => {
+  test('draws the cluster split proportionally without assigning cluster roles', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
     const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.clusters = '20 cores · 20 threads · clusters: 8 + 12 cores';
-    preview.scaling = 'MT/ST score ratio 7.25×';
+    preview.topology = {
+      cores: 20,
+      threads: 28,
+      clusters: [
+        { cores: 8, maxGHz: 5.5 },
+        { cores: 12, maxGHz: 4.2 },
+      ],
+    };
 
-    renderSingleProcessorContext(preview, settings(true, { showTopologyScaling: true }));
+    renderSingleProcessorContext(
+      preview,
+      settings(true, { showCoreTopology: true, showMultiCoreScaling: true }),
+    );
 
     const topology = document.querySelector('.geeklens-preview-topology');
-    expect(topology?.textContent).toContain('20 cores · 20 threads · clusters: 8 + 12 cores');
-    expect(topology?.textContent).toContain('MT/ST score ratio 7.25×');
+    expect(topology?.closest('tr')?.firstElementChild?.textContent).toContain('Topology');
+    // The native cell reads "1 Processor, 16 Cores"; the socket count survives,
+    // the payload's totals replace the rest.
+    expect(topology?.querySelector('.geeklens-preview-topology-summary')?.textContent).toBe(
+      '1 processor · 20 cores · 28 threads',
+    );
+    expect(
+      Array.from(topology?.querySelectorAll('.geeklens-preview-topology-segment') ?? []).map(
+        (segment) => segment.getAttribute('style'),
+      ),
+    ).toEqual(['flex-grow:8;opacity:1', 'flex-grow:12;opacity:0.75']);
+    expect(
+      Array.from(topology?.querySelectorAll('.geeklens-preview-topology-cluster') ?? []).map(
+        (cluster) => cluster.textContent,
+      ),
+    ).toEqual(['8 cores · up to 5.50 GHz', '12 cores · up to 4.20 GHz']);
     expect(topology?.textContent).not.toMatch(/performance|efficiency|P-core|E-core/i);
+    expect(topology?.textContent).not.toContain('×');
+  });
+
+  test('gates the topology row and the scaling note independently', async () => {
+    const preview = model('Intel CPU', 'Intel', 'x86');
+    preview.topology = { cores: 8, threads: 16, clusters: [] };
+    preview.scaling = { ratio: 5.5, singleCore: 2000, multiCore: 11000 };
+    const multiCoreTable =
+      '<table class="table benchmark-table"><thead><tr><th class="name">Multi-Core Score</th><th class="score">11000</th></tr></thead><tbody></tbody></table>';
+
+    globalThis.document = await fixture('geekbench7-single.html');
+    document.body.insertAdjacentHTML('beforeend', multiCoreTable);
+    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+    expect(document.querySelector('.geeklens-preview-topology')).not.toBeNull();
+    expect(document.querySelector('[data-geeklens-preview-scaling]')).toBeNull();
+
+    globalThis.document = await fixture('geekbench7-single.html');
+    document.body.insertAdjacentHTML('beforeend', multiCoreTable);
+    renderSingleProcessorContext(preview, settings(true, { showMultiCoreScaling: true }));
+    expect(document.querySelector('.geeklens-preview-topology')).toBeNull();
+    expect(document.querySelector('[data-geeklens-preview-scaling]')).not.toBeNull();
+  });
+
+  test('falls back to the native topology string when the payload carries no totals', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+
+    renderSingleProcessorContext(
+      model('Intel CPU', 'Intel', 'x86'),
+      settings(true, { showCoreTopology: true, showMultiCoreScaling: true }),
+    );
+
+    expect(document.querySelector('.geeklens-preview-topology-summary')?.textContent).toBe(
+      '1 Processor, 16 Cores',
+    );
+    expect(document.querySelector('.geeklens-preview-topology-bar')).toBeNull();
+  });
+
+  test('prints multi-core scaling beside the multi-core score, once', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<table class="table benchmark-table"><thead><tr class="stacked-heading"><th class="name">Multi-Core Score</th><th class="score">14500</th></tr></thead><tbody></tbody></table>',
+    );
+    const preview = model('Intel CPU', 'Intel', 'x86');
+    preview.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    const enabled = settings(true, { showCoreTopology: true, showMultiCoreScaling: true });
+
+    renderSingleProcessorContext(preview, enabled);
+    renderSingleProcessorContext(preview, enabled);
+
+    const notes = document.querySelectorAll('[data-geeklens-preview-scaling]');
+    expect(notes).toHaveLength(1);
+    expect(notes[0]?.parentElement?.className).toBe('score');
+    expect(notes[0]?.firstChild?.textContent).toBe('7.25× single-core');
+    expect(notes[0]?.getAttribute('aria-label')).toBe(
+      'Multi-core score is 7.25× the single-core score of 2,000.',
+    );
+    expect(notes[0]?.querySelector('.geeklens-preview-scaling-tooltip')?.textContent).toContain(
+      'poor comparison against the core count',
+    );
+    expect(document.querySelector('.geeklens-preview-topology')?.textContent).not.toContain('7.25');
+  });
+
+  test('places comparison scaling in each multi-core column', async () => {
+    globalThis.document = await fixture('geekbench7-comparison.html');
+    document
+      .querySelector('table.comparison-benchmark-table tbody')
+      ?.insertAdjacentHTML(
+        'afterbegin',
+        '<tr><td class="name">Multi-Core Score</td><td class="score">14500</td><td class="score">8000</td><td class="delta"></td></tr>',
+      );
+    const primary = model('Intel CPU', 'Intel', 'x86');
+    primary.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    const baseline = model('AMD CPU', 'AMD', 'x86');
+    baseline.scaling = { ratio: 4.5, singleCore: 1778, multiCore: 8000 };
+
+    renderComparisonProcessorContext(
+      [primary, baseline],
+      settings(true, { showCoreTopology: true, showMultiCoreScaling: true }),
+    );
+
+    expect(
+      Array.from(document.querySelectorAll('[data-geeklens-preview-scaling]')).map(
+        (note) => note.firstChild?.textContent,
+      ),
+    ).toEqual(['7.25× single-core', '4.50× single-core']);
+    const row = document.querySelector('[data-geeklens-preview-detail="topology"]');
+    expect(row?.firstElementChild?.textContent).toContain('Topology');
+    expect(row?.textContent).not.toContain('×');
   });
 
   test('suppresses a single-result frequency row when data or the setting is absent', async () => {
@@ -158,7 +271,7 @@ describe('processor context DOM integration', () => {
     expect(document.querySelector('[data-geeklens-preview-detail="frequency"]')).toBeNull();
   });
 
-  test('uses readable per-result comparison scales and preserves a missing frequency side', async () => {
+  test('uses one labeled shared comparison scale and preserves a missing frequency lane', async () => {
     globalThis.document = await fixture('geekbench7-comparison.html');
     const primary = withFrequency(model('AMD Ryzen 7 5800X3D', 'AMD', 'x86'), 4, 5);
     const baseline = withFrequency(model('Apple M1 Pro', 'Apple', 'ARM'), 2, 4);
@@ -168,19 +281,38 @@ describe('processor context DOM integration', () => {
       settings(true, { showFrequencyDistribution: true }),
     );
 
+    // Both lanes share one domain, inset at each end so the result owning an
+    // extreme is not drawn half outside the plot box.
     const charts = document.querySelectorAll('.geeklens-preview-distribution');
-    expect(charts[0]?.getAttribute('style')).toContain('--min:0%');
-    expect(charts[0]?.getAttribute('style')).toContain('--max:100%');
-    expect(charts[1]?.getAttribute('style')).toContain('--min:0%');
-    expect(charts[1]?.getAttribute('style')).toContain('--max:100%');
+    expect(charts[0]?.getAttribute('style')).toContain('--min:65.33333333333333%');
+    expect(charts[0]?.getAttribute('style')).toContain('--max:96.00000000000001%');
+    expect(charts[1]?.getAttribute('style')).toContain('--min:4%');
+    expect(charts[1]?.getAttribute('style')).toContain('--max:65.33333333333333%');
+    const row = document.querySelector('[data-geeklens-preview-detail="frequency"]');
+    expect((row?.querySelector('td:last-child') as HTMLTableCellElement | null)?.colSpan).toBe(2);
+    expect(
+      Array.from(row?.querySelectorAll('.geeklens-preview-frequency-lane-label') ?? []).map(
+        (label) => label.textContent,
+      ),
+    ).toEqual(['Ryzen 7 5800X3D', 'M1 Pro']);
+    expect(row?.querySelector('.geeklens-preview-frequency-axis')?.textContent).toContain(
+      'Shared scale2.00 GHz5.00 GHz',
+    );
+    // The readout stays beside each plot: a lane compressed by the shared scale
+    // would otherwise be unreadable without hovering.
+    expect(
+      Array.from(row?.querySelectorAll('.geeklens-preview-frequency-values') ?? []).map(
+        (values) => values.textContent,
+      ),
+    ).toEqual(['4.00–5.00 GHz · mean 4.60', '2.00–4.00 GHz · mean 3.20']);
 
     globalThis.document = await fixture('geekbench7-comparison.html');
     renderComparisonProcessorContext(
-      [primary, model('Qualcomm CPU', 'Qualcomm', 'ARM')],
+      [primary, model('Qualcomm Snapdragon X Elite', 'Qualcomm', 'ARM')],
       settings(true, { showFrequencyDistribution: true }),
     );
-    const cells = document.querySelectorAll('[data-geeklens-preview-detail="frequency"] td');
-    expect(cells[2]?.textContent).toBe('Not available');
+    const lanes = document.querySelectorAll('.geeklens-preview-frequency-lane');
+    expect(lanes[1]?.textContent).toBe('Snapdragon X EliteNot available');
   });
 
   test('renders one memory fact per line with accessible provenance', async () => {
