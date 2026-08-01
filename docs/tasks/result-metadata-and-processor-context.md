@@ -829,6 +829,65 @@ all today. Before shipping a generic cache row, settle the ARM caveat recorded
 under _Other payload candidates_: sampled ARM payloads report zero or per-cluster
 cache values that do not describe the whole CPU.
 
+### 10. Published core-type composition (deferred, not scheduled)
+
+**Raised:** 2026-08-01. The topology row states cluster sizes but never says what
+kind of cores a cluster holds, which is the fact readers actually want on a
+hybrid part.
+
+**Core types cannot be inferred from the payload.** The per-cluster `label`
+metric is only ever a size restatement — `6 Cores`, or `2 Cores @ 2.25 GHz` on
+the parts that also report frequencies. No vendor ships a role name. Cluster size
+does not substitute for one: the 13900K's _larger_ cluster (16) is its E-cores,
+so "largest cluster is the performance cluster" is wrong on the most common
+hybrid desktop part. Cluster order does not substitute either, for the reasons
+recorded in stage 6. Where per-cluster maxima exist the fastest-first sort
+already conveys the ordering without naming anything.
+
+So a role name can only be a `published` catalogue fact, carried on
+`HardwareSpecification` beside `memoryType`/`bandwidthGBs` with the same
+`CatalogueSource`, and rendered through the memory provenance badge and tooltip.
+
+**Record the vendor's own wording verbatim; do not normalize to a big/little or
+performance/efficiency taxonomy.** AMD is the case that makes this a correctness
+requirement rather than a style preference: Zen 5c is not an efficiency core. It
+is the same microarchitecture at the same IPC with the same ISA, differing in
+peak clock and L3 per CCX. Filing it under "efficiency" would state something
+false. Intel's Low Power Efficient-cores are likewise not interchangeable with
+its Efficient-cores, and Apple uses neither vocabulary. One source-worded string
+per entry avoids designing a taxonomy at all:
+
+- `4 Performance-cores + 8 Efficient-cores` (Intel ARK)
+- `4 Zen 5 + 8 Zen 5c` (AMD)
+- `10 performance cores + 4 efficiency cores` (Apple)
+
+**AMD is also the case that needs this most.** Every bundled AMD fixture reports
+either a single cluster (`1248`, `64509`, `18873252`, `62238`) or the `0 Cores`
+placeholder that gets dropped (`40339`, `62440`), so Strix Point and Hawk Point
+parts render totals with no bar at all. A published composition line is the only
+route to showing `4 Zen 5 + 8 Zen 5c`. A live Strix Point result should confirm
+the cluster metrics are empty there too before the field is designed; result
+`62400` was cited as an example and is not among the bundled fixtures.
+
+Scope for the initial slice:
+
+- One optional string field, one rendered line under the bar, reusing the
+  existing published-provenance rendering. No new UI machinery.
+- Seed entries opportunistically for SKUs with a bundled fixture or a captured
+  result; do not attempt coverage across all 264 catalogue processors.
+- Degrades to today's output whenever the field is absent, so partial coverage is
+  a valid shipping state.
+
+**Follow-up option, explicitly out of this slice: labelling individual bar
+segments.** The rule would be a join of catalogue core-type counts against
+payload cluster sizes, labelling only on an exact and unambiguous multiset match
+— the 13900K's `[8, 16]` against `8 P + 16 E` matches by size, while any chip
+reporting two clusters of equal size is ambiguous and must go unlabelled, as must
+any mismatch between the two sources. That is rigorous rather than fabricated,
+but it needs its own matching rules and test matrix, and it only helps parts that
+already draw a bar — which excludes the AMD parts that motivated the request.
+Revisit once the published line exists and the catalogue field has real coverage.
+
 ## Reference-data recommendation
 
 Ship a curated, versioned snapshot rather than fetching processor/Mac pages for

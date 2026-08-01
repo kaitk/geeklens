@@ -11,10 +11,24 @@
 
   let settingsStore = getSettingsStore();
 
-  // Only show groups that have instructions
+  /** Groups the system box never renders.
+   *
+   * SIMD_LEGACY (SSE through SSE4.1, plus FMA3) is guaranteed present on any
+   * x86 CPU able to run Geekbench 6 or 7, so it is identical on every result
+   * and adds nothing to a comparison. No workload mapping in benchmarkMap.ts or
+   * benchmarkMapV7.ts references these either, so they can never light up a
+   * per-test row. The definitions stay in instructions.ts and the popup
+   * glossary still lists them.
+   */
+  const SUPPRESSED_GROUPS: ReadonlySet<InstructionCategory> = new Set(['SIMD_LEGACY']);
+
+  // Only show groups that carry discriminating information
   let activeGroups = $derived(
     Object.entries(instructionGroups)
-      .filter(([_, instructions]) => instructions.length > 0)
+      .filter(
+        ([type, instructions]) =>
+          instructions.length > 0 && !SUPPRESSED_GROUPS.has(type as InstructionCategory),
+      )
       .map(([type]) => type as InstructionCategory),
   );
 </script>
