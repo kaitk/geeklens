@@ -18,7 +18,7 @@ async function context(resultId: string): Promise<CachedResultContext> {
     instructionSet: null,
     metadata: extractResultMetadata(payload, 7),
     processorLinks: { processorPath: null, macPath: null },
-    timestamp: 1,
+    lastAccessedAt: 1,
   };
 }
 

@@ -117,7 +117,7 @@ async function loadResultContext(
         instructionSet,
         metadata,
         processorLinks: mergeProcessorLinks(cached?.processorLinks, comparisonLinks),
-        timestamp: cached?.timestamp ?? Date.now(),
+        lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
       };
     }
 
@@ -135,7 +135,7 @@ async function loadResultContext(
       instructionSet: fetched.instructionSet,
       metadata: cached?.metadata ?? null,
       processorLinks,
-      timestamp: cached?.timestamp ?? Date.now(),
+      lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
     };
   } catch (error) {
     console.error(`GeekLens: Error fetching data for result ${resultId}:`, error);
@@ -149,11 +149,7 @@ async function cacheProcessorLinks(
   processorLinks: CanonicalProcessorLinks,
 ): Promise<void> {
   if (!processorLinks.processorPath && !processorLinks.macPath) return;
-  try {
-    await resultsCache.storeResultContext(generation, resultId, { processorLinks });
-  } catch {
-    // Result rendering should not fail merely because optional link caching did.
-  }
+  await resultsCache.storeResultContext(generation, resultId, { processorLinks });
 }
 
 // Main function to annotate the comparison page

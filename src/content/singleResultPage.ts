@@ -92,7 +92,7 @@ async function getResultContext(
       instructionSet: instructionSets,
       metadata: cached?.metadata ?? null,
       processorLinks,
-      timestamp: cached?.timestamp ?? Date.now(),
+      lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
     };
   }
 
@@ -118,7 +118,7 @@ async function getResultContext(
     instructionSet: instructionSets,
     metadata,
     processorLinks,
-    timestamp: cached?.timestamp ?? Date.now(),
+    lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
   };
 }
 

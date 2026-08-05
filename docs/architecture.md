@@ -82,9 +82,13 @@ content.
 payload metadata when available, a compatibility instruction-set string, and
 explicit Geekbench processor/Mac links found in result HTML. Cache keys include
 the Geekbench generation and result ID (`v<generation>:cpu:<resultId>`) so
-results cannot collide across generations. Database version 2 deliberately
-retains the original `instructionSets` object store; its schemaless version-1
-rows remain readable and are enriched lazily rather than discarded.
+results cannot collide across generations. Database version 3 replaces the
+legacy instruction-set-only store with the result-oriented `results` store;
+the old cache is intentionally discarded during that upgrade. Successful reads
+update `lastAccessedAt` on a best-effort basis. Once the cache exceeds 5,000
+results, opportunistic background cleanup removes least-recently-used entries
+until 4,000 remain. Cache writes never prevent otherwise successful page
+annotation, including when an upgrade is blocked by a tab using an older schema.
 
 Canonical-link parsing lives in `src/geekbench/processorLinks.ts`. It accepts
 only same-origin `/processors/<slug>` and `/macs/<slug>` paths from system tables.

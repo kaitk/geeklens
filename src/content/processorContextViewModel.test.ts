@@ -11,7 +11,7 @@ async function context(resultId: string): Promise<CachedResultContext> {
     instructionSet: null,
     metadata: extractResultMetadata(payload, 7),
     processorLinks: { processorPath: null, macPath: null },
-    timestamp: 1,
+    lastAccessedAt: 1,
   };
 }
 
@@ -476,7 +476,7 @@ describe('buildProcessorContextViewModel', () => {
         instructionSet: 'sse2',
         metadata: null,
         processorLinks: { processorPath: null, macPath: null },
-        timestamp: 1,
+        lastAccessedAt: 1,
       }),
     ).toBeNull();
   });

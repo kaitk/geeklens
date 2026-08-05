@@ -49,7 +49,7 @@ For each processor:
 Expected compositions require source verification before implementation:
 
 - X7 358H: likely `4 Performance-cores + 8 Efficient-cores + 4 Low Power
-  Efficient-cores`.
+Efficient-cores`.
 - 270K Plus: likely `8 Performance-cores + 16 Efficient-cores`.
 
 The 270K Plus payload's `8 + 16` shape should be directly labelable once the
