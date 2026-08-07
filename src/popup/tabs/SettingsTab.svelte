@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import browser from '../../browserApi';
+  import { logError } from '../../logger';
   import {
     defaultSettings,
     loadSettings,
@@ -11,29 +12,46 @@
   // Copied, not aliased: these checkboxes bind directly into this object.
   let settings: Settings = $state({ ...defaultSettings });
   let savedSettings: Settings = $state({ ...defaultSettings });
-  let showSavedMessage = $state(false);
+  let statusMessage = $state('');
   let isSaving = $state(false);
+  let statusTimeout: ReturnType<typeof setTimeout> | undefined;
   let hasChanges = $derived(JSON.stringify(settings) !== JSON.stringify(savedSettings));
 
-  // Load settings on mount
   onMount(async () => {
     settings = await loadSettings();
     savedSettings = { ...settings };
   });
 
-  // Save settings
+  onDestroy(() => clearTimeout(statusTimeout));
+
   async function onSaveSettings() {
     if (!hasChanges || isSaving) return;
     isSaving = true;
-    await saveSettings(settings);
-    savedSettings = { ...settings };
-    showSavedMessage = true;
-    const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
-    if (activeTab?.id && activeTab.url?.startsWith('https://browser.geekbench.com/')) {
-      await browser.tabs.reload(activeTab.id);
+    const settingsToSave = { ...settings };
+    clearTimeout(statusTimeout);
+    statusMessage = '';
+    try {
+      await saveSettings(settingsToSave);
+      savedSettings = settingsToSave;
+      statusMessage = 'Saved';
+
+      try {
+        const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
+        if (activeTab?.id && activeTab.url?.startsWith('https://browser.geekbench.com/')) {
+          await browser.tabs.reload(activeTab.id);
+          statusMessage = 'Saved and page refreshed';
+        }
+      } catch (error) {
+        logError('Failed to reload the active Geekbench page', error);
+        statusMessage = 'Saved; refresh the page manually';
+      }
+
+      statusTimeout = setTimeout(() => (statusMessage = ''), 1800);
+    } catch {
+      statusMessage = 'Could not save settings. Try again.';
+    } finally {
+      isSaving = false;
     }
-    isSaving = false;
-    setTimeout(() => (showSavedMessage = false), 1800);
   }
 </script>
 
@@ -125,7 +143,7 @@
 
   <div class="settings-actions">
     <span class="settings-status">
-      {#if showSavedMessage}Saved and page refreshed{/if}
+      {statusMessage}
     </span>
     {#if hasChanges}
       <button class="save-settings" type="button" onclick={onSaveSettings} disabled={isSaving}>

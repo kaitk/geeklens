@@ -473,10 +473,3 @@ export function extractResultMetadata(
     },
   };
 }
-
-export function extractInstructionSetsFromPayload(
-  payload: unknown,
-  expectedGeneration?: GeekbenchGeneration,
-): string | null {
-  return extractResultMetadata(payload, expectedGeneration)?.instructionSets?.value ?? null;
-}

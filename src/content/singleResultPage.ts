@@ -1,19 +1,19 @@
-import { categorizeInstructionSets } from '../isa/categories';
-import { parseGeekbenchGeneration, type GeekbenchGeneration } from '../geekbench/generation';
-import {
-  extractProcessorLinks,
-  mergeProcessorLinks,
-  type CanonicalProcessorLinks,
-} from '../geekbench/processorLinks';
-import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
-import {
-  initialInstructionStatus,
-  processorContextStatus,
-  singleResultInstructionStatus,
-} from '../geekbench/instructionDataStatus';
+import { resultsCache, type CachedResultContext } from '../cache/ResultsCache';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
-import { extractIndividualInstructions } from '../isa/instructions';
+import { parseGeekbenchGeneration, type GeekbenchGeneration } from '../geekbench/generation';
+import { extractProcessorLinks, mergeProcessorLinks } from '../geekbench/processorLinks';
+import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
+import { parseResultId } from '../geekbench/urls';
+import { categorizeInstructionSets } from '../isa/categories';
+import { extractIndividualInstructions, type Instruction } from '../isa/instructions';
 import { workloadInstructions } from '../isa/workloadInstructions';
+import { debugLog } from '../logger';
+import type { Settings } from '../settings/settings';
+import {
+  annotationErrorStatus,
+  completedAnnotationStatus,
+  loadingStatus,
+} from './annotationStatus';
 import {
   extractBenchmarkName,
   findBenchmarkTables,
@@ -22,136 +22,161 @@ import {
   waitForElement,
 } from './domUtils';
 import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
-import { isPageAnnotated, showStatus } from './statusBanner';
-import { resultsCache, type CachedResultContext } from '../cache/ResultsCache';
-import { loadSettings } from '../settings/settings';
-import { markRowLabel } from './rowMarker';
 import {
   applyProcessorContextPreferences,
   renderSingleProcessorContext,
-} from './processorContextUi';
+} from './processorContext/render';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
+import { markRowLabel } from './rowMarker';
+import { isPageAnnotated, showStatus } from './statusBanner';
 
-// Main function to annotate the Geekbench results
-export async function annotateGeekbenchResults() {
-  if (isPageAnnotated()) {
-    return; // page already annotated
+interface SingleResultPageDependencies {
+  cache: Pick<typeof resultsCache, 'getResultContext' | 'storeResultContext'>;
+  fetchMetadata: typeof fetchResultMetadataFromPayload;
+  mountSystemInstructionSets: typeof mountSystemInstructionSets;
+  mountWorkloadBadges: typeof mountWorkloadBadges;
+}
+
+type MountSystemInstructionSets = (
+  target: Element,
+  instructionGroups: ReturnType<typeof categorizeInstructionSets>,
+) => void;
+
+type MountWorkloadBadges = (
+  target: Element,
+  instructions: Instruction[],
+  confidenceNote?: string,
+) => void;
+
+const singleResultPageDependencies: SingleResultPageDependencies = {
+  cache: resultsCache,
+  fetchMetadata: fetchResultMetadataFromPayload,
+  mountSystemInstructionSets,
+  mountWorkloadBadges,
+};
+
+export async function annotateGeekbenchResults(
+  settings: Settings,
+  dependencies: SingleResultPageDependencies = singleResultPageDependencies,
+) {
+  if (isPageAnnotated()) return;
+
+  debugLog('Starting annotation process');
+  const generation = parseGeekbenchGeneration(window.location.pathname);
+  const resultId = parseResultId(window.location.pathname);
+  if (!generation || !resultId) {
+    showStatus(annotationErrorStatus('GeekLens: Unsupported or malformed result page'));
+    return;
   }
 
-  console.log('GeekLens: Starting annotation process');
-  const generation = parseGeekbenchGeneration(window.location.pathname);
-  const resultId = window.location.pathname.split('/').filter(Boolean).at(-1);
-  if (!generation || !resultId) return;
-
   const signedOut = isGeekbenchSignedOut();
-  showStatus(initialInstructionStatus(generation, signedOut));
+  showStatus(loadingStatus);
 
-  // Wait for benchmark tables to ensure page is fully rendered
   try {
     await waitForElement('table.benchmark-table');
-    const settings = await loadSettings();
     applyProcessorContextPreferences(settings);
-    const context = await getResultContext(generation, resultId, signedOut);
-    const instructionSets = context?.instructionSet ?? null;
+
+    const context = await loadSingleResultContext(generation, resultId, signedOut, dependencies);
+    // Geekbench 6.4+ single-result pages are the only rendered HTML ISA source.
+    // Older v6 pages have no row; Geekbench 7 uses payload metadata instead.
+    const renderedInstructions =
+      generation === 6 ? findInstructionSetValueCell()?.textContent?.trim() || null : null;
+    const instructionSets =
+      generation === 6
+        ? renderedInstructions
+        : generation === 7
+          ? (context?.metadata?.instructionSets?.value ?? null)
+          : null;
     const processorContext = buildProcessorContextViewModel(context);
     if (processorContext) renderSingleProcessorContext(processorContext, settings);
-    if (!instructionSets) {
-      showStatus(
-        generation === 5
-          ? processorContextStatus(Boolean(processorContext), signedOut)
-          : singleResultInstructionStatus(generation, false),
+
+    if (settings.showIsaAnnotations && instructionSets) {
+      const mountSystem: MountSystemInstructionSets = (target, instructionGroups) =>
+        dependencies.mountSystemInstructionSets(target, instructionGroups, settings);
+      const mountWorkload: MountWorkloadBadges = (target, instructions, confidenceNote) =>
+        dependencies.mountWorkloadBadges(target, instructions, settings, confidenceNote);
+      annotateSystemInstructionSets(generation, instructionSets, mountSystem);
+      annotateBenchmarkTables(
+        generation,
+        extractIndividualInstructions(instructionSets),
+        mountWorkload,
       );
-      return;
     }
 
-    if (settings.showIsaAnnotations) {
-      annotateSystemInstructionSets(generation, instructionSets);
-      annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets));
-    }
-    showStatus(singleResultInstructionStatus(generation, true));
+    showStatus(
+      completedAnnotationStatus({
+        hasDetails: Boolean(processorContext || instructionSets),
+        payloadComplete: Boolean(context?.metadata),
+        signedOut,
+      }),
+    );
   } catch (error) {
-    console.error('GeekLens: Failed to find benchmark tables', error);
+    console.error('GeekLens: Failed to annotate result page', error);
+    showStatus(annotationErrorStatus());
   }
 }
 
-async function getResultContext(
+async function loadSingleResultContext(
   generation: GeekbenchGeneration,
   resultId: string,
   signedOut: boolean,
+  dependencies: SingleResultPageDependencies,
 ): Promise<CachedResultContext | null> {
-  const cached = await resultsCache.getResultContext(generation, resultId);
-  const processorLinks = mergeProcessorLinks(cached?.processorLinks, extractProcessorLinks());
+  const cached = await dependencies.cache.getResultContext(generation, resultId);
+  const pageLinks = extractProcessorLinks();
+  let metadata = cached?.metadata ?? null;
+  let fetchedMetadata = false;
 
-  // Geekbench 6 renders instruction sets into the page, so keep that as the
-  // compatibility source even when its authenticated payload is unavailable.
-  // The payload still supplies the processor-context metadata shared with v7.
-  if (generation === 6) {
-    const metadata =
-      cached?.metadata ??
-      (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
-    const instructionSets =
-      cached?.instructionSet ??
-      findInstructionSetValueCell()?.textContent?.trim() ??
-      metadata?.instructionSets?.value ??
-      null;
-    if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
-      await resultsCache.storeResultContext(generation, resultId, {
-        instructionSet: instructionSets,
-        metadata,
-        processorLinks,
-      });
+  // Signed-out Geekbench 5–7 payload requests disturb Geekbench's post-login
+  // destination, so only an authenticated single-result page fills a cache miss.
+  if (!metadata && !signedOut) {
+    try {
+      metadata = await dependencies.fetchMetadata(generation, resultId);
+      fetchedMetadata = Boolean(metadata);
+    } catch (error) {
+      console.error(`GeekLens: Could not load result details for ${resultId}`, error);
     }
-    return {
-      instructionSet: instructionSets,
-      metadata,
-      processorLinks,
-      lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
-    };
+  } else if (!metadata && signedOut) {
+    debugLog(`Signed out of Geekbench ${generation}, skipping payload fetch`);
   }
 
-  // A signed-out payload request is not merely doomed: Geekbench stores the
-  // rejected path as the session's post-login destination, so a later sign-in
-  // lands the user on raw `.gb6` JSON instead of the result page.
-  if (signedOut && !cached?.metadata) {
-    console.log(`GeekLens: Signed out of Geekbench ${generation}, skipping payload fetch`);
+  const processorLinks = mergeProcessorLinks(cached?.processorLinks, pageLinks);
+  const hasPageLinks = Boolean(pageLinks.processorPath || pageLinks.macPath);
+  if (fetchedMetadata || hasPageLinks) {
+    try {
+      await dependencies.cache.storeResultContext(generation, resultId, {
+        ...(fetchedMetadata ? { metadata } : {}),
+        ...(hasPageLinks ? { processorLinks: pageLinks } : {}),
+      });
+    } catch (error) {
+      console.error(`GeekLens: Could not cache result details for ${resultId}`, error);
+    }
   }
-  const metadata =
-    cached?.metadata ??
-    (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
-  const instructionSets = metadata?.instructionSets?.value ?? cached?.instructionSet ?? null;
 
-  if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
-    await resultsCache.storeResultContext(generation, resultId, {
-      instructionSet: instructionSets,
-      metadata,
-      processorLinks,
-    });
-  }
+  if (!cached && !metadata && !hasPageLinks) return null;
   return {
-    instructionSet: instructionSets,
     metadata,
     processorLinks,
+    validity: cached?.validity ?? null,
     lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
   };
 }
 
-function hasProcessorLinks(links: CanonicalProcessorLinks): boolean {
-  return Boolean(links.processorPath || links.macPath);
-}
-
-function annotateSystemInstructionSets(generation: GeekbenchGeneration, instructionSets: string) {
+function annotateSystemInstructionSets(
+  generation: GeekbenchGeneration,
+  instructionSets: string,
+  mountInstructionSets: MountSystemInstructionSets,
+) {
   const valueCell =
     generation === 6 ? findInstructionSetValueCell() : insertGeekbench7InstructionSetRow();
   if (!valueCell || valueCell.querySelector('[data-geeklens-system-info]')) return;
 
-  // Geekbench 6 renders this row itself and we replace its contents; the
-  // Geekbench 7 row above is one we inserted, and marks itself as added.
   if (generation === 6 && valueCell.previousElementSibling) {
     markRowLabel(valueCell.previousElementSibling, 'changed');
   }
 
   valueCell.textContent = '';
-  mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets));
+  mountInstructionSets(valueCell, categorizeInstructionSets(instructionSets));
 }
 
 function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
@@ -179,18 +204,16 @@ function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
 function annotateBenchmarkTables(
   generation: GeekbenchGeneration,
   allSupportedInstructions: Set<string>,
+  mountBadges: MountWorkloadBadges,
 ) {
   const benchmarkTables = findBenchmarkTables();
-
   if (benchmarkTables.length === 0) {
     console.error('GeekLens: No benchmark tables found');
     return;
   }
 
   benchmarkTables.forEach((table) => {
-    const rows = Array.from(table.querySelectorAll('tr'));
-
-    rows.forEach((row) => {
+    Array.from(table.querySelectorAll('tr')).forEach((row) => {
       const benchmarkName = extractBenchmarkName(row);
       if (!benchmarkName) return;
 
@@ -201,14 +224,12 @@ function annotateBenchmarkTables(
       );
       if (instructions.length === 0) return;
 
-      // Get the cell where we'll add the instruction set badges
       const benchmarkCell = row.querySelector('td:first-child');
       if (!benchmarkCell) {
         console.error(`GeekLens: No benchmark cell found for ${benchmarkName}`);
         return;
       }
-
-      mountWorkloadBadges(benchmarkCell, instructions, confidenceNote);
+      mountBadges(benchmarkCell, instructions, confidenceNote);
     });
   });
 }

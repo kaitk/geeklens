@@ -9,19 +9,19 @@ function linkHost(url: string): string | undefined {
   }
 }
 
-export function renderIdentity(preview: ProcessorContextViewModel): HTMLElement {
+export function renderIdentity(viewModel: ProcessorContextViewModel): HTMLElement {
   const wrapper = document.createElement('div');
   wrapper.className = 'geeklens-preview-processor';
   const heading = document.createElement('div');
   heading.className = 'geeklens-preview-identity';
   const nameElement = document.createElement('strong');
-  nameElement.textContent = preview.displayName;
-  if (preview.displayName !== preview.name) {
+  nameElement.textContent = viewModel.displayName;
+  if (viewModel.displayName !== viewModel.name) {
     nameElement.className = 'geeklens-preview-reported-name';
     nameElement.tabIndex = 0;
     nameElement.setAttribute(
       'aria-label',
-      `${preview.displayName}. Reported processor name: ${preview.name}`,
+      `${viewModel.displayName}. Reported processor name: ${viewModel.name}`,
     );
     const tooltip = document.createElement('span');
     tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-source-tooltip';
@@ -29,18 +29,18 @@ export function renderIdentity(preview: ProcessorContextViewModel): HTMLElement 
     title.className = 'geeklens-preview-source-tooltip-title';
     title.textContent = 'Reported processor name';
     const detail = document.createElement('span');
-    detail.textContent = preview.name;
+    detail.textContent = viewModel.name;
     tooltip.append(title, detail);
     nameElement.appendChild(tooltip);
   }
   const vendorBadge = document.createElement('span');
-  vendorBadge.className = `geeklens-preview-badge geeklens-preview-badge-${preview.vendorKey}`;
-  vendorBadge.textContent = preview.vendor;
+  vendorBadge.className = `geeklens-preview-badge geeklens-preview-badge-${viewModel.vendorKey}`;
+  vendorBadge.textContent = viewModel.vendor;
   const architectureBadge = document.createElement('span');
   architectureBadge.className = 'geeklens-preview-badge geeklens-preview-badge-architecture';
-  architectureBadge.textContent = preview.architecture;
+  architectureBadge.textContent = viewModel.architecture;
   heading.append(vendorBadge, nameElement);
-  if (preview.status === 'engineering-sample') {
+  if (viewModel.status === 'engineering-sample') {
     const statusBadge = document.createElement('span');
     statusBadge.className = 'geeklens-preview-badge geeklens-preview-badge-status';
     statusBadge.textContent = 'ES';
@@ -54,10 +54,10 @@ export function renderIdentity(preview: ProcessorContextViewModel): HTMLElement 
   }
   heading.appendChild(architectureBadge);
 
-  if (preview.cataloguePath) {
+  if (viewModel.cataloguePath) {
     const link = document.createElement('a');
     link.className = 'geeklens-preview-external-link';
-    link.href = preview.cataloguePath;
+    link.href = viewModel.cataloguePath;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.setAttribute('aria-label', 'Open processor page in a new tab.');
@@ -68,7 +68,7 @@ export function renderIdentity(preview: ProcessorContextViewModel): HTMLElement 
     title.className = 'geeklens-preview-source-tooltip-title';
     title.textContent = 'Processor page';
     const detail = document.createElement('span');
-    detail.textContent = linkHost(preview.cataloguePath) ?? '';
+    detail.textContent = linkHost(viewModel.cataloguePath) ?? '';
     const hint = document.createElement('span');
     hint.className = 'geeklens-preview-source-tooltip-hint';
     hint.textContent = 'Click to open in a new tab.';

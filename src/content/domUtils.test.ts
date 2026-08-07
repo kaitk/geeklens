@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { afterEach, describe, expect, test } from 'bun:test';
 import { parseHTML } from 'linkedom';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
 import { getV6SupportedInstructions } from '../isa/benchmarkMap';
@@ -9,13 +9,61 @@ import {
   findComparisonScoreRow,
   findInstructionSetValueCell,
   findSystemTableByHeading,
-  getComparisonVersions,
+  waitForElement,
 } from './domUtils';
+
+const originalDocument = globalThis.document;
+const originalMutationObserver = globalThis.MutationObserver;
+
+afterEach(() => {
+  if (originalDocument === undefined) delete (globalThis as { document?: Document }).document;
+  else globalThis.document = originalDocument;
+  if (originalMutationObserver === undefined) {
+    delete (globalThis as { MutationObserver?: typeof MutationObserver }).MutationObserver;
+  } else {
+    globalThis.MutationObserver = originalMutationObserver;
+  }
+});
 
 async function fixture(name: string): Promise<Document> {
   const html = await Bun.file(new URL(`__fixtures__/${name}`, import.meta.url)).text();
   return parseHTML(html).document as unknown as Document;
 }
+
+describe('waitForElement', () => {
+  test('returns an existing element after one query', async () => {
+    const { document, MutationObserver } = parseHTML(
+      '<!doctype html><html><body><div class="target"></div></body></html>',
+    );
+    globalThis.document = document as unknown as Document;
+    globalThis.MutationObserver = MutationObserver as unknown as typeof globalThis.MutationObserver;
+
+    const originalQuerySelector = document.querySelector.bind(document);
+    let queryCount = 0;
+    document.querySelector = ((selector: string) => {
+      queryCount += 1;
+      return originalQuerySelector(selector);
+    }) as typeof document.querySelector;
+
+    const element = await waitForElement('.target');
+
+    expect(element).toBe(originalQuerySelector('.target')!);
+    expect(queryCount).toBe(1);
+  });
+
+  test('resolves when an observed mutation adds the element', async () => {
+    const { document, MutationObserver } = parseHTML('<!doctype html><html><body></body></html>');
+    globalThis.document = document as unknown as Document;
+    globalThis.MutationObserver = MutationObserver as unknown as typeof globalThis.MutationObserver;
+
+    const waiting = waitForElement('.target', 100);
+    const element = document.createElement('div');
+    element.className = 'target';
+    document.body.append(element);
+
+    expect(await waiting).toBe(element);
+  });
+});
 
 describe('Geekbench 5 page selectors', () => {
   test('supports the captured single-result structure without inventing instruction data', async () => {
@@ -34,10 +82,6 @@ describe('Geekbench 5 page selectors', () => {
   test('supports the captured comparison structure and row ordering', async () => {
     const document = await fixture('geekbench5-comparison.html');
 
-    expect(getComparisonVersions(document)).toEqual({
-      primary: 'Geekbench 5.4.5 Tryout',
-      baseline: 'Geekbench 5.4.5 Tryout',
-    });
     expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(4);
     expect(document.querySelector('table.system-information')).not.toBeNull();
     expect(findInstructionSetValueCell(document)).toBeNull();
@@ -118,14 +162,10 @@ describe('Geekbench 7 processor catalogue link fixtures', () => {
 });
 
 describe('Geekbench 6 comparison selectors', () => {
-  test('finds versions and comparison tables from stored HTML', async () => {
+  test('finds comparison tables from stored HTML', async () => {
     const document = await fixture('geekbench6-comparison.html');
 
     expect(isGeekbenchSignedOut(document)).toBe(true);
-    expect(getComparisonVersions(document)).toEqual({
-      primary: 'Geekbench 6.7.1',
-      baseline: 'Geekbench 6.5.0',
-    });
     expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(3);
     expect(document.querySelector('table.system-information')).not.toBeNull();
   });
@@ -187,14 +227,10 @@ describe('Geekbench 7 single-result selectors', () => {
 });
 
 describe('Geekbench 7 comparison selectors', () => {
-  test('finds versions and comparison tables from stored HTML', async () => {
+  test('finds comparison tables from stored HTML', async () => {
     const document = await fixture('geekbench7-comparison.html');
 
     expect(isGeekbenchSignedOut(document)).toBe(true);
-    expect(getComparisonVersions(document)).toEqual({
-      primary: 'Geekbench 7.0.0',
-      baseline: 'Geekbench 7.0.0',
-    });
     expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(3);
     expect(document.querySelector('table.system-information')).not.toBeNull();
   });

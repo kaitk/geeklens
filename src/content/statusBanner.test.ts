@@ -24,8 +24,8 @@ describe('showStatus', () => {
   test('links a sign-in status to the page’s own login destination', () => {
     render(SIGNED_OUT_NAV);
     showStatus({
-      text: 'GeekLens: Sign in to load instruction data',
-      type: 'warning',
+      text: 'GeekLens: Sign in to load result details',
+      state: 'sign-in',
       action: 'sign-in',
     });
 
@@ -34,24 +34,25 @@ describe('showStatus', () => {
     // A new tab keeps the result on screen; signing in cannot return here.
     expect(link?.getAttribute('target')).toBe('_blank');
     expect(link?.getAttribute('rel')).toBe('noopener');
-    expect(link?.textContent).toBe('GeekLens: Sign in to load instruction data');
+    expect(link?.textContent).toBe('GeekLens: Sign in to load result details');
+    expect(banner().classList.contains('gb-extension-warning')).toBe(false);
   });
 
   test('still shows the message when no login link is rendered to point at', () => {
     render(SIGNED_IN_NAV);
     showStatus({
-      text: 'GeekLens: Sign in to load instruction data',
-      type: 'warning',
+      text: 'GeekLens: Sign in to load result details',
+      state: 'sign-in',
       action: 'sign-in',
     });
 
     expect(banner().querySelector('a')).toBeNull();
-    expect(banner().textContent).toBe('GeekLens: Sign in to load instruction data');
+    expect(banner().textContent).toBe('GeekLens: Sign in to load result details');
   });
 
   test('does not offer a link for statuses signing in cannot fix', () => {
     render(SIGNED_OUT_NAV);
-    showStatus({ text: 'GeekLens: No instruction data available', type: 'warning' });
+    showStatus({ text: 'GeekLens: Result details unavailable', state: 'limited' });
 
     expect(banner().querySelector('a')).toBeNull();
   });
@@ -59,15 +60,22 @@ describe('showStatus', () => {
   test('drops the link once the status no longer calls for signing in', () => {
     render(SIGNED_OUT_NAV);
     showStatus({
-      text: 'GeekLens: Sign in to load instruction data',
-      type: 'warning',
+      text: 'GeekLens: Sign in to load result details',
+      state: 'sign-in',
       action: 'sign-in',
     });
-    showStatus({ text: 'GeekLens Active', type: 'info' });
+    showStatus({ text: 'GeekLens Active', state: 'active' });
 
     // Updated in place, so a stale link would otherwise survive the transition.
     expect(banner().querySelector('a')).toBeNull();
     expect(banner().textContent).toBe('GeekLens Active');
     expect(banner().classList.contains('gb-extension-warning')).toBe(false);
+  });
+
+  test('reserves warning styling for annotation errors', () => {
+    render(SIGNED_OUT_NAV);
+    showStatus({ text: 'GeekLens: Annotation failed', state: 'error' });
+
+    expect(banner().classList.contains('gb-extension-warning')).toBe(true);
   });
 });

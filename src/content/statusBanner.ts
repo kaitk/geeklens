@@ -1,5 +1,5 @@
 import { findGeekbenchSignInUrl } from '../geekbench/authentication';
-import type { InstructionDataStatus } from '../geekbench/instructionDataStatus';
+import type { AnnotationStatus } from './annotationStatus';
 
 const BANNER_ID = 'geeklens-info';
 
@@ -8,13 +8,13 @@ const BANNER_ID = 'geeklens-info';
  * their "already annotated" guard, so it is created on the first call and
  * updated in place afterwards.
  */
-export function showStatus({ text, type, action }: InstructionDataStatus) {
+export function showStatus({ text, state, action }: AnnotationStatus) {
   const banner = document.getElementById(BANNER_ID) ?? createBanner();
   // Cleared rather than overwritten so a status that drops the sign-in link
   // does not leave the previous one behind.
   banner.textContent = '';
   // toggle, not add: a status can go from warning back to info.
-  banner.classList.toggle('gb-extension-warning', type === 'warning');
+  banner.classList.toggle('gb-extension-warning', state === 'error');
 
   const signInUrl = action === 'sign-in' ? findGeekbenchSignInUrl() : null;
   if (!signInUrl) {

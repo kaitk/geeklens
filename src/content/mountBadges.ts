@@ -1,8 +1,14 @@
 import { mount } from 'svelte';
 import type { Instruction } from '../isa/instructions';
 import type { InstructionCategory } from '../isa/instructions';
+import type { Settings } from '../settings/settings';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
+
+type BadgePresentationPreferences = Pick<
+  Settings,
+  'coloredBadges' | 'tooltips' | 'mappingWarnings'
+>;
 
 /**
  * Svelte components are always mounted into a container element of our own
@@ -19,20 +25,22 @@ function containerIn(cell: Element, marker: string): HTMLElement {
 export function mountSystemInstructionSets(
   cell: Element,
   instructionGroups: Record<InstructionCategory, string[]>,
+  preferences: BadgePresentationPreferences,
 ) {
   mount(SystemInstructionSetsComponent, {
     target: containerIn(cell, 'data-geeklens-system-info'),
-    props: { instructionGroups },
+    props: { instructionGroups, preferences },
   });
 }
 
 export function mountWorkloadBadges(
   cell: Element,
   instructions: Instruction[],
+  preferences: BadgePresentationPreferences,
   confidenceNote?: string,
 ) {
   mount(TableInstructionSetsComponent, {
     target: containerIn(cell, 'data-geeklens-instructions'),
-    props: { instructions, confidenceNote },
+    props: { instructions, preferences, confidenceNote },
   });
 }

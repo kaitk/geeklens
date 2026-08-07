@@ -9,7 +9,6 @@ async function context(resultId: string, generation: 5 | 6 | 7 = 7): Promise<Cac
     new URL(`../geekbench/__fixtures__/${resultId}.${extension}.json`, import.meta.url),
   ).json();
   return {
-    instructionSet: null,
     metadata: extractResultMetadata(payload, generation),
     processorLinks: { processorPath: null, macPath: null },
     lastAccessedAt: 1,
@@ -533,7 +532,6 @@ describe('buildProcessorContextViewModel', () => {
     expect(buildProcessorContextViewModel(null)).toBeNull();
     expect(
       buildProcessorContextViewModel({
-        instructionSet: 'sse2',
         metadata: null,
         processorLinks: { processorPath: null, macPath: null },
         lastAccessedAt: 1,

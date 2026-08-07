@@ -8,7 +8,10 @@ in the [README](../README.md).
 
 `src/manifest.json` is a templated cross-browser manifest. The Vite extension
 plugin expands its `{{chrome}}` and `{{firefox}}` keys and writes browser-specific
-builds to `dist/<browser>/`.
+builds to `dist/<browser>/`. Extension release metadata (`name`, `description`,
+and `version`) has one source in `package.json`; the manifest generator adds it
+after the template so built manifests and package-versioned release archives
+cannot drift.
 
 The background script only enables the toolbar action on supported Geekbench
 URLs. A single content entry, `src/content/contentScript.ts`, detects the page
@@ -17,26 +20,54 @@ shape and owns annotation at DOM ready.
 The content entry delegates to two page adapters:
 
 - `src/content/singleResultPage.ts` reads the result's system table, loads one
-  cached result context, and annotates benchmark tables from its compatibility
-  instruction-set string.
-- `src/content/comparisonPage.ts` obtains result contexts for both results (from
-  IndexedDB or fetched result pages), adds instruction sets to the comparison
-  system table, and annotates both CPUs' graph rows.
+  payload/cache-backed result context, and keeps the rendered Geekbench 6 ISA
+  row as a local annotation source.
+- `src/content/comparisonPage.ts` obtains payload/cache-backed contexts for both
+  results, adds their metadata instruction sets to the comparison system table,
+  and annotates both CPUs' graph rows.
 
 Both adapters route between Geekbench 5, 6, and 7 based on the URL generation.
 Geekbench 5 uses an authenticated `.gb5` payload for processor context. Its
 captured payloads and rendered pages expose no instruction-set capability
-string, so GeekLens deliberately provides no ISA workload badges for v5.
-Geekbench 6 exposes instruction sets in result-page HTML. Geekbench 7 omits that
-row, so GeekLens fetches and normalizes the result's `.gb6` JSON payload once,
-reads metric `20000` from the cached metadata, and adds an Instruction Sets row
-to the rendered system information.
+string, so GeekLens deliberately provides no ISA workload badges for v5. Of the
+supported HTML shapes, only Geekbench 6.4 and newer single-result pages render an
+Instruction Sets row. Older Geekbench 6 results and all captured comparison pages
+omit it. Geekbench 7 also omits the row, so GeekLens fetches and normalizes the
+result's `.gb6` JSON payload once, reads metric `20000` from the cached metadata,
+and adds an Instruction Sets row to the rendered system information.
 
 All three generations share payload-backed processor context when the visitor
 is signed in. Geekbench 6 retains its rendered instruction-set row as a public
 fallback, so signed-out visitors still receive ISA annotations but not payload-
 only processor context. Generation-matched Browser averages remain available
 only where the bundled catalogue carries a reference for that generation.
+
+The rendered Geekbench 6 row is a direct, page-local opportunity, not a general
+HTML data API. Comparison pages never fetch result HTML for instruction sets or
+processor links; they use authenticated payload metadata or a cached payload for
+both ISA and processor context. Result-validity HTML remains a separate concern.
+
+### Complexity should follow reach
+
+The amount and placement of code should broadly reflect how much of GeekLens a
+source or feature serves. Shared abstractions are justified for the common path;
+a compatibility case affecting one generation, version range, page shape, or
+authentication state should remain a small, visibly scoped branch near that page
+adapter.
+
+| Data or behavior        | Reach                                      | Source                         | Expected code shape                  |
+| ----------------------- | ------------------------------------------ | ------------------------------ | ------------------------------------ |
+| Processor context       | Geekbench 5–7, single and comparison pages | Authenticated payload or cache | Shared primary path                  |
+| Payload ISA metadata    | Geekbench 6–7 where payloads are available | Payload metric `20000`         | Part of normalized result metadata   |
+| Rendered ISA fallback   | Geekbench 6.4+, single-result page only    | Row already present in the DOM | Local compatibility branch           |
+| Browser result validity | Comparison result lanes                    | Rendered result HTML           | Separate feature-specific fetch path |
+
+Before adding a shared helper, require at least two real production call sites
+with the same policy—not merely similar parameters. Comments on exceptional
+branches should name the affected generation, version range, page shape, and
+authentication state when those constraints are not obvious from the types. If
+an edge case needs more machinery than the common path, reconsider the feature's
+value before generalizing the machinery.
 
 Shared selectors and benchmark-name extraction live in
 `src/content/domUtils.ts`. Svelte components in `src/content/` render badges;
@@ -47,12 +78,31 @@ mounting), so neither adapter creates DOM containers itself. Mount containers
 carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
 guards must use those markers rather than Svelte component CSS classes.
 
-The processor-context presentation is orchestrated by
-`src/content/processorContextUi.ts`, with its neutral contract and feature renderers
-under `src/content/processorContext/`. It is not a parser
-or data source. Page adapters pass it real cached contexts through a pure
+The status pill describes GeekLens as a whole, not ISA acquisition. Processor
+context, validity, score context, and ISA badges are independent enhancements;
+the expected absence of one slice must not turn an otherwise successful page
+amber. Use feature-neutral copy such as “Loading result details” and “Sign in to
+load result details.” Reserve warning presentation for an actual annotation
+failure or unsupported page state. A signed-out visitor, an older result without
+ISA metadata, and a one-sided comparison are normal limited-data states.
+
+The processor-context presentation is implemented under
+`src/content/processorContext/`: `model.ts` owns the neutral contract;
+`identity.ts`, `frequency.ts`, `memory.ts`, `topology.ts`,
+`scoreReferences.ts`, `scaling.ts`, and `cacheDispute.ts` own feature
+presentation; and `render.ts` owns single/comparison orchestration and preference
+application. `sourceLink.ts` and `rows.ts` are narrowly shared processor-context
+DOM primitives. Page adapters import `render.ts` directly. The renderer is not a
+parser or data source. Page adapters pass it real cached contexts through a pure
 view-model boundary; never embed preview values or fetch from the renderer. All
 currently exposed processor-context slices are wired and default on.
+
+Orchestration locates the shared Geekbench CPU/System Information table and its
+processor, topology, and cache rows, then passes those anchors to feature
+renderers. Features locate only distinct DOM they exclusively own: score
+references and scaling locate benchmark score tables, and single-result memory
+locates the separate Memory Information table. This exception keeps the anchor
+rule explicit while avoiding unrelated table knowledge in orchestration.
 `src/content/rowMarker.ts` owns the common marker for rows GeekLens creates.
 See [Result metadata and processor context](result-metadata.md) for payload,
 identity, provenance, fixture, and catalogue-maintenance rules.
@@ -74,29 +124,30 @@ Geekbench's space-separated instruction-set string is:
 `src/isa/workloadInstructions.ts` is the only place that chooses between the
 generation-specific benchmark maps. Geekbench 5 intentionally resolves no
 workload instructions because its captures expose no capability string. The
-resolver returns a `confidenceNote` for
-inferred mappings and omits it for documented ones, so callers cannot render an
-inferred Geekbench 7 mapping without its warning. A `suspected` workload returns
-the note with an empty instruction list, so the two annotation call sites render
-on either signal rather than on badge count alone. The `mappingWarnings` setting
-suppresses the warning at render time in `TableInstructionSets.svelte`, not at
-lookup time, so toggling it re-renders open pages; a suspected workload drops its
-container entirely when warnings are hidden, since the warning was its only
-content.
+resolver returns a `confidenceNote` for inferred mappings and omits it for
+documented ones, so every rendered inferred Geekbench 7 mapping carries its
+warning when `mappingWarnings` is enabled. A `suspected` workload retains its
+note in the benchmark map as mapping rationale but names no instructions, so it
+resolves to no match and does not render. The two annotation call sites require
+at least one instruction before mounting, and `TableInstructionSets.svelte`
+likewise renders only a non-empty badge container. Badge components receive a
+settings snapshot, so saving the popup setting reloads the active Geekbench tab
+to apply it.
 
 `src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized
-payload metadata when available, a compatibility instruction-set string, and
-explicit Geekbench processor/Mac links found in result HTML. It also stores the
-last HTML-derived result-validity check; see [Result validity](result-validity.md).
-Cache keys include
-the Geekbench generation and result ID (`v<generation>:cpu:<resultId>`) so
-results cannot collide across generations. Database version 3 replaces the
-legacy instruction-set-only store with the result-oriented `results` store;
-the old cache is intentionally discarded during that upgrade. Successful reads
-update `lastAccessedAt` on a best-effort basis. Once the cache exceeds 5,000
-results, opportunistic background cleanup removes least-recently-used entries
-until 4,000 remain. Cache writes never prevent otherwise successful page
-annotation, including when an upgrade is blocked by a tab using an older schema.
+payload metadata when available and explicit Geekbench processor/Mac links found
+in rendered system tables. Payload-backed ISA is read only from
+`metadata.instructionSets`; the rendered Geekbench 6 string is never cached. The
+cache also stores the last HTML-derived result-validity check; see
+[Result validity](result-validity.md). Cache keys include the Geekbench generation
+and result ID (`v<generation>:cpu:<resultId>`) so results cannot collide across
+generations. Database version 3 replaces the legacy instruction-set-only store
+with the result-oriented `results` store; the old cache is intentionally
+discarded during that upgrade. Successful reads update `lastAccessedAt` on a
+best-effort basis. Once the cache exceeds 5,000 results, opportunistic background
+cleanup removes least-recently-used entries until 4,000 remain. Cache writes
+never prevent otherwise successful page annotation, including when an upgrade is
+blocked by a tab using an older schema.
 
 Canonical-link parsing lives in `src/geekbench/processorLinks.ts`. It accepts
 only same-origin `/processors/<slug>` and `/macs/<slug>` paths from system tables.
@@ -144,22 +195,19 @@ public result is available.
 
 - Exact benchmark display names are keys in the benchmark map.
 - Comparison parsing depends on row classes and relative row ordering.
-- Geekbench rejects both GB6 comparison HTML requests and GB7 `.gb6` payload
-  requests while a comparison baseline is selected. The comparison adapter
-  therefore clears the baseline once, fetches missing primary and baseline data
-  in parallel, then restores the baseline once in a `finally`.
-- Signed-out Geekbench 5 and 7 visitors cannot load payload metadata. Comparison
-  pages must not clear the selected baseline for either generation when signed
-  out; Geekbench 6 is the sole public HTML fallback.
-- Geekbench 7 instruction data requires being signed in; logged-out pages carry
-  none at all. The comparison adapter therefore skips fetching entirely for a
-  signed-out Geekbench 7 visitor rather than disturbing the baseline for a
-  request that cannot succeed. Recheck this whenever a new Geekbench version
-  ships: if logged-out pages start exposing instruction sets again — either as a
-  rendered Instruction Sets row or in a payload readable while signed out — then
-  the skip becomes a silent regression that hides data GeekLens could show.
-  Re-verify against a logged-out single result and comparison page, and prefer
-  reading the row directly over fetching, as Geekbench 6 does.
+- Geekbench rejects payload and result-validity requests while a comparison
+  baseline is selected. When either source is needed, the comparison adapter
+  clears the baseline once, loads missing lanes in parallel, then restores the
+  baseline once in a `finally`.
+- Signed-out visitors cannot load payload metadata for any supported generation.
+  Comparisons use cached payload metadata when present and otherwise remain
+  limited; they never substitute rendered result HTML for ISA. A stale validity
+  check may still require a baseline-clear window because validity is an
+  independent Browser-side source.
+- Geekbench 6.4+ single-result HTML is the sole public ISA fallback. Recheck this
+  whenever a new Geekbench version ships: if another page shape exposes an
+  Instruction Sets row or payloads become public, make that source policy
+  explicit rather than silently widening the Geekbench 6 branch.
 - The popup settings use synchronized browser storage, while result metadata uses
   page-origin IndexedDB.
 - Settings are consumed by badge components.

@@ -1,6 +1,7 @@
 import browser from './browserApi';
 import { parseGeekbenchGeneration } from './geekbench/generation';
 import { BROWSER_HOST } from './geekbench/urls';
+import { debugLog } from './logger';
 
 /**
  * Parsed rather than pattern-matched so the supported generations stay defined
@@ -16,7 +17,7 @@ function isSupportedGeekbenchUrl(url: string): boolean {
 }
 
 browser.runtime.onInstalled.addListener((details) => {
-  console.log('Extension installed:', details);
+  debugLog('Extension installed', details);
   // Hide action by default
   browser.action.disable();
 });

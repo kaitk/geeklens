@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { parseHTML } from 'linkedom';
 import type { Settings } from '../settings/settings';
+import type { ProcessorContextViewModel } from './processorContext/model';
 import {
   renderComparisonProcessorContext,
   renderSingleProcessorContext,
-  type ProcessorContextViewModel,
-} from './processorContextUi';
+} from './processorContext/render';
 
 function model(name: string, vendor: string, architecture: string): ProcessorContextViewModel {
   return {
@@ -46,12 +46,12 @@ function settings(showProcessorSummary: boolean, overrides: Partial<Settings> = 
 }
 
 function withFrequency(
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
   minGHz: number,
   maxGHz: number,
 ): ProcessorContextViewModel {
   return {
-    ...preview,
+    ...viewModel,
     frequency: {
       minGHz,
       q1GHz: minGHz + (maxGHz - minGHz) * 0.25,
@@ -75,11 +75,11 @@ beforeEach(() => {
 describe('processor context DOM integration', () => {
   test('replaces the native single-result processor cell once', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
-    preview.cataloguePath = 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x3d';
+    const viewModel = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    viewModel.cataloguePath = 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x3d';
 
-    renderSingleProcessorContext(preview, settings(true));
-    renderSingleProcessorContext(preview, settings(true));
+    renderSingleProcessorContext(viewModel, settings(true));
+    renderSingleProcessorContext(viewModel, settings(true));
 
     const cell = document
       .querySelectorAll('table.system-table')[1]
@@ -99,10 +99,10 @@ describe('processor context DOM integration', () => {
 
   test('shows the exact reported name only when the presentation was cleaned up', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD Ryzen 9 9950X3D2 16-Core Processor', 'AMD', 'x86');
-    preview.displayName = 'Ryzen 9 9950X3D2';
+    const viewModel = model('AMD Ryzen 9 9950X3D2 16-Core Processor', 'AMD', 'x86');
+    viewModel.displayName = 'Ryzen 9 9950X3D2';
 
-    renderSingleProcessorContext(preview, settings(true));
+    renderSingleProcessorContext(viewModel, settings(true));
 
     const name = document.querySelector('.geeklens-preview-reported-name');
     expect(name?.firstChild?.textContent).toBe('Ryzen 9 9950X3D2');
@@ -136,11 +136,11 @@ describe('processor context DOM integration', () => {
 
   test('renders engineering-sample status as an accessible compact badge', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD Eng Sample: 100-000001535-05', 'AMD', 'x86');
-    preview.displayName = '100-000001535-05';
-    preview.status = 'engineering-sample';
+    const viewModel = model('AMD Eng Sample: 100-000001535-05', 'AMD', 'x86');
+    viewModel.displayName = '100-000001535-05';
+    viewModel.status = 'engineering-sample';
 
-    renderSingleProcessorContext(preview, settings(true));
+    renderSingleProcessorContext(viewModel, settings(true));
 
     const badge = document.querySelector('.geeklens-preview-badge-status');
     expect(badge?.firstChild?.textContent).toBe('ES');
@@ -170,11 +170,11 @@ describe('processor context DOM integration', () => {
 
   test('adds one accessible frequency row below native topology', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = withFrequency(model('AMD Ryzen 7 5800X3D', 'AMD', 'x86'), 4.446, 4.538);
+    const viewModel = withFrequency(model('AMD Ryzen 7 5800X3D', 'AMD', 'x86'), 4.446, 4.538);
     const enabled = settings(true, { showFrequencyDistribution: true });
 
-    renderSingleProcessorContext(preview, enabled);
-    renderSingleProcessorContext(preview, enabled);
+    renderSingleProcessorContext(viewModel, enabled);
+    renderSingleProcessorContext(viewModel, enabled);
 
     const row = document.querySelector('[data-geeklens-preview-detail="frequency"]');
     expect(row?.previousElementSibling?.firstElementChild?.textContent?.trim()).toBe('Topology');
@@ -187,8 +187,8 @@ describe('processor context DOM integration', () => {
 
   test('draws the cluster split proportionally without assigning cluster roles', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.topology = {
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
+    viewModel.topology = {
       cores: 20,
       threads: 28,
       clusters: [
@@ -198,7 +198,7 @@ describe('processor context DOM integration', () => {
     };
 
     renderSingleProcessorContext(
-      preview,
+      viewModel,
       settings(true, { showCoreTopology: true, showMultiCoreScaling: true }),
     );
 
@@ -225,17 +225,17 @@ describe('processor context DOM integration', () => {
 
   test('states core types as a sourced fact, without labelling any segment', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD CPU', 'AMD', 'x86');
+    const viewModel = model('AMD CPU', 'AMD', 'x86');
     // Strix Point's shape: totals but no clusters, so the composition line is the
     // only place core types can appear at all.
-    preview.topology = { cores: 12, threads: 24, clusters: [] };
-    preview.coreComposition = {
+    viewModel.topology = { cores: 12, threads: 24, clusters: [] };
+    viewModel.coreComposition = {
       value: '4 Zen 5 + 8 Zen 5c',
       provenance: 'published',
       source: { url: 'https://example.com/amd', label: 'AMD, retrieved 2026-08-01' },
     };
 
-    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showCoreTopology: true }));
 
     const composition = document.querySelector('[data-geeklens-preview-composition]');
     expect(composition?.firstElementChild?.textContent).toBe('4 Zen 5 + 8 Zen 5c');
@@ -255,10 +255,10 @@ describe('processor context DOM integration', () => {
 
   test('names the clusters in the legend instead of repeating them as a line', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('Intel CPU', 'Intel', 'x86');
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
     // The 13900K's shape: named clusters carry the composition themselves, so
     // the sentence below the bar would be the same fact stated twice.
-    preview.topology = {
+    viewModel.topology = {
       cores: 24,
       threads: 32,
       clusters: [
@@ -266,13 +266,13 @@ describe('processor context DOM integration', () => {
         { cores: 16, maxGHz: 4.3, label: 'Efficient-cores' },
       ],
     };
-    preview.coreComposition = {
+    viewModel.coreComposition = {
       value: '8 Performance-cores + 16 Efficient-cores',
       provenance: 'published',
       source: { url: 'https://example.com/intel', label: 'Wikipedia, retrieved 2026-08-01' },
     };
 
-    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showCoreTopology: true }));
 
     const topology = document.querySelector('.geeklens-preview-topology');
     const entries = Array.from(
@@ -306,8 +306,8 @@ describe('processor context DOM integration', () => {
 
   test('keeps the composition line when only some clusters could be named', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.topology = {
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
+    viewModel.topology = {
       cores: 16,
       threads: 24,
       clusters: [
@@ -315,13 +315,13 @@ describe('processor context DOM integration', () => {
         { cores: 8, maxGHz: 4.3, label: null },
       ],
     };
-    preview.coreComposition = {
+    viewModel.coreComposition = {
       value: '8 Performance-cores + 8 Efficient-cores',
       provenance: 'published',
       source: { url: 'https://example.com/intel', label: 'Wikipedia, retrieved 2026-08-01' },
     };
 
-    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showCoreTopology: true }));
 
     const line = document.querySelector('.geeklens-preview-topology-composition');
     expect(line?.firstElementChild?.textContent).toBe('8 Performance-cores + 8 Efficient-cores');
@@ -334,13 +334,13 @@ describe('processor context DOM integration', () => {
 
   test('flags a disputed L3 total with one affordance, leaving the value alone', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD CPU', 'AMD', 'x86');
-    preview.disputedL3Cache = {
+    const viewModel = model('AMD CPU', 'AMD', 'x86');
+    viewModel.disputedL3Cache = {
       detail: 'Geekbench multiplies one die’s L3 by the die count. It is published as 128 MB.',
       source: { url: 'https://example.com/zen5', label: 'Wikipedia, retrieved 2026-08-01' },
     };
 
-    renderSingleProcessorContext(preview, settings(true));
+    renderSingleProcessorContext(viewModel, settings(true));
 
     const row = Array.from(document.querySelectorAll('table.system-table tbody tr')).find(
       (candidate) => candidate.firstElementChild?.textContent?.trim() === 'L3 Cache',
@@ -375,8 +375,8 @@ describe('processor context DOM integration', () => {
 
   test('drops the dispute if the reported cache stops being a per-die total', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD CPU', 'AMD', 'x86');
-    preview.disputedL3Cache = {
+    const viewModel = model('AMD CPU', 'AMD', 'x86');
+    viewModel.disputedL3Cache = {
       detail: 'Geekbench multiplies one die’s L3 by the die count. It is published as 128 MB.',
       source: { url: 'https://example.com/zen5', label: 'Wikipedia, retrieved 2026-08-01' },
     };
@@ -387,7 +387,7 @@ describe('processor context DOM integration', () => {
     );
     row!.lastElementChild!.textContent = '128 MB';
 
-    renderSingleProcessorContext(preview, settings(true));
+    renderSingleProcessorContext(viewModel, settings(true));
 
     expect(document.querySelector('[data-geeklens-row-marker="disputed"]')).toBeNull();
   });
@@ -417,8 +417,8 @@ describe('processor context DOM integration', () => {
 
   test('omits the composition line when no catalogue entry supplies one', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.topology = {
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
+    viewModel.topology = {
       cores: 8,
       threads: 8,
       clusters: [
@@ -427,7 +427,7 @@ describe('processor context DOM integration', () => {
       ],
     };
 
-    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showCoreTopology: true }));
 
     expect(document.querySelector('[data-geeklens-preview-composition]')).toBeNull();
     expect(document.querySelector('.geeklens-preview-topology')?.textContent).not.toMatch(
@@ -436,21 +436,21 @@ describe('processor context DOM integration', () => {
   });
 
   test('gates the topology row and the scaling note independently', async () => {
-    const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.topology = { cores: 8, threads: 16, clusters: [] };
-    preview.scaling = { ratio: 5.5, singleCore: 2000, multiCore: 11000 };
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
+    viewModel.topology = { cores: 8, threads: 16, clusters: [] };
+    viewModel.scaling = { ratio: 5.5, singleCore: 2000, multiCore: 11000 };
     const multiCoreTable =
       '<table class="table benchmark-table"><thead><tr><th class="name">Multi-Core Score</th><th class="score">11000</th></tr></thead><tbody></tbody></table>';
 
     globalThis.document = await fixture('geekbench7-single.html');
     document.body.insertAdjacentHTML('beforeend', multiCoreTable);
-    renderSingleProcessorContext(preview, settings(true, { showCoreTopology: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showCoreTopology: true }));
     expect(document.querySelector('.geeklens-preview-topology')).not.toBeNull();
     expect(document.querySelector('[data-geeklens-preview-scaling]')).toBeNull();
 
     globalThis.document = await fixture('geekbench7-single.html');
     document.body.insertAdjacentHTML('beforeend', multiCoreTable);
-    renderSingleProcessorContext(preview, settings(true, { showMultiCoreScaling: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showMultiCoreScaling: true }));
     expect(document.querySelector('.geeklens-preview-topology')).toBeNull();
     expect(document.querySelector('[data-geeklens-preview-scaling]')).not.toBeNull();
   });
@@ -475,10 +475,10 @@ describe('processor context DOM integration', () => {
       'beforeend',
       '<table class="table benchmark-table"><thead><tr class="stacked-heading"><th class="name">Multi-Core Score</th><th class="score">14500</th><th class="graph"></th></tr></thead><tbody></tbody></table>',
     );
-    const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
-    preview.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
-    preview.reference = {
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
+    viewModel.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    viewModel.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
+    viewModel.reference = {
       singleCore: 1900,
       multiCore: 14000,
       generation: 'Geekbench 7',
@@ -489,8 +489,8 @@ describe('processor context DOM integration', () => {
       showReferenceComparison: true,
     });
 
-    renderSingleProcessorContext(preview, enabled);
-    renderSingleProcessorContext(preview, enabled);
+    renderSingleProcessorContext(viewModel, enabled);
+    renderSingleProcessorContext(viewModel, enabled);
 
     const notes = document.querySelectorAll('[data-geeklens-preview-scaling]');
     expect(notes).toHaveLength(1);
@@ -516,17 +516,17 @@ describe('processor context DOM integration', () => {
       'beforeend',
       '<div class="score-container desktop"><div class="score">2000</div></div><div class="score-container desktop"><div class="score">14500</div></div>',
     );
-    const preview = model('Intel CPU', 'Intel', 'x86');
-    preview.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
-    preview.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
-    preview.reference = {
+    const viewModel = model('Intel CPU', 'Intel', 'x86');
+    viewModel.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    viewModel.cataloguePath = 'https://browser.geekbench.com/processors/intel-cpu';
+    viewModel.reference = {
       singleCore: 1900,
       multiCore: 14000,
       generation: 'Geekbench 7',
     };
 
     renderSingleProcessorContext(
-      preview,
+      viewModel,
       settings(true, {
         showMultiCoreScaling: true,
         showReferenceComparison: true,
@@ -732,8 +732,8 @@ describe('processor context DOM integration', () => {
       'beforeend',
       '<table class="system-table"><thead><tr><th>Memory Information</th></tr></thead><tbody><tr><td>Size</td><td>32 GB</td></tr></tbody></table>',
     );
-    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
-    preview.memory = [
+    const viewModel = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    viewModel.memory = [
       { kind: 'capacity', value: '32 GB', provenance: 'reported' },
       {
         kind: 'specification',
@@ -756,7 +756,7 @@ describe('processor context DOM integration', () => {
       },
     ];
 
-    renderSingleProcessorContext(preview, settings(true, { showMemoryDetails: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showMemoryDetails: true }));
 
     const memory = document.querySelector('[data-geeklens-preview-memory]');
     expect(memory?.querySelector('.geeklens-preview-memory-summary')?.textContent).toBe(
@@ -793,10 +793,10 @@ describe('processor context DOM integration', () => {
       'beforeend',
       '<table class="system-table"><thead><tr><th>Memory Information</th></tr></thead><tbody><tr><td>Size</td><td>32 GB</td></tr></tbody></table>',
     );
-    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
-    preview.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
+    const viewModel = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    viewModel.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
 
-    renderSingleProcessorContext(preview, settings(true, { showMemoryDetails: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showMemoryDetails: true }));
 
     const memory = document.querySelector('[data-geeklens-preview-memory]');
     expect(memory?.querySelector('.geeklens-preview-memory-summary')?.textContent).toBe('32 GB');
@@ -809,13 +809,13 @@ describe('processor context DOM integration', () => {
       'beforeend',
       '<table class="system-table"><thead><tr><th>Memory Information</th></tr></thead><tbody><tr><td>Size</td><td>32 GB</td></tr></tbody></table>',
     );
-    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
-    preview.memory = [
+    const viewModel = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    viewModel.memory = [
       { kind: 'capacity', value: '32 GB', provenance: 'reported' },
       { kind: 'bandwidth', value: '57.6 GB/s', provenance: 'computed' },
     ];
 
-    renderSingleProcessorContext(preview, settings(true, { showMemoryDetails: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showMemoryDetails: true }));
 
     expect(document.querySelector('.geeklens-preview-memory-bandwidth')?.textContent).toBe(
       'Calculated bandwidth57.6 GB/s',
@@ -851,16 +851,16 @@ describe('processor context DOM integration', () => {
 
   test('renders reference averages and signed deltas only when reference data exists', async () => {
     globalThis.document = await fixture('geekbench7-single.html');
-    const preview = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
-    preview.cataloguePath = 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x3d';
-    preview.reference = {
+    const viewModel = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    viewModel.cataloguePath = 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x3d';
+    viewModel.reference = {
       singleCore: 2000,
       multiCore: 10000,
       generation: 'Geekbench 7',
       minimumUniqueResults: 5,
     };
 
-    renderSingleProcessorContext(preview, settings(true, { showReferenceComparison: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showReferenceComparison: true }));
 
     const references = document.querySelectorAll('[data-geeklens-preview-reference]');
     expect(references.length).toBeGreaterThan(0);
@@ -870,10 +870,10 @@ describe('processor context DOM integration', () => {
 
   test('omits unavailable averages when the result generation has no average dataset', async () => {
     globalThis.document = await fixture('geekbench6-single.html');
-    const preview = model('AMD Ryzen 9 9950X', 'AMD', 'x86');
-    preview.hasReferenceDataset = false;
+    const viewModel = model('AMD Ryzen 9 9950X', 'AMD', 'x86');
+    viewModel.hasReferenceDataset = false;
 
-    renderSingleProcessorContext(preview, settings(true, { showReferenceComparison: true }));
+    renderSingleProcessorContext(viewModel, settings(true, { showReferenceComparison: true }));
 
     expect(document.querySelector('[data-geeklens-preview-reference]')).toBeNull();
     expect(document.body.textContent).not.toContain('avg unavailable');
@@ -881,10 +881,10 @@ describe('processor context DOM integration', () => {
 
   test('renders processor context against the captured Geekbench 5 table shape', async () => {
     globalThis.document = await fixture('geekbench5-single.html');
-    const preview = model('AMD Ryzen 7 7700X 8-Core Processor', 'AMD', 'x86');
-    preview.hasReferenceDataset = false;
-    preview.hasReportedMemoryTransferRate = false;
-    preview.frequency = {
+    const viewModel = model('AMD Ryzen 7 7700X 8-Core Processor', 'AMD', 'x86');
+    viewModel.hasReferenceDataset = false;
+    viewModel.hasReportedMemoryTransferRate = false;
+    viewModel.frequency = {
       minGHz: 5.365,
       q1GHz: 5.433,
       medianGHz: 5.441,
@@ -892,10 +892,10 @@ describe('processor context DOM integration', () => {
       q3GHz: 5.448,
       maxGHz: 5.463,
     };
-    preview.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
+    viewModel.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
 
     renderSingleProcessorContext(
-      preview,
+      viewModel,
       settings(true, {
         showFrequencyDistribution: true,
         showMemoryDetails: true,

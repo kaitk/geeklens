@@ -99,8 +99,9 @@ confirmation without reproducible traces or a primary source.
 ## Current per-workload mappings
 
 Geekbench 7 mappings that name instructions are marked `inferred` and display an
-amber warning in the extension. Workloads marked `suspected` display the same
-warning with no instruction names; they are listed separately below.
+amber warning in the extension when mapping warnings are enabled. Workloads
+marked `suspected` name no instructions and do not render; their notes are
+retained here and in the benchmark map as rationale for future investigation.
 
 ### File Compression
 

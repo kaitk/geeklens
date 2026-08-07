@@ -2,14 +2,14 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import webExtension, { readJsonFile } from 'vite-plugin-web-extension';
 
-function generateManifest() {
+export function generateManifest() {
   const manifest = readJsonFile('src/manifest.json');
   const pkg = readJsonFile('package.json');
   return {
+    ...manifest,
     name: pkg.name,
     description: pkg.description,
     version: pkg.version,
-    ...manifest,
   };
 }
 
@@ -32,6 +32,7 @@ export default defineConfig({
         target: browser === 'firefox' ? 'firefox-desktop' : 'chromium',
         startUrl: [
           'https://browser.geekbench.com/v5/cpu/18449406',
+          'https://browser.geekbench.com/v6/cpu/16897404',
           'https://browser.geekbench.com/v7/cpu/1248',
         ],
       },

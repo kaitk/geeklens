@@ -1,19 +1,24 @@
 export function waitForElement(selector: string, timeout = 5000): Promise<Element> {
   return new Promise((resolve, reject) => {
-    if (document.querySelector(selector)) {
-      return resolve(document.querySelector(selector) as Element);
+    const existingElement = document.querySelector(selector);
+    if (existingElement) {
+      resolve(existingElement);
+      return;
     }
 
+    let timeoutId: ReturnType<typeof setTimeout>;
     const observer = new MutationObserver(() => {
-      if (document.querySelector(selector)) {
+      const element = document.querySelector(selector);
+      if (element) {
         observer.disconnect();
-        resolve(document.querySelector(selector) as Element);
+        clearTimeout(timeoutId);
+        resolve(element);
       }
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
 
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       observer.disconnect();
       reject(new Error(`Timeout waiting for element: ${selector}`));
     }, timeout);
@@ -61,20 +66,6 @@ export function findSystemTableByHeading(
       (table) => table.querySelector('th')?.textContent?.trim() === heading,
     ) ?? null
   );
-}
-
-export function getComparisonVersions(root: ParentNode = document): {
-  primary: string | null;
-  baseline: string | null;
-} {
-  const versionRow = root.querySelector('tr.version');
-  const primaryCell = versionRow?.querySelector('td.document-version');
-  const baselineCell = primaryCell?.nextElementSibling;
-
-  return {
-    primary: primaryCell?.textContent?.trim() || null,
-    baseline: baselineCell?.textContent?.trim() || null,
-  };
 }
 
 export function findComparisonScoreRow(
