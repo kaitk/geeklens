@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from 'bun:test';
 
 let stored: Record<string, unknown> = {};
+let saveError: Error | null = null;
 
 mock.module('../browserApi', () => ({
   default: {
@@ -8,6 +9,7 @@ mock.module('../browserApi', () => ({
       sync: {
         get: async () => stored,
         set: async (values: Record<string, unknown>) => {
+          if (saveError) throw saveError;
           stored = { ...stored, ...values };
         },
       },
@@ -15,7 +17,7 @@ mock.module('../browserApi', () => ({
   },
 }));
 
-const { defaultSettings, loadSettings } = await import('./settings');
+const { defaultSettings, loadSettings, saveSettings } = await import('./settings');
 
 describe('loadSettings', () => {
   test('never hands back the shared defaults object', async () => {
@@ -78,5 +80,17 @@ describe('loadSettings', () => {
     expect(settings.showMemoryDetails).toBe(true);
     expect(settings.showReferenceComparison).toBe(true);
     expect(settings.showIsaAnnotations).toBe(true);
+  });
+});
+
+describe('saveSettings', () => {
+  test('rejects when synchronized storage fails', async () => {
+    saveError = new Error('storage unavailable');
+
+    await expect(saveSettings({ ...defaultSettings, tooltips: false })).rejects.toThrow(
+      'storage unavailable',
+    );
+
+    saveError = null;
   });
 });

@@ -24,7 +24,7 @@ import {
 import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
 import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache, type CachedResultContext } from '../cache/ResultsCache';
-import { loadSettings } from '../settings/settings';
+import type { Settings } from '../settings/settings';
 import { markRowLabel } from './rowMarker';
 import {
   applyProcessorContextPreferences,
@@ -33,7 +33,7 @@ import {
 import { buildProcessorContextViewModel } from './processorContextViewModel';
 
 // Main function to annotate the Geekbench results
-export async function annotateGeekbenchResults() {
+export async function annotateGeekbenchResults(settings: Settings) {
   if (isPageAnnotated()) {
     return; // page already annotated
   }
@@ -49,7 +49,6 @@ export async function annotateGeekbenchResults() {
   // Wait for benchmark tables to ensure page is fully rendered
   try {
     await waitForElement('table.benchmark-table');
-    const settings = await loadSettings();
     applyProcessorContextPreferences(settings);
     const context = await getResultContext(generation, resultId, signedOut);
     const instructionSets = context?.instructionSet ?? null;
@@ -65,8 +64,8 @@ export async function annotateGeekbenchResults() {
     }
 
     if (settings.showIsaAnnotations) {
-      annotateSystemInstructionSets(generation, instructionSets);
-      annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets));
+      annotateSystemInstructionSets(generation, instructionSets, settings);
+      annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets), settings);
     }
     showStatus(singleResultInstructionStatus(generation, true));
   } catch (error) {
@@ -139,7 +138,11 @@ function hasProcessorLinks(links: CanonicalProcessorLinks): boolean {
   return Boolean(links.processorPath || links.macPath);
 }
 
-function annotateSystemInstructionSets(generation: GeekbenchGeneration, instructionSets: string) {
+function annotateSystemInstructionSets(
+  generation: GeekbenchGeneration,
+  instructionSets: string,
+  settings: Settings,
+) {
   const valueCell =
     generation === 6 ? findInstructionSetValueCell() : insertGeekbench7InstructionSetRow();
   if (!valueCell || valueCell.querySelector('[data-geeklens-system-info]')) return;
@@ -151,7 +154,7 @@ function annotateSystemInstructionSets(generation: GeekbenchGeneration, instruct
   }
 
   valueCell.textContent = '';
-  mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets));
+  mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets), settings);
 }
 
 function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
@@ -179,6 +182,7 @@ function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
 function annotateBenchmarkTables(
   generation: GeekbenchGeneration,
   allSupportedInstructions: Set<string>,
+  settings: Settings,
 ) {
   const benchmarkTables = findBenchmarkTables();
 
@@ -208,7 +212,7 @@ function annotateBenchmarkTables(
         return;
       }
 
-      mountWorkloadBadges(benchmarkCell, instructions, confidenceNote);
+      mountWorkloadBadges(benchmarkCell, instructions, settings, confidenceNote);
     });
   });
 }

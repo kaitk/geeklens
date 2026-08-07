@@ -33,7 +33,7 @@ import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache } from '../cache/ResultsCache';
 import type { CachedResultContext } from '../cache/ResultsCache';
 import { withClearedComparisonBaseline } from './comparisonBaseline';
-import { loadSettings } from '../settings/settings';
+import type { Settings } from '../settings/settings';
 import { markRowLabel } from './rowMarker';
 import {
   applyProcessorContextPreferences,
@@ -188,7 +188,7 @@ async function cacheProcessorLinks(
 }
 
 // Main function to annotate the comparison page
-export async function annotateGeekbenchComparisonPage() {
+export async function annotateGeekbenchComparisonPage(settings: Settings) {
   if (isPageAnnotated()) {
     return; // page already annotated
   }
@@ -220,7 +220,6 @@ export async function annotateGeekbenchComparisonPage() {
       resultsCache.getResultContext(generation, baseline),
     ]);
     await waitForElement('table.comparison-benchmark-table');
-    const settings = await loadSettings();
     applyProcessorContextPreferences(settings);
     const processorLinks = extractComparisonProcessorLinks();
 
@@ -320,13 +319,14 @@ export async function annotateGeekbenchComparisonPage() {
 
     // If at least one CPU has instruction sets, we can proceed
     if (settings.showIsaAnnotations && (primaryInstructions || baselineInstructions)) {
-      annotateSystemInstructionSets(primaryInstructions, baselineInstructions);
+      annotateSystemInstructionSets(primaryInstructions, baselineInstructions, settings);
 
       // Annotate benchmark tables with instruction sets for each CPU
       annotateBenchmarkTables(
         generation,
         extractIndividualInstructions(primaryInstructions),
         extractIndividualInstructions(baselineInstructions),
+        settings,
       );
     }
 
@@ -369,6 +369,7 @@ function mergeContextLinks(
 function annotateSystemInstructionSets(
   primaryInstructions: string | null,
   baselineInstructions: string | null,
+  settings: Settings,
 ) {
   if (!primaryInstructions && !baselineInstructions) {
     console.error('GeekLens: No instruction sets available');
@@ -399,7 +400,7 @@ function annotateSystemInstructionSets(
     newRow.appendChild(cell);
 
     if (instructionSets) {
-      mountSystemInstructionSets(cell, categorizeInstructionSets(instructionSets));
+      mountSystemInstructionSets(cell, categorizeInstructionSets(instructionSets), settings);
     } else {
       cell.textContent = 'Not available';
     }
@@ -414,6 +415,7 @@ function annotateBenchmarkTables(
   generation: GeekbenchGeneration,
   primaryInstructions: Set<string>,
   baselineInstructions: Set<string>,
+  settings: Settings,
 ) {
   const benchmarkTables = findBenchmarkTables('table.comparison-benchmark-table');
 
@@ -426,12 +428,12 @@ function annotateBenchmarkTables(
     // Annotate primary CPU rows
     table
       .querySelectorAll('tr.document-graph')
-      .forEach((row) => annotateGraphRow(generation, row, primaryInstructions, false));
+      .forEach((row) => annotateGraphRow(generation, row, primaryInstructions, false, settings));
 
     // Annotate baseline CPU rows
     table
       .querySelectorAll('tr.baseline-graph')
-      .forEach((row) => annotateGraphRow(generation, row, baselineInstructions, true));
+      .forEach((row) => annotateGraphRow(generation, row, baselineInstructions, true, settings));
   });
 }
 
@@ -440,6 +442,7 @@ function annotateGraphRow(
   row: Element,
   cpuInstructions: Set<string>,
   isBaseline: boolean,
+  settings: Settings,
 ) {
   // Get the previous score row to determine the benchmark. Summary rows
   // (Single-/Multi-Core Score) have no `.scores` row and are skipped here.
@@ -469,5 +472,5 @@ function annotateGraphRow(
     return;
   }
 
-  mountWorkloadBadges(cpuCell, instructions, confidenceNote);
+  mountWorkloadBadges(cpuCell, instructions, settings, confidenceNote);
 }

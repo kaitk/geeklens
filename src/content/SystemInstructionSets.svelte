@@ -1,15 +1,14 @@
 <script lang="ts">
   import { instructionsByName, type InstructionCategory } from '../isa/instructions';
-  import { getSettingsStore } from '../settings/settings-store.svelte';
+  import type { BadgePresentationPreferences } from './mountBadges';
   import InstructionBadge from './InstructionBadge.svelte';
 
   interface Props {
     instructionGroups: Record<InstructionCategory, string[]>;
+    preferences: BadgePresentationPreferences;
   }
 
-  const { instructionGroups }: Props = $props();
-
-  let settingsStore = getSettingsStore();
+  const { instructionGroups, preferences }: Props = $props();
 
   /** Groups the system box never renders.
    *
@@ -40,7 +39,8 @@
         <InstructionBadge
           {instruction}
           {groupType}
-          description={settingsStore.value.tooltips
+          coloredBadges={preferences.coloredBadges}
+          description={preferences.tooltips
             ? instructionsByName[instruction]?.description
             : undefined}
         />

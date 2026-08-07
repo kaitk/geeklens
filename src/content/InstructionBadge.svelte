@@ -1,33 +1,38 @@
 <script lang="ts">
   import { getCategoryStyle } from '../isa/badgeColors';
   import type { InstructionCategory } from '../isa/instructions';
-  import { getSettingsStore } from '../settings/settings-store.svelte';
 
   interface Props {
     instruction: string;
     groupType: InstructionCategory;
     description?: string;
+    coloredBadges: boolean;
   }
 
-  const { instruction, groupType, description }: Props = $props();
-  let settingsStore = getSettingsStore();
+  const { instruction, groupType, description, coloredBadges }: Props = $props();
+  const tooltipId = `geeklens-instruction-tooltip-${crypto.randomUUID()}`;
 
-  const { backgroundColor, color } = $derived(
-    getCategoryStyle(groupType, settingsStore.value.coloredBadges),
-  );
+  const { backgroundColor, color } = $derived(getCategoryStyle(groupType, coloredBadges));
 </script>
 
-<span
-  class="gb-instruction-badge"
-  style="background-color: {backgroundColor}; color: {color}; cursor: {description
-    ? 'help'
-    : 'default'}"
->
-  {instruction}
-  {#if description}
-    <span class="gb-instruction-tooltip">{description}</span>
-  {/if}
-</span>
+{#if description}
+  <button
+    type="button"
+    class="gb-instruction-badge"
+    aria-describedby={tooltipId}
+    style="background-color: {backgroundColor}; color: {color}; cursor: help"
+  >
+    {instruction}
+    <span id={tooltipId} role="tooltip" class="gb-instruction-tooltip">{description}</span>
+  </button>
+{:else}
+  <span
+    class="gb-instruction-badge"
+    style="background-color: {backgroundColor}; color: {color}; cursor: default"
+  >
+    {instruction}
+  </span>
+{/if}
 
 <style>
   .gb-instruction-badge {
@@ -39,6 +44,9 @@
     font-size: 10px;
     font-weight: 500;
     position: relative;
+    border: 0;
+    font-family: inherit;
+    line-height: inherit;
   }
 
   .gb-instruction-tooltip {
@@ -75,7 +83,13 @@
     border-top-color: #6c757d;
   }
 
-  .gb-instruction-badge:hover .gb-instruction-tooltip {
+  .gb-instruction-badge:hover .gb-instruction-tooltip,
+  .gb-instruction-badge:focus .gb-instruction-tooltip {
     visibility: visible;
+  }
+
+  .gb-instruction-badge:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
   }
 </style>

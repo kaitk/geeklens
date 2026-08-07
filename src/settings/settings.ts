@@ -60,10 +60,11 @@ export async function loadSettings(): Promise<Settings> {
 }
 
 // Save settings
-export async function saveSettings(settings: Settings) {
+export async function saveSettings(settings: Settings): Promise<void> {
   try {
     await browser.storage.sync.set({ geekLensSettings: settings });
   } catch (e) {
     console.error('Failed to save settings:', e);
+    throw e;
   }
 }

@@ -1,20 +1,19 @@
 <script lang="ts">
   import type { Instruction } from '../isa/instructions';
-  import { getSettingsStore } from '../settings/settings-store.svelte';
+  import type { BadgePresentationPreferences } from './mountBadges';
   import InstructionBadge from './InstructionBadge.svelte';
 
   interface Props {
     instructions: Instruction[];
     confidenceNote?: string;
+    preferences: BadgePresentationPreferences;
   }
 
-  const { instructions, confidenceNote }: Props = $props();
-
-  let settingsStore = getSettingsStore();
+  const { instructions, confidenceNote, preferences }: Props = $props();
 
   // The warning only ever qualifies badges that are present; a workload with no
   // instructions to name resolves to no match and never reaches this component.
-  const showWarning = $derived(Boolean(confidenceNote) && settingsStore.value.mappingWarnings);
+  const showWarning = $derived(Boolean(confidenceNote) && preferences.mappingWarnings);
   const showContainer = $derived(instructions.length > 0);
 </script>
 
@@ -24,7 +23,8 @@
       <InstructionBadge
         instruction={instruction.name}
         groupType={instruction.category}
-        description={settingsStore.value.tooltips ? instruction.description : undefined}
+        coloredBadges={preferences.coloredBadges}
+        description={preferences.tooltips ? instruction.description : undefined}
       />
     {/each}
     {#if showWarning}
