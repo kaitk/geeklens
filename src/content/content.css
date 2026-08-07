@@ -87,6 +87,46 @@ table.system-information td {
   color: #426b14;
 }
 
+/* Match the prominence of Geekbench's result-page validity label without
+ * changing the compact processor-context badges that share this palette. */
+.geeklens-result-validity-badge {
+  min-height: 24px;
+  padding: 3px 8px;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+.geeklens-result-validity-cell {
+  text-align: right;
+}
+
+.geeklens-result-validity-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.geeklens-summary-validity-badge {
+  min-height: 14px;
+  padding: 1px 4px;
+  font-size: 9px;
+  line-height: 10px;
+  vertical-align: baseline;
+}
+
+.geeklens-result-validity-badge,
+.geeklens-summary-validity-badge {
+  position: relative;
+  cursor: help;
+  outline: none;
+}
+
+.geeklens-result-validity-badge:hover > .geeklens-result-validity-tooltip,
+.geeklens-result-validity-badge:focus > .geeklens-result-validity-tooltip,
+.geeklens-summary-validity-badge:hover > .geeklens-result-validity-tooltip,
+.geeklens-summary-validity-badge:focus > .geeklens-result-validity-tooltip {
+  visibility: visible;
+}
+
 /* Samsung, MediaTek, and any future secondary vendor deliberately have no rule
  * and inherit the neutral badge above. The badge prints the vendor name, so
  * colour is decoration rather than the identifier, and a Samsung black would sit

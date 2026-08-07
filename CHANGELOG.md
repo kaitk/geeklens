@@ -1,8 +1,6 @@
 # Changelog
 
-## [Unreleased]
-
-## [v0.7.0] - 2026-08-07
+## [v0.7.0] - Unreleased
 
 ### Added
 
@@ -10,6 +8,8 @@
   including processor identity, topology and multi-core scaling, frequency
   distributions, and memory details.
 - Extended the same processor-context information to Geekbench 6 pages.
+- Added result validity indicators and explanations to CPU comparison pages 
+  (without GeekLens these are only available on single result pages).
 
 ### Notes
 

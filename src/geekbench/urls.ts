@@ -4,6 +4,12 @@ export const BROWSER_HOST = 'browser.geekbench.com';
 
 export const BROWSER_ORIGIN = `https://${BROWSER_HOST}`;
 
+/** Public rendered result page, including Browser-side validity warnings that
+ * are not reflected in the downloadable benchmark payload. */
+export function resultPageUrl(generation: GeekbenchGeneration, resultId: string): string {
+  return `${BROWSER_ORIGIN}/v${generation}/cpu/${encodeURIComponent(resultId)}`;
+}
+
 /**
  * Geekbench Browser URL shapes. These are an external interface: they are not
  * documented and are only known from observed behaviour, so keep every literal

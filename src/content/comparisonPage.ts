@@ -41,6 +41,12 @@ import {
 } from './processorContextUi';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
 import { needsComparisonResultFetch } from './comparisonFetch';
+import {
+  combinePayloadValidity,
+  isResultValidityFresh,
+  loadBrowserResultValidity,
+  renderComparisonResultValidity,
+} from './comparisonValidity';
 
 // Extract result IDs from the URL
 function extractResultIds(): { baseline: string | null; primary: string | null } {
@@ -247,38 +253,65 @@ export async function annotateGeekbenchComparisonPage() {
     });
     const needsFetch = needsPrimaryFetch || needsBaselineFetch;
     const cannotFetch = signedOut && generation !== 6;
+    let validity = [primaryCached?.validity ?? null, baselineCached?.validity ?? null];
+    let checkedValidity = false;
+    const needsValidityFetch = validity.some((value) => !isResultValidityFresh(value));
 
     if (needsFetch && !cannotFetch) {
       await withClearedComparisonBaseline(generation, primary, baseline, async () => {
-        [primaryContext, baselineContext] = await Promise.all([
-          needsPrimaryFetch
-            ? loadResultContext(
-                generation,
-                primary,
-                primaryVersion,
-                primaryCached,
-                processorLinks.primary,
-                signedOut,
-              )
-            : primaryContext,
-          needsBaselineFetch
-            ? loadResultContext(
-                generation,
-                baseline,
-                baselineVersion,
-                baselineCached,
-                processorLinks.baseline,
-                signedOut,
-              )
-            : baselineContext,
+        [[primaryContext, baselineContext], validity] = await Promise.all([
+          Promise.all([
+            needsPrimaryFetch
+              ? loadResultContext(
+                  generation,
+                  primary,
+                  primaryVersion,
+                  primaryCached,
+                  processorLinks.primary,
+                  signedOut,
+                )
+              : primaryContext,
+            needsBaselineFetch
+              ? loadResultContext(
+                  generation,
+                  baseline,
+                  baselineVersion,
+                  baselineCached,
+                  processorLinks.baseline,
+                  signedOut,
+                )
+              : baselineContext,
+          ]),
+          Promise.all([
+            loadBrowserResultValidity(generation, primary, primaryCached?.validity),
+            loadBrowserResultValidity(generation, baseline, baselineCached?.validity),
+          ]),
         ]);
+        checkedValidity = true;
         primaryInstructions = primaryContext?.instructionSet ?? null;
         baselineInstructions = baselineContext?.instructionSet ?? null;
       });
     }
 
+    // Result pages can lose their server-side invalidity alert while a
+    // comparison baseline is selected, so even a cache hit must check inside
+    // the same clear/restore window used by payload requests. Signed-out v5/v7
+    // pages retain the existing no-session-mutation rule.
+    if (!checkedValidity && !cannotFetch && needsValidityFetch) {
+      validity = await withClearedComparisonBaseline(generation, primary, baseline, () =>
+        Promise.all([
+          loadBrowserResultValidity(generation, primary, primaryCached?.validity),
+          loadBrowserResultValidity(generation, baseline, baselineCached?.validity),
+        ]),
+      );
+    }
+
     primaryContext = mergeContextLinks(primaryContext, processorLinks.primary);
     baselineContext = mergeContextLinks(baselineContext, processorLinks.baseline);
+    renderComparisonResultValidity([
+      combinePayloadValidity(validity[0], primaryContext),
+      combinePayloadValidity(validity[1], baselineContext),
+    ]);
     const primaryProcessor = buildProcessorContextViewModel(primaryContext);
     const baselineProcessor = buildProcessorContextViewModel(baselineContext);
     if (primaryProcessor || baselineProcessor) {

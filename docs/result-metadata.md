@@ -29,6 +29,13 @@ The shared Geekbench 5, 6, and 7 presentation includes:
   the submitted run's multi-core/single-core score ratio; and
 - generation-matched Geekbench Browser average scores and signed deltas.
 
+Comparison pages also fetch each rendered result page and add a result-validity
+row when Geekbench displays an invalid-result alert. This cannot come from the
+downloadable payload: observed result `98600` has `valid: 1` at the result,
+section, and workload levels while the Browser invalidates it server-side for a
+timer issue. A failed page fetch remains unavailable rather than being treated
+as valid.
+
 All processor-context controls are independently toggleable and default on.
 Missing or malformed data removes the affected single-result detail; comparison
 pages preserve the native Geekbench value or show that the affected side is

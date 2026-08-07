@@ -11,18 +11,27 @@ const MAX_WRITES_BETWEEN_CLEANUPS = 50;
 export const CACHE_HIGH_WATER_ENTRIES = 5_000;
 export const CACHE_LOW_WATER_ENTRIES = 4_000;
 
+export interface CachedResultValidity {
+  level: 'valid' | 'warning' | 'invalid';
+  message: string;
+  checkedAt: number;
+  source: 'validation-widget-v2';
+}
+
 export interface StoredResultRecord {
   cacheKey: string;
   instructionSet?: string;
   lastAccessedAt: number;
   metadata?: ResultMetadata;
   processorLinks?: CanonicalProcessorLinks;
+  validity?: CachedResultValidity;
 }
 
 export interface CachedResultContext {
   instructionSet: string | null;
   metadata: ResultMetadata | null;
   processorLinks: CanonicalProcessorLinks;
+  validity?: CachedResultValidity | null;
   lastAccessedAt: number;
 }
 
@@ -30,6 +39,7 @@ export interface ResultContextUpdate {
   instructionSet?: string | null;
   metadata?: ResultMetadata | null;
   processorLinks?: CanonicalProcessorLinks;
+  validity?: CachedResultValidity | null;
 }
 
 export interface ResultsCacheOptions {
@@ -43,6 +53,7 @@ export function normalizeStoredResultRecord(record: StoredResultRecord): CachedR
     instructionSet: record.instructionSet || record.metadata?.instructionSets?.value || null,
     metadata: record.metadata ?? null,
     processorLinks: mergeProcessorLinks(null, record.processorLinks),
+    validity: record.validity ?? null,
     lastAccessedAt: record.lastAccessedAt,
   };
 }
@@ -65,6 +76,7 @@ export function mergeStoredResultRecord(
     instructionSet,
     metadata,
     processorLinks: mergeProcessorLinks(existing?.processorLinks, update.processorLinks),
+    validity: update.validity === undefined ? existing?.validity : (update.validity ?? undefined),
     lastAccessedAt,
   };
 }

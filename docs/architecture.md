@@ -86,7 +86,9 @@ content.
 
 `src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized
 payload metadata when available, a compatibility instruction-set string, and
-explicit Geekbench processor/Mac links found in result HTML. Cache keys include
+explicit Geekbench processor/Mac links found in result HTML. It also stores the
+last HTML-derived result-validity check; see [Result validity](result-validity.md).
+Cache keys include
 the Geekbench generation and result ID (`v<generation>:cpu:<resultId>`) so
 results cannot collide across generations. Database version 3 replaces the
 legacy instruction-set-only store with the result-oriented `results` store;
