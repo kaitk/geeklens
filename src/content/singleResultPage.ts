@@ -77,20 +77,28 @@ async function getResultContext(
   const cached = await resultsCache.getResultContext(generation, resultId);
   const processorLinks = mergeProcessorLinks(cached?.processorLinks, extractProcessorLinks());
 
-  // Geekbench 6 renders the instruction sets into the page; Geekbench 7 omits
-  // the row entirely and only exposes them in the authenticated JSON payload.
+  // Geekbench 6 renders instruction sets into the page, so keep that as the
+  // compatibility source even when its authenticated payload is unavailable.
+  // The payload still supplies the processor-context metadata shared with v7.
   if (generation === 6) {
+    const metadata =
+      cached?.metadata ??
+      (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
     const instructionSets =
-      cached?.instructionSet ?? findInstructionSetValueCell()?.textContent?.trim() ?? null;
-    if (instructionSets || hasProcessorLinks(processorLinks)) {
+      cached?.instructionSet ??
+      findInstructionSetValueCell()?.textContent?.trim() ??
+      metadata?.instructionSets?.value ??
+      null;
+    if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
       await resultsCache.storeResultContext(generation, resultId, {
         instructionSet: instructionSets,
+        metadata,
         processorLinks,
       });
     }
     return {
       instructionSet: instructionSets,
-      metadata: cached?.metadata ?? null,
+      metadata,
       processorLinks,
       lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
     };

@@ -94,10 +94,12 @@ async function loadResultContext(
   version: string | null,
   cached: CachedResultContext | null,
   comparisonLinks: CanonicalProcessorLinks,
+  signedOut: boolean,
 ): Promise<CachedResultContext | null> {
   try {
-    // Check if version supports instruction sets
-    if (version && !versionSupportsInstructionSets(version)) {
+    // Older v6 pages have no rendered instruction data, but an authenticated
+    // payload may still carry useful processor metadata.
+    if (signedOut && version && !versionSupportsInstructionSets(version)) {
       console.log(
         `GeekLens: Skipping fetch for ${resultId}, version ${version} doesn't support instruction sets`,
       );
@@ -121,6 +123,28 @@ async function loadResultContext(
       };
     }
 
+    // Geekbench 6 can use the same payload metadata as v7 while retaining its
+    // public HTML instruction-set fallback for signed-out and failed requests.
+    const metadata =
+      cached?.metadata ??
+      (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
+    if (metadata) {
+      const instructionSet = cached?.instructionSet ?? metadata.instructionSets?.value ?? null;
+      const processorLinks = mergeProcessorLinks(cached?.processorLinks, comparisonLinks);
+      await resultsCache.storeResultContext(generation, resultId, {
+        instructionSet,
+        metadata,
+        processorLinks,
+      });
+      return {
+        instructionSet,
+        metadata,
+        processorLinks,
+        lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
+      };
+    }
+
+    if (version && !versionSupportsInstructionSets(version)) return cached;
     if (cached?.instructionSet) return cached;
 
     const fetched = await fetchInstructionSetsFromHtml(generation, resultId);
@@ -133,7 +157,7 @@ async function loadResultContext(
     }
     return {
       instructionSet: fetched.instructionSet,
-      metadata: cached?.metadata ?? null,
+      metadata: null,
       processorLinks,
       lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
     };
@@ -194,8 +218,8 @@ export async function annotateGeekbenchComparisonPage() {
       cacheProcessorLinks(generation, baseline, processorLinks.baseline),
     ]);
 
-    if (generation === 7 && signedOut && (!primaryCached?.metadata || !baselineCached?.metadata)) {
-      console.log('GeekLens: Signed out of Geekbench 7, skipping payload fetch');
+    if (signedOut && (!primaryCached?.metadata || !baselineCached?.metadata)) {
+      console.log(`GeekLens: Signed out of Geekbench ${generation}, skipping payload fetch`);
     }
 
     let primaryContext = primaryCached;
@@ -203,11 +227,19 @@ export async function annotateGeekbenchComparisonPage() {
     let primaryInstructions = primaryContext?.instructionSet ?? null;
     let baselineInstructions = baselineContext?.instructionSet ?? null;
     const needsPrimaryFetch =
-      (generation === 7 ? !primaryCached?.metadata : !primaryInstructions) &&
-      (primaryVersion === null || versionSupportsInstructionSets(primaryVersion));
+      generation === 7
+        ? !primaryCached?.metadata
+        : !signedOut
+          ? !primaryCached?.metadata
+          : !primaryInstructions &&
+            (primaryVersion === null || versionSupportsInstructionSets(primaryVersion));
     const needsBaselineFetch =
-      (generation === 7 ? !baselineCached?.metadata : !baselineInstructions) &&
-      (baselineVersion === null || versionSupportsInstructionSets(baselineVersion));
+      generation === 7
+        ? !baselineCached?.metadata
+        : !signedOut
+          ? !baselineCached?.metadata
+          : !baselineInstructions &&
+            (baselineVersion === null || versionSupportsInstructionSets(baselineVersion));
     const needsFetch = needsPrimaryFetch || needsBaselineFetch;
     const cannotFetch = generation === 7 && signedOut;
 
@@ -221,6 +253,7 @@ export async function annotateGeekbenchComparisonPage() {
                 primaryVersion,
                 primaryCached,
                 processorLinks.primary,
+                signedOut,
               )
             : primaryContext,
           needsBaselineFetch
@@ -230,6 +263,7 @@ export async function annotateGeekbenchComparisonPage() {
                 baselineVersion,
                 baselineCached,
                 processorLinks.baseline,
+                signedOut,
               )
             : baselineContext,
         ]);

@@ -314,6 +314,24 @@ function unavailableReference(): HTMLElement {
   return indicator;
 }
 
+function referenceElement(
+  preview: ProcessorContextViewModel,
+  current: number,
+  scoreKind: 'singleCore' | 'multiCore',
+): HTMLElement | null {
+  const reference = preview.reference;
+  if (reference && preview.cataloguePath) {
+    return referenceLink(
+      current,
+      reference[scoreKind],
+      preview.cataloguePath,
+      reference.generation,
+      reference.minimumUniqueResults,
+    );
+  }
+  return preview.referenceGeneration ? unavailableReference() : null;
+}
+
 function scoreValue(container: ParentNode): number | null {
   const value = Number(container.querySelector('.score')?.textContent?.replaceAll(',', '').trim());
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -328,21 +346,13 @@ function annotateSingleScoreReferences(preview: ProcessorContextViewModel): void
     if (container.querySelector('[data-geeklens-preview-reference]')) return;
     const current = scoreValue(container);
     if (!current) return;
+    const scoreKind = index === 0 ? 'singleCore' : 'multiCore';
+    const reference = referenceElement(preview, current, scoreKind);
+    if (!reference) return;
     const note = document.createElement('div');
     note.dataset.geeklensPreviewReference = '';
     note.className = 'geeklens-preview-reference';
-    const reference = preview.reference;
-    note.appendChild(
-      reference && preview.cataloguePath
-        ? referenceLink(
-            current,
-            index === 0 ? reference.singleCore : reference.multiCore,
-            preview.cataloguePath,
-            reference.generation,
-            reference.minimumUniqueResults,
-          )
-        : unavailableReference(),
-    );
+    note.appendChild(reference);
     container.querySelector('.score')?.appendChild(note);
   });
 }
@@ -360,18 +370,8 @@ function annotateSinglePerformanceReferences(preview: ProcessorContextViewModel)
     const scoreKind = scoreRow.firstElementChild?.textContent?.trim().startsWith('Single-Core')
       ? 'singleCore'
       : 'multiCore';
-    const reference = preview.reference;
-    scoreCell.appendChild(
-      reference && preview.cataloguePath
-        ? referenceLink(
-            current,
-            reference[scoreKind],
-            preview.cataloguePath,
-            reference.generation,
-            reference.minimumUniqueResults,
-          )
-        : unavailableReference(),
-    );
+    const reference = referenceElement(preview, current, scoreKind);
+    if (reference) scoreCell.appendChild(reference);
   }
 }
 
@@ -977,18 +977,8 @@ function annotateComparisonReferences(
           if (!Number.isFinite(current)) return;
           const preview = previews[index];
           if (!preview) return;
-          const reference = preview.reference;
-          cell.appendChild(
-            reference && preview.cataloguePath
-              ? referenceLink(
-                  current,
-                  reference[scoreKind],
-                  preview.cataloguePath,
-                  reference.generation,
-                  reference.minimumUniqueResults,
-                )
-              : unavailableReference(),
-          );
+          const reference = referenceElement(preview, current, scoreKind);
+          if (reference) cell.appendChild(reference);
         });
     }
   }

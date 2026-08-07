@@ -3,19 +3,38 @@ import type { CachedResultContext } from '../cache/ResultsCache';
 import { extractResultMetadata } from '../geekbench/resultPayload';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
 
-async function context(resultId: string): Promise<CachedResultContext> {
+async function context(resultId: string, generation: 6 | 7 = 7): Promise<CachedResultContext> {
   const payload = await Bun.file(
     new URL(`../geekbench/__fixtures__/${resultId}.gb6.json`, import.meta.url),
   ).json();
   return {
     instructionSet: null,
-    metadata: extractResultMetadata(payload, 7),
+    metadata: extractResultMetadata(payload, generation),
     processorLinks: { processorPath: null, macPath: null },
     lastAccessedAt: 1,
   };
 }
 
 describe('buildProcessorContextViewModel', () => {
+  test.each([
+    ['18864843', 'Apple M5 Max', 'Apple', 'ARM'],
+    ['18873252', 'AMD Ryzen 9 9950X', 'AMD', 'x86'],
+  ])('maps Geekbench 6 payload %s into shared processor context', async (id, name, vendor, isa) => {
+    const viewModel = buildProcessorContextViewModel(await context(id, 6));
+
+    expect(viewModel).toMatchObject({
+      name,
+      vendor,
+      architecture: isa,
+      frequency: expect.any(Object),
+      topology: expect.any(Object),
+      scaling: expect.any(Object),
+    });
+    expect(viewModel?.memory.length).toBeGreaterThan(0);
+    expect(viewModel?.referenceGeneration).toBeNull();
+    expect(viewModel?.reference).toBeNull();
+  });
+
   test.each([
     ['1248', 'AMD Ryzen 7 5800X3D', 'AMD', 'x86'],
     ['64437', 'Intel(R) Core(TM) Ultra 5 250K Plus', 'Intel', 'x86'],
@@ -465,6 +484,7 @@ describe('buildProcessorContextViewModel', () => {
       singleCore: expect.any(Number),
       multiCore: expect.any(Number),
     });
+    expect(amd?.referenceGeneration).toBe('Geekbench 7');
     expect(buildProcessorContextViewModel(await context('58949'))?.reference).toBeNull();
     expect(buildProcessorContextViewModel(await context('18873252'))?.reference ?? null).toBeNull();
   });

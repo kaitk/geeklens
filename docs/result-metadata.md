@@ -1,9 +1,9 @@
 # Result metadata and processor context
 
-GeekLens supplements Geekbench 7 result pages with processor context parsed
-from the authenticated `.gb6` payload. Geekbench 6 remains supported for its
-existing instruction annotations and shares metadata presentation only where
-that does not require generation-specific complexity.
+GeekLens supplements Geekbench 6 and 7 result pages with processor context
+parsed from the authenticated `.gb6` payload. Geekbench 6 also retains its
+rendered instruction-set row as a signed-out fallback; payload-only processor
+context is unavailable without an authenticated payload.
 
 Geekbench payload metric IDs, result-page links, processor pages, and catalogue
 tables are undocumented external interfaces. Keep their assumptions explicit,
@@ -19,7 +19,7 @@ string and any explicit processor/Mac links, then pass the cached context throug
 the neutral contract in `src/content/processorContext/model.ts`; they do not
 parse pages, fetch payloads, or resolve identities.
 
-The current Geekbench 7 presentation includes:
+The shared Geekbench 6 and 7 presentation includes:
 
 - processor name, vendor, ISA family, and an exact catalogue link;
 - frequency min/mean/max and a compact distribution;

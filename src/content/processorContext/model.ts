@@ -20,6 +20,8 @@ export interface ProcessorContextViewModel {
   } | null;
   scaling: { ratio: number; singleCore: number; multiCore: number } | null;
   coreComposition: ProvenanceFact | null;
+  /** The average dataset applicable to this result generation, if one exists. */
+  referenceGeneration: 'Geekbench 7' | null;
   reference: {
     singleCore: number;
     multiCore: number;

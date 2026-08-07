@@ -18,6 +18,7 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
     topology: null,
     scaling: null,
     coreComposition: null,
+    referenceGeneration: 'Geekbench 7',
     reference: null,
     disputedL3Cache: null,
     memory: [],
@@ -749,5 +750,16 @@ describe('processor context DOM integration', () => {
     expect(references.length).toBeGreaterThan(0);
     expect(references[0]?.textContent).toContain('avg');
     expect(references[0]?.getAttribute('aria-label')).toContain('Open reference source');
+  });
+
+  test('omits unavailable averages when the result generation has no average dataset', async () => {
+    globalThis.document = await fixture('geekbench6-single.html');
+    const preview = model('AMD Ryzen 9 9950X', 'AMD', 'x86');
+    preview.referenceGeneration = null;
+
+    renderSingleProcessorContext(preview, settings(true, { showReferenceComparison: true }));
+
+    expect(document.querySelector('[data-geeklens-preview-reference]')).toBeNull();
+    expect(document.body.textContent).not.toContain('avg unavailable');
   });
 });
