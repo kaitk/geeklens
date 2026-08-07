@@ -112,7 +112,8 @@ result and processor, but a result ID is never processor identity.
 
 Fixture coverage should span x86-64, AArch64, and RISC-V; zero-frequency data;
 heterogeneous and placeholder cluster shapes; linked and unlinked processor/Mac
-HTML; and both Geekbench generations where shared parsing is claimed.
+HTML; engineering-sample presentation; result-validity HTML levels; and both
+Geekbench generations where shared parsing is claimed.
 
 ## Updating the bundled catalogue
 

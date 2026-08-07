@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { extractResultMetadata } from '../geekbench/resultPayload';
 import { processorPresentation } from './processorPresentation';
 
 describe('processorPresentation', () => {
@@ -36,6 +37,21 @@ describe('processorPresentation', () => {
       name: '100-000000425_37/24_N @ 3.72 GHz',
       status: 'engineering-sample',
     });
+  });
+
+  test('presents the captured engineering-sample payload without inventing a product name', async () => {
+    const payload = await Bun.file(
+      new URL('../geekbench/__fixtures__/6312.gb6.json', import.meta.url),
+    ).json();
+    const metadata = extractResultMetadata(payload, 7);
+
+    expect(
+      processorPresentation(
+        metadata?.processor.name?.value ?? '',
+        metadata?.processor.vendor.value ?? 'unknown',
+        metadata?.topology.physicalCores?.value ?? null,
+      ),
+    ).toEqual({ name: '100-000001535-05', status: 'engineering-sample' });
   });
 
   test('does not interpret sample wording outside the explicit prefix form', () => {

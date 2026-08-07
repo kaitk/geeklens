@@ -157,6 +157,13 @@ export const RESULT_PAYLOAD_FIXTURES = {
     generation: 7,
     notableFor: ['linked Mac generation', 'capacity-only unified memory'],
   },
+  '6312': {
+    cpu: 'AMD Eng Sample: 100-000001535-05',
+    vendor: 'amd',
+    architecture: 'x86',
+    generation: 7,
+    notableFor: ['engineering sample', '128-core server processor'],
+  },
   '18864843': {
     cpu: 'Apple M5 Max',
     vendor: 'apple',

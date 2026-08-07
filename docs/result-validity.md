@@ -31,3 +31,7 @@ validity level and tooltip message. Failed requests are not cached as
 valid. After expiry, comparison-page loading fetches the individual result page
 again with HTTP cache revalidation and refreshes the record. The cache remains subject to the shared
 least-recently-used eviction limits.
+
+Sanitized regression fixtures cover the red timer invalidation and yellow BOT
+warning independently of the downloadable payload fixtures, whose root
+`valid` fields remain `1` in both observed cases.

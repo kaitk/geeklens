@@ -9,6 +9,11 @@ import {
   renderComparisonResultValidity,
 } from './comparisonValidity';
 
+async function validityFixture(name: string): Promise<Document> {
+  const html = await Bun.file(new URL(`__fixtures__/${name}`, import.meta.url)).text();
+  return parseHTML(html).document as unknown as Document;
+}
+
 beforeEach(() => {
   const { document } = parseHTML(`
     <table class="system-information"><tbody>
@@ -30,14 +35,9 @@ beforeEach(() => {
 });
 
 describe('comparison result validity', () => {
-  test('reads the exact invalid explanation rendered by Geekbench', () => {
-    const { document } = parseHTML(`
-      <div class="validation-widget validation-error">Invalid</div>
-      <div class="alert alert-error">
-        This benchmark result is invalid due to an issue with the timers on this system.
-      </div>
-    `);
-    expect(parseBrowserResultValidity(document as unknown as Document)).toEqual({
+  test('reads the exact timer invalidation from the captured Geekbench fixture', async () => {
+    const document = await validityFixture('geekbench7-invalid-timers.html');
+    expect(parseBrowserResultValidity(document)).toEqual({
       level: 'invalid',
       message: 'This benchmark result is invalid due to an issue with the timers on this system.',
     });
@@ -117,14 +117,9 @@ describe('comparison result validity', () => {
     ).toEqual({ level: 'invalid', message: 'Browser invalidation.' });
   });
 
-  test('preserves Geekbench warning invalidity and its message', () => {
-    const { document } = parseHTML(`
-      <div class="alert alert-warning">
-        This benchmark result may be invalid due to binary modification tools that can run on this system.
-      </div>
-      <div class="validation-widget validation-warning">Invalid</div>
-    `);
-    expect(parseBrowserResultValidity(document as unknown as Document)).toEqual({
+  test('preserves BOT warning invalidity from the captured Geekbench fixture', async () => {
+    const document = await validityFixture('geekbench6-invalid-bot.html');
+    expect(parseBrowserResultValidity(document)).toEqual({
       level: 'warning',
       message:
         'This benchmark result may be invalid due to binary modification tools that can run on this system.',

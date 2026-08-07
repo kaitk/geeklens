@@ -38,6 +38,7 @@ const PAYLOADS = [
   '64629.gb6.json',
   '64810.gb6.json',
   '64820.gb6.json',
+  '6312.gb6.json',
 ] as const;
 
 const HTML_FIXTURES = {
