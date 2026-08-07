@@ -10,16 +10,18 @@ import type { CatalogueSource } from './catalogue.types';
 
 export const PROCESSOR_CATALOGUE_SOURCE = {
   url: 'https://browser.geekbench.com/processor-benchmarks',
-  retrievedOn: '2026-07-31',
+  retrievedOn: '2026-08-07',
   generation: 7,
   minimumUniqueResults: 5,
 } as const;
 
 export const MAC_CATALOGUE_SOURCE = {
-  url: 'https://browser.geekbench.com/macs/mac-mini-2024-12c-cpu',
-  retrievedOn: '2026-08-01',
-  identityOnly: true,
-  scoreGeneration: 'unresolved-conflicting-page-copy',
+  urls: [
+    'https://browser.geekbench.com/macs/mac-mini-2024-12c-cpu',
+    'https://browser.geekbench.com/macs/macbook-pro-14-inch-2024-12c-cpu',
+  ],
+  retrievedOn: '2026-08-07',
+  generation: 7,
 } as const;
 
 /** The former AnandTech citation 301-redirects to an unrelated Tom's Hardware

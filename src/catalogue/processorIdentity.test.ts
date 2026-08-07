@@ -27,22 +27,34 @@ describe('resolveProcessorIdentity', () => {
     expect(PROCESSOR_CATALOGUE.length).toBeGreaterThan(250);
     expect(PROCESSOR_CATALOGUE_SOURCE).toEqual({
       url: 'https://browser.geekbench.com/processor-benchmarks',
-      retrievedOn: '2026-07-31',
+      retrievedOn: '2026-08-07',
       generation: 7,
       minimumUniqueResults: 5,
     });
     expect(MAC_CATALOGUE_SOURCE).toEqual({
-      url: 'https://browser.geekbench.com/macs/mac-mini-2024-12c-cpu',
-      retrievedOn: '2026-08-01',
-      identityOnly: true,
-      scoreGeneration: 'unresolved-conflicting-page-copy',
+      urls: [
+        'https://browser.geekbench.com/macs/mac-mini-2024-12c-cpu',
+        'https://browser.geekbench.com/macs/macbook-pro-14-inch-2024-12c-cpu',
+      ],
+      retrievedOn: '2026-08-07',
+      generation: 7,
     });
-    expect(PROCESSOR_CATALOGUE.filter((entry) => entry.macPaths.length > 0)).toHaveLength(15);
+    expect(PROCESSOR_CATALOGUE.filter((entry) => entry.macPaths.length > 0).length).toBeGreaterThan(
+      15,
+    );
     expect(
       PROCESSOR_CATALOGUE.find((entry) => entry.key === 'mac-mac-mini-2024-12c-cpu'),
     ).toMatchObject({
       displayName: 'Mac mini (2024) — Apple M4 Pro',
       macPaths: ['/macs/mac-mini-2024-12c-cpu'],
+      requiredConfiguration: { physicalCores: 12, gpuCores: 16 },
+      scoreReferences: [{ generation: 7, singleCore: 3333, multiCore: 21768 }],
+    });
+    expect(
+      PROCESSOR_CATALOGUE.find((entry) => entry.key === 'mac-macbook-pro-14-inch-2024-12c-cpu'),
+    ).toMatchObject({
+      displayName: 'MacBook Pro (14-inch, 2024) — Apple M4 Pro',
+      macPaths: ['/macs/macbook-pro-14-inch-2024-12c-cpu'],
       requiredConfiguration: { physicalCores: 12, gpuCores: 16 },
     });
   });
