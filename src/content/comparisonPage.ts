@@ -12,7 +12,7 @@ import {
   type CanonicalProcessorLinks,
 } from '../geekbench/processorLinks';
 import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
-import { comparisonUrl } from '../geekbench/urls';
+import { comparisonUrl, parseComparisonIds } from '../geekbench/urls';
 import {
   comparisonInstructionStatus,
   initialInstructionStatus,
@@ -31,7 +31,7 @@ import {
 import { mountSystemInstructionSets, mountWorkloadBadges } from './mountBadges';
 import { isPageAnnotated, showStatus } from './statusBanner';
 import { resultsCache } from '../cache/ResultsCache';
-import type { CachedResultContext } from '../cache/ResultsCache';
+import type { CachedResultContext, CachedResultValidity } from '../cache/ResultsCache';
 import { withClearedComparisonBaseline } from './comparisonBaseline';
 import type { Settings } from '../settings/settings';
 import { markRowLabel } from './rowMarker';
@@ -41,6 +41,8 @@ import {
 } from './processorContextUi';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
 import { needsComparisonResultFetch } from './comparisonFetch';
+import { debugLog } from '../logger';
+import { loadResultContext } from './resultContextLoader';
 import {
   combinePayloadValidity,
   isResultValidityFresh,
@@ -48,17 +50,31 @@ import {
   renderComparisonResultValidity,
 } from './comparisonValidity';
 
-// Extract result IDs from the URL
-function extractResultIds(): { baseline: string | null; primary: string | null } {
-  const url = new URL(window.location.href);
-  const pathParts = url.pathname.split('/');
-
-  // URL format: /v<generation>/cpu/compare/[primary]?baseline=[baseline]
-  return {
-    primary: pathParts[pathParts.length - 1] || null,
-    baseline: url.searchParams.get('baseline'),
-  };
+interface ComparisonPageDependencies {
+  cache: Pick<typeof resultsCache, 'getResultContext' | 'storeResultContext'>;
+  fetchHtmlContext: typeof fetchInstructionSetsFromHtml;
+  fetchMetadata: typeof fetchResultMetadataFromPayload;
+  loadValidity: typeof loadBrowserResultValidity;
+  mountSystemInstructionSets: typeof mountSystemInstructionSets;
+  mountWorkloadBadges: typeof mountWorkloadBadges;
+  withClearedBaseline: typeof withClearedComparisonBaseline;
 }
+
+interface ComparisonData {
+  primaryContext: CachedResultContext | null;
+  baselineContext: CachedResultContext | null;
+  validity: readonly [CachedResultValidity | null, CachedResultValidity | null];
+}
+
+const comparisonPageDependencies: ComparisonPageDependencies = {
+  cache: resultsCache,
+  fetchHtmlContext: fetchInstructionSetsFromHtml,
+  fetchMetadata: fetchResultMetadataFromPayload,
+  loadValidity: loadBrowserResultValidity,
+  mountSystemInstructionSets,
+  mountWorkloadBadges,
+  withClearedBaseline: withClearedComparisonBaseline,
+};
 
 /**
  * Geekbench 6 exposes instruction sets in result-page HTML.
@@ -96,104 +112,166 @@ async function fetchInstructionSetsFromHtml(
   };
 }
 
-async function loadResultContext(
+async function loadComparisonResultContext(
   generation: GeekbenchGeneration,
   resultId: string,
   version: string | null,
   cached: CachedResultContext | null,
   comparisonLinks: CanonicalProcessorLinks,
   signedOut: boolean,
+  dependencies: ComparisonPageDependencies,
 ): Promise<CachedResultContext | null> {
   try {
     // Older v6 pages have no rendered instruction data, but an authenticated
     // payload may still carry useful processor metadata.
     if (signedOut && version && !versionSupportsInstructionSets(version)) {
-      console.log(
-        `GeekLens: Skipping fetch for ${resultId}, version ${version} doesn't support instruction sets`,
+      debugLog(
+        `Skipping fetch for ${resultId}, version ${version} doesn't support instruction sets`,
       );
       return cached;
     }
+    return await loadResultContext({
+      cache: dependencies.cache,
+      generation,
+      resultId,
+      cached,
+      async loadSource(current) {
+        const metadata =
+          current?.metadata ??
+          (signedOut ? null : await dependencies.fetchMetadata(generation, resultId));
+        if (metadata) {
+          return {
+            instructionSet:
+              generation !== 6
+                ? (metadata.instructionSets?.value ?? current?.instructionSet ?? null)
+                : (current?.instructionSet ?? metadata.instructionSets?.value ?? null),
+            metadata,
+            processorLinks: comparisonLinks,
+          };
+        }
 
-    if (generation === 7) {
-      const metadata =
-        cached?.metadata ?? (await fetchResultMetadataFromPayload(generation, resultId));
-      const instructionSet = metadata?.instructionSets?.value ?? cached?.instructionSet ?? null;
-      await resultsCache.storeResultContext(generation, resultId, {
-        instructionSet,
-        metadata,
-        processorLinks: comparisonLinks,
-      });
-      return {
-        instructionSet,
-        metadata,
-        processorLinks: mergeProcessorLinks(cached?.processorLinks, comparisonLinks),
-        lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
-      };
-    }
+        // Geekbench 7 is payload-only. A failed authenticated request must not
+        // fall through to the Geekbench 6 rendered-HTML strategy.
+        if (generation === 7) {
+          return {
+            instructionSet: current?.instructionSet ?? null,
+            metadata: null,
+            processorLinks: comparisonLinks,
+          };
+        }
 
-    // Geekbench 6 can use the same payload metadata as v7 while retaining its
-    // public HTML instruction-set fallback for signed-out and failed requests.
-    const metadata =
-      cached?.metadata ??
-      (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
-    if (metadata) {
-      const instructionSet = cached?.instructionSet ?? metadata.instructionSets?.value ?? null;
-      const processorLinks = mergeProcessorLinks(cached?.processorLinks, comparisonLinks);
-      await resultsCache.storeResultContext(generation, resultId, {
-        instructionSet,
-        metadata,
-        processorLinks,
-      });
-      return {
-        instructionSet,
-        metadata,
-        processorLinks,
-        lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
-      };
-    }
-
-    // Geekbench 5 never rendered instruction-set data. If its payload was
-    // unavailable above, there is no HTML source to fall back to.
-    if (generation === 5) return cached;
-    if (version && !versionSupportsInstructionSets(version)) return cached;
-    if (cached?.instructionSet) return cached;
-
-    const fetched = await fetchInstructionSetsFromHtml(generation, resultId);
-    const processorLinks = mergeProcessorLinks(comparisonLinks, fetched.processorLinks);
-    if (fetched.instructionSet || processorLinks.processorPath || processorLinks.macPath) {
-      await resultsCache.storeResultContext(generation, resultId, {
-        instructionSet: fetched.instructionSet,
-        processorLinks,
-      });
-    }
-    return {
-      instructionSet: fetched.instructionSet,
-      metadata: null,
-      processorLinks,
-      lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
-    };
+        // Geekbench 5 has no HTML fallback, and older v6 pages expose no
+        // compatible rendered instruction row.
+        if (
+          generation === 5 ||
+          (version && !versionSupportsInstructionSets(version)) ||
+          current?.instructionSet
+        ) {
+          return null;
+        }
+        const fetched = await dependencies.fetchHtmlContext(generation, resultId);
+        return {
+          instructionSet: fetched.instructionSet,
+          metadata: null,
+          // A link found on the fetched result page retains its precedence over
+          // the comparison-table link, matching the previous adapter policy.
+          processorLinks: mergeProcessorLinks(comparisonLinks, fetched.processorLinks),
+        };
+      },
+    });
   } catch (error) {
     console.error(`GeekLens: Error fetching data for result ${resultId}:`, error);
     return cached;
   }
 }
 
+async function acquireComparisonData(
+  generation: GeekbenchGeneration,
+  primary: string,
+  baseline: string,
+  versions: readonly [string | null, string | null],
+  cached: readonly [CachedResultContext | null, CachedResultContext | null],
+  links: readonly [CanonicalProcessorLinks, CanonicalProcessorLinks],
+  signedOut: boolean,
+  dependencies: ComparisonPageDependencies,
+): Promise<ComparisonData> {
+  const needsContext = cached.map((context, index) => {
+    const payloadInstructions = context?.metadata?.instructionSets?.value ?? null;
+    return (
+      needsComparisonResultFetch({
+        generation,
+        signedOut,
+        hasMetadata: Boolean(context?.metadata),
+        hasInstructions: Boolean(context?.instructionSet),
+        version: versions[index] ?? null,
+      }) ||
+      (generation !== 6 &&
+        payloadInstructions !== null &&
+        payloadInstructions !== context?.instructionSet)
+    );
+  });
+  const initialValidity = [cached[0]?.validity ?? null, cached[1]?.validity ?? null] as const;
+  const needsValidity = initialValidity.some((value) => !isResultValidityFresh(value));
+  const cannotFetch = signedOut && generation !== 6;
+  if (cannotFetch || (!needsContext.some(Boolean) && !needsValidity)) {
+    return {
+      primaryContext: cached[0],
+      baselineContext: cached[1],
+      validity: initialValidity,
+    };
+  }
+
+  return dependencies.withClearedBaseline(generation, primary, baseline, async () => {
+    const ids = [primary, baseline] as const;
+    const [contexts, validity] = await Promise.all([
+      Promise.all(
+        ids.map((resultId, index) =>
+          needsContext[index]
+            ? loadComparisonResultContext(
+                generation,
+                resultId,
+                versions[index] ?? null,
+                cached[index],
+                links[index],
+                signedOut,
+                dependencies,
+              )
+            : cached[index],
+        ),
+      ),
+      Promise.all(
+        ids.map((resultId, index) =>
+          dependencies.loadValidity(generation, resultId, initialValidity[index]),
+        ),
+      ),
+    ]);
+    return {
+      primaryContext: contexts[0],
+      baselineContext: contexts[1],
+      validity: [validity[0], validity[1]] as const,
+    };
+  });
+}
+
 async function cacheProcessorLinks(
   generation: GeekbenchGeneration,
   resultId: string,
   processorLinks: CanonicalProcessorLinks,
+  dependencies: ComparisonPageDependencies,
 ): Promise<void> {
   if (!processorLinks.processorPath && !processorLinks.macPath) return;
-  await resultsCache.storeResultContext(generation, resultId, { processorLinks });
+  await dependencies.cache.storeResultContext(generation, resultId, { processorLinks });
 }
 
-// Main function to annotate the comparison page
-export async function annotateGeekbenchComparisonPage(settings: Settings) {
+export async function annotateGeekbenchComparisonPage(
+  settings: Settings,
+  dependencies: ComparisonPageDependencies = comparisonPageDependencies,
+) {
   if (isPageAnnotated()) {
     return; // page already annotated
   }
 
-  console.log('GeekLens: Starting comparison annotation process');
+  debugLog('Starting comparison annotation process');
 
   try {
     const generation = parseGeekbenchGeneration(window.location.pathname);
@@ -204,8 +282,7 @@ export async function annotateGeekbenchComparisonPage(settings: Settings) {
     const signedOut = isGeekbenchSignedOut();
     showStatus(initialInstructionStatus(generation, signedOut));
 
-    // Extract result IDs from URL
-    const { baseline, primary } = extractResultIds();
+    const { baseline, primary } = parseComparisonIds(new URL(window.location.href));
 
     if (!primary || !baseline) {
       console.error('GeekLens: Could not extract primary or baseline result ID');
@@ -216,94 +293,36 @@ export async function annotateGeekbenchComparisonPage(settings: Settings) {
     const { primary: primaryVersion, baseline: baselineVersion } = getComparisonVersions();
 
     const [primaryCached, baselineCached] = await Promise.all([
-      resultsCache.getResultContext(generation, primary),
-      resultsCache.getResultContext(generation, baseline),
+      dependencies.cache.getResultContext(generation, primary),
+      dependencies.cache.getResultContext(generation, baseline),
     ]);
     await waitForElement('table.comparison-benchmark-table');
     applyProcessorContextPreferences(settings);
     const processorLinks = extractComparisonProcessorLinks();
 
     await Promise.all([
-      cacheProcessorLinks(generation, primary, processorLinks.primary),
-      cacheProcessorLinks(generation, baseline, processorLinks.baseline),
+      cacheProcessorLinks(generation, primary, processorLinks.primary, dependencies),
+      cacheProcessorLinks(generation, baseline, processorLinks.baseline, dependencies),
     ]);
 
     if (signedOut && (!primaryCached?.metadata || !baselineCached?.metadata)) {
-      console.log(`GeekLens: Signed out of Geekbench ${generation}, skipping payload fetch`);
+      debugLog(`Signed out of Geekbench ${generation}, skipping payload fetch`);
     }
 
-    let primaryContext = primaryCached;
-    let baselineContext = baselineCached;
-    let primaryInstructions = primaryContext?.instructionSet ?? null;
-    let baselineInstructions = baselineContext?.instructionSet ?? null;
-    const needsPrimaryFetch = needsComparisonResultFetch({
+    const acquired = await acquireComparisonData(
       generation,
+      primary,
+      baseline,
+      [primaryVersion, baselineVersion],
+      [primaryCached, baselineCached],
+      [processorLinks.primary, processorLinks.baseline],
       signedOut,
-      hasMetadata: Boolean(primaryCached?.metadata),
-      hasInstructions: Boolean(primaryInstructions),
-      version: primaryVersion,
-    });
-    const needsBaselineFetch = needsComparisonResultFetch({
-      generation,
-      signedOut,
-      hasMetadata: Boolean(baselineCached?.metadata),
-      hasInstructions: Boolean(baselineInstructions),
-      version: baselineVersion,
-    });
-    const needsFetch = needsPrimaryFetch || needsBaselineFetch;
-    const cannotFetch = signedOut && generation !== 6;
-    let validity = [primaryCached?.validity ?? null, baselineCached?.validity ?? null];
-    let checkedValidity = false;
-    const needsValidityFetch = validity.some((value) => !isResultValidityFresh(value));
-
-    if (needsFetch && !cannotFetch) {
-      await withClearedComparisonBaseline(generation, primary, baseline, async () => {
-        [[primaryContext, baselineContext], validity] = await Promise.all([
-          Promise.all([
-            needsPrimaryFetch
-              ? loadResultContext(
-                  generation,
-                  primary,
-                  primaryVersion,
-                  primaryCached,
-                  processorLinks.primary,
-                  signedOut,
-                )
-              : primaryContext,
-            needsBaselineFetch
-              ? loadResultContext(
-                  generation,
-                  baseline,
-                  baselineVersion,
-                  baselineCached,
-                  processorLinks.baseline,
-                  signedOut,
-                )
-              : baselineContext,
-          ]),
-          Promise.all([
-            loadBrowserResultValidity(generation, primary, primaryCached?.validity),
-            loadBrowserResultValidity(generation, baseline, baselineCached?.validity),
-          ]),
-        ]);
-        checkedValidity = true;
-        primaryInstructions = primaryContext?.instructionSet ?? null;
-        baselineInstructions = baselineContext?.instructionSet ?? null;
-      });
-    }
-
-    // Result pages can lose their server-side invalidity alert while a
-    // comparison baseline is selected, so even a cache hit must check inside
-    // the same clear/restore window used by payload requests. Signed-out v5/v7
-    // pages retain the existing no-session-mutation rule.
-    if (!checkedValidity && !cannotFetch && needsValidityFetch) {
-      validity = await withClearedComparisonBaseline(generation, primary, baseline, () =>
-        Promise.all([
-          loadBrowserResultValidity(generation, primary, primaryCached?.validity),
-          loadBrowserResultValidity(generation, baseline, baselineCached?.validity),
-        ]),
-      );
-    }
+      dependencies,
+    );
+    let { primaryContext, baselineContext } = acquired;
+    const { validity } = acquired;
+    const primaryInstructions = primaryContext?.instructionSet ?? null;
+    const baselineInstructions = baselineContext?.instructionSet ?? null;
 
     primaryContext = mergeContextLinks(primaryContext, processorLinks.primary);
     baselineContext = mergeContextLinks(baselineContext, processorLinks.baseline);
@@ -319,7 +338,12 @@ export async function annotateGeekbenchComparisonPage(settings: Settings) {
 
     // If at least one CPU has instruction sets, we can proceed
     if (settings.showIsaAnnotations && (primaryInstructions || baselineInstructions)) {
-      annotateSystemInstructionSets(primaryInstructions, baselineInstructions, settings);
+      annotateSystemInstructionSets(
+        primaryInstructions,
+        baselineInstructions,
+        settings,
+        dependencies,
+      );
 
       // Annotate benchmark tables with instruction sets for each CPU
       annotateBenchmarkTables(
@@ -327,6 +351,7 @@ export async function annotateGeekbenchComparisonPage(settings: Settings) {
         extractIndividualInstructions(primaryInstructions),
         extractIndividualInstructions(baselineInstructions),
         settings,
+        dependencies,
       );
     }
 
@@ -370,6 +395,7 @@ function annotateSystemInstructionSets(
   primaryInstructions: string | null,
   baselineInstructions: string | null,
   settings: Settings,
+  dependencies: ComparisonPageDependencies,
 ) {
   if (!primaryInstructions && !baselineInstructions) {
     console.error('GeekLens: No instruction sets available');
@@ -400,7 +426,11 @@ function annotateSystemInstructionSets(
     newRow.appendChild(cell);
 
     if (instructionSets) {
-      mountSystemInstructionSets(cell, categorizeInstructionSets(instructionSets), settings);
+      dependencies.mountSystemInstructionSets(
+        cell,
+        categorizeInstructionSets(instructionSets),
+        settings,
+      );
     } else {
       cell.textContent = 'Not available';
     }
@@ -416,6 +446,7 @@ function annotateBenchmarkTables(
   primaryInstructions: Set<string>,
   baselineInstructions: Set<string>,
   settings: Settings,
+  dependencies: ComparisonPageDependencies,
 ) {
   const benchmarkTables = findBenchmarkTables('table.comparison-benchmark-table');
 
@@ -428,12 +459,16 @@ function annotateBenchmarkTables(
     // Annotate primary CPU rows
     table
       .querySelectorAll('tr.document-graph')
-      .forEach((row) => annotateGraphRow(generation, row, primaryInstructions, false, settings));
+      .forEach((row) =>
+        annotateGraphRow(generation, row, primaryInstructions, false, settings, dependencies),
+      );
 
     // Annotate baseline CPU rows
     table
       .querySelectorAll('tr.baseline-graph')
-      .forEach((row) => annotateGraphRow(generation, row, baselineInstructions, true, settings));
+      .forEach((row) =>
+        annotateGraphRow(generation, row, baselineInstructions, true, settings, dependencies),
+      );
   });
 }
 
@@ -443,6 +478,7 @@ function annotateGraphRow(
   cpuInstructions: Set<string>,
   isBaseline: boolean,
   settings: Settings,
+  dependencies: ComparisonPageDependencies,
 ) {
   // Get the previous score row to determine the benchmark. Summary rows
   // (Single-/Multi-Core Score) have no `.scores` row and are skipped here.
@@ -466,11 +502,10 @@ function annotateGraphRow(
     return;
   }
 
-  // Check if already annotated
   if (cpuCell.querySelector('[data-geeklens-instructions]')) {
-    console.warn(`Already annotated`);
+    debugLog('Already annotated');
     return;
   }
 
-  mountWorkloadBadges(cpuCell, instructions, settings, confidenceNote);
+  dependencies.mountWorkloadBadges(cpuCell, instructions, settings, confidenceNote);
 }

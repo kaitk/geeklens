@@ -83,24 +83,24 @@ function referenceLink(
 }
 
 function referenceElement(
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
   current: number,
   scoreKind: 'singleCore' | 'multiCore',
 ): HTMLElement | null {
-  const reference = preview.reference;
-  if (reference && preview.cataloguePath) {
+  const reference = viewModel.reference;
+  if (reference && viewModel.cataloguePath) {
     return referenceLink(
       current,
       reference[scoreKind],
-      preview.cataloguePath,
+      viewModel.cataloguePath,
       reference.generation,
       reference.minimumUniqueResults,
     );
   }
-  return preview.hasReferenceDataset ? unavailableReference() : null;
+  return viewModel.hasReferenceDataset ? unavailableReference() : null;
 }
 
-export function annotateSingleScoreReferences(preview: ProcessorContextViewModel): void {
+export function annotateSingleScoreReferences(viewModel: ProcessorContextViewModel): void {
   const desktopContainers = document.querySelectorAll('.score-container.desktop');
   const scoreContainers = desktopContainers.length
     ? desktopContainers
@@ -111,7 +111,11 @@ export function annotateSingleScoreReferences(preview: ProcessorContextViewModel
       container.querySelector('.score')?.textContent?.replaceAll(',', '').trim(),
     );
     if (!Number.isFinite(current) || current <= 0) return;
-    const reference = referenceElement(preview, current, index === 0 ? 'singleCore' : 'multiCore');
+    const reference = referenceElement(
+      viewModel,
+      current,
+      index === 0 ? 'singleCore' : 'multiCore',
+    );
     if (!reference) return;
     const note = document.createElement('div');
     note.dataset.geeklensPreviewReference = '';
@@ -132,13 +136,13 @@ export function annotateSingleScoreReferences(preview: ProcessorContextViewModel
     const scoreKind = scoreRow.firstElementChild?.textContent?.trim().startsWith('Single-Core')
       ? 'singleCore'
       : 'multiCore';
-    const reference = referenceElement(preview, current, scoreKind);
+    const reference = referenceElement(viewModel, current, scoreKind);
     if (reference) scoreCell.appendChild(reference);
   }
 }
 
 export function annotateComparisonReferences(
-  previews: readonly [ProcessorContextViewModel, ProcessorContextViewModel],
+  viewModels: readonly [ProcessorContextViewModel, ProcessorContextViewModel],
 ): void {
   for (const table of Array.from(document.querySelectorAll('table.comparison-benchmark-table'))) {
     for (const scoreRow of Array.from(table.querySelectorAll('tbody tr'))) {
@@ -151,7 +155,7 @@ export function annotateComparisonReferences(
           if (cell.querySelector('[data-geeklens-preview-reference]')) return;
           const current = Number(cell.textContent?.replaceAll(',', '').trim());
           if (!Number.isFinite(current)) return;
-          const reference = referenceElement(previews[index], current, scoreKind);
+          const reference = referenceElement(viewModels[index], current, scoreKind);
           if (reference) cell.appendChild(reference);
         });
     }

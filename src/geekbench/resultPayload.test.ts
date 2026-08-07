@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { extractInstructionSetsFromPayload, extractResultMetadata } from './resultPayload';
+import { extractResultMetadata } from './resultPayload';
 import { RESULT_PAYLOAD_FIXTURES } from './__fixtures__/manifest';
 
 async function fixture(resultId: string): Promise<unknown> {
@@ -25,8 +25,8 @@ function vendorOf(processorName: string, systemName: string): string | undefined
   )?.processor.vendor.value;
 }
 
-describe('extractInstructionSetsFromPayload', () => {
-  test('extracts metric 20000 from a matching Geekbench payload', () => {
+describe('extractResultMetadata', () => {
+  test('extracts instruction-set metric 20000 from a matching Geekbench payload', () => {
     const payload = {
       document_version: 7,
       metrics: [
@@ -35,7 +35,7 @@ describe('extractInstructionSetsFromPayload', () => {
       ],
     };
 
-    expect(extractInstructionSetsFromPayload(payload, 7)).toBe('sse2 aesni avx2');
+    expect(extractResultMetadata(payload, 7)?.instructionSets?.value).toBe('sse2 aesni avx2');
   });
 
   test('accepts numeric strings but rejects the wrong generation', () => {
@@ -44,18 +44,20 @@ describe('extractInstructionSetsFromPayload', () => {
       metrics: [{ id: '20000', value: ' avx2 ' }],
     };
 
-    expect(extractInstructionSetsFromPayload(payload, 7)).toBe('avx2');
-    expect(extractInstructionSetsFromPayload(payload, 6)).toBeNull();
+    expect(extractResultMetadata(payload, 7)?.instructionSets?.value).toBe('avx2');
+    expect(extractResultMetadata(payload, 6)).toBeNull();
   });
 
   test('rejects missing, empty, and malformed metrics', () => {
-    expect(extractInstructionSetsFromPayload({ metrics: [] })).toBeNull();
-    expect(extractInstructionSetsFromPayload({ metrics: [{ id: 20000, value: ' ' }] })).toBeNull();
-    expect(extractInstructionSetsFromPayload(null)).toBeNull();
+    expect(
+      extractResultMetadata({ document_version: 7, metrics: [] }, 7)?.instructionSets,
+    ).toBeNull();
+    expect(
+      extractResultMetadata({ document_version: 7, metrics: [{ id: 20000, value: ' ' }] }, 7)
+        ?.instructionSets,
+    ).toBeNull();
+    expect(extractResultMetadata(null)).toBeNull();
   });
-});
-
-describe('extractResultMetadata', () => {
   const fixtureCases = Object.entries(RESULT_PAYLOAD_FIXTURES).map(
     ([resultId, { architecture, vendor, cpu, generation }]) => ({
       resultId,

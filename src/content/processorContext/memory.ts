@@ -1,4 +1,5 @@
 import { createIcon } from '../icons';
+import { findSystemTableByHeading } from '../domUtils';
 import { markRowLabel } from '../rowMarker';
 import type { MemoryFact, ProcessorContextViewModel } from './model';
 import { rowLabel, tableRowLabel } from './rows';
@@ -99,7 +100,7 @@ function memoryBandwidthLine(facts: readonly MemoryFact[]): HTMLElement | null {
 
 function appendMemoryDetails(
   cell: Element,
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
   preserveNative = false,
 ): void {
   if (cell.querySelector('[data-geeklens-preview-memory]')) return;
@@ -108,45 +109,43 @@ function appendMemoryDetails(
   details.className = 'geeklens-preview-memory';
   const value = document.createElement('span');
   value.className = 'geeklens-preview-memory-summary';
-  value.textContent = memoryHeadline(preview.memory);
+  value.textContent = memoryHeadline(viewModel.memory);
   const info = document.createElement('span');
   info.className = 'geeklens-preview-memory-info';
   info.tabIndex = 0;
   info.setAttribute('role', 'img');
   info.setAttribute(
     'aria-label',
-    `Memory details. ${preview.memory.map((fact) => `${memoryFactLabel(fact)}: ${fact.value}. ${MEMORY_PROVENANCE_HELP[fact.provenance]}`).join(' ')}`,
+    `Memory details. ${viewModel.memory.map((fact) => `${memoryFactLabel(fact)}: ${fact.value}. ${MEMORY_PROVENANCE_HELP[fact.provenance]}`).join(' ')}`,
   );
-  info.append(createIcon('info'), memoryTooltip(preview.memory));
+  info.append(createIcon('info'), memoryTooltip(viewModel.memory));
   details.append(value, info);
-  const bandwidth = memoryBandwidthLine(preview.memory);
+  const bandwidth = memoryBandwidthLine(viewModel.memory);
   if (bandwidth) details.appendChild(bandwidth);
   if (preserveNative) cell.appendChild(details);
   else cell.replaceChildren(details);
 }
 
-export function renderSingleMemory(preview: ProcessorContextViewModel): void {
-  const table = Array.from(document.querySelectorAll('table.system-table')).find(
-    (candidate) => candidate.querySelector('th')?.textContent?.trim() === 'Memory Information',
-  );
+export function renderSingleMemory(viewModel: ProcessorContextViewModel): void {
+  const table = findSystemTableByHeading('Memory Information');
   const row = Array.from(table?.querySelectorAll('tr') ?? []).find(
     (candidate) => tableRowLabel(candidate) === 'Memory',
   );
   const sizeCell = row?.lastElementChild ?? table?.querySelector('tbody tr td:last-child');
-  if (preview.memory.length === 0 || !sizeCell) return;
+  if (viewModel.memory.length === 0 || !sizeCell) return;
   const nativeMemory = sizeCell.textContent?.trim() ?? '';
   const hasNativeClock = /\b\d+(?:\.\d+)?\s*(?:MHz|GHz)\b/i.test(nativeMemory);
-  const preserveNative = hasNativeClock && !preview.hasReportedMemoryTransferRate;
+  const preserveNative = hasNativeClock && !viewModel.hasReportedMemoryTransferRate;
   const labelCell = sizeCell.parentElement?.firstElementChild;
   if (labelCell) {
     if (preserveNative) markRowLabel(labelCell, 'changed');
     else labelCell.replaceChildren(rowLabel('Details', 'changed'));
   }
-  appendMemoryDetails(sizeCell, preview, preserveNative);
+  appendMemoryDetails(sizeCell, viewModel, preserveNative);
 }
 
 export function renderComparisonMemory(
-  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
+  viewModels: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
   table: Element | null,
 ): void {
   const row = Array.from(table?.querySelectorAll('tbody tr') ?? []).find(
@@ -156,9 +155,9 @@ export function renderComparisonMemory(
   Array.from(row?.children ?? [])
     .slice(1, 3)
     .forEach((cell, index) => {
-      const preview = previews[index];
-      if (!preview?.memory.length) return;
-      appendMemoryDetails(cell, preview);
+      const viewModel = viewModels[index];
+      if (!viewModel?.memory.length) return;
+      appendMemoryDetails(cell, viewModel);
       annotated = true;
     });
   // Claim the native row only when a memory block was actually added; without

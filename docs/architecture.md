@@ -8,7 +8,10 @@ in the [README](../README.md).
 
 `src/manifest.json` is a templated cross-browser manifest. The Vite extension
 plugin expands its `{{chrome}}` and `{{firefox}}` keys and writes browser-specific
-builds to `dist/<browser>/`.
+builds to `dist/<browser>/`. Extension release metadata (`name`, `description`,
+and `version`) has one source in `package.json`; the manifest generator adds it
+after the template so built manifests and package-versioned release archives
+cannot drift.
 
 The background script only enables the toolbar action on supported Geekbench
 URLs. A single content entry, `src/content/contentScript.ts`, detects the page
@@ -86,16 +89,15 @@ Geekbench's space-separated instruction-set string is:
 `src/isa/workloadInstructions.ts` is the only place that chooses between the
 generation-specific benchmark maps. Geekbench 5 intentionally resolves no
 workload instructions because its captures expose no capability string. The
-resolver returns a `confidenceNote` for
-inferred mappings and omits it for documented ones, so callers cannot render an
-inferred Geekbench 7 mapping without its warning. A `suspected` workload returns
-the note with an empty instruction list, so the two annotation call sites render
-on either signal rather than on badge count alone. The `mappingWarnings` setting
-suppresses the warning at render time in `TableInstructionSets.svelte`, not at
-lookup time. Badge components receive a settings snapshot, so saving the popup
-setting reloads the active Geekbench tab to apply it; a suspected workload drops
-its container entirely when warnings are hidden, since the warning was its only
-content.
+resolver returns a `confidenceNote` for inferred mappings and omits it for
+documented ones, so every rendered inferred Geekbench 7 mapping carries its
+warning when `mappingWarnings` is enabled. A `suspected` workload retains its
+note in the benchmark map as mapping rationale but names no instructions, so it
+resolves to no match and does not render. The two annotation call sites require
+at least one instruction before mounting, and `TableInstructionSets.svelte`
+likewise renders only a non-empty badge container. Badge components receive a
+settings snapshot, so saving the popup setting reloads the active Geekbench tab
+to apply it.
 
 `src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized
 payload metadata when available, a compatibility instruction-set string, and

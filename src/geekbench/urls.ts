@@ -1,8 +1,43 @@
-import type { GeekbenchGeneration } from './generation';
+import { isSupportedGeneration, type GeekbenchGeneration } from './generation';
 
 export const BROWSER_HOST = 'browser.geekbench.com';
 
 export const BROWSER_ORIGIN = `https://${BROWSER_HOST}`;
+
+const RESULT_PATH = /^\/v(\d+)\/cpu\/([^/]+)\/?$/;
+const COMPARISON_PATH = /^\/v(\d+)\/cpu\/compare\/([^/]+)\/?$/;
+
+export interface ComparisonIds {
+  primary: string | null;
+  baseline: string | null;
+}
+
+function parsePathId(pathname: string, pattern: RegExp): string | null {
+  const match = pathname.match(pattern);
+  if (!match || !isSupportedGeneration(Number(match[1]))) return null;
+
+  try {
+    return decodeURIComponent(match[2]) || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Extracts an opaque ID from an exact, supported CPU result pathname. */
+export function parseResultId(pathname: string): string | null {
+  return parsePathId(pathname, RESULT_PATH);
+}
+
+/** Extracts both lanes from an exact, supported CPU comparison URL. */
+export function parseComparisonIds(url: URL): ComparisonIds {
+  const primary = parsePathId(url.pathname, COMPARISON_PATH);
+  if (!primary) return { primary: null, baseline: null };
+
+  return {
+    primary,
+    baseline: url.searchParams.get('baseline') || null,
+  };
+}
 
 /** Public rendered result page, including Browser-side validity warnings that
  * are not reflected in the downloadable benchmark payload. */

@@ -44,15 +44,15 @@ function compositionLine(composition: ProvenanceFact): HTMLElement {
 
 export function topologyDetails(
   nativeTopology: string,
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
 ): HTMLElement {
   const value = document.createElement('div');
   value.className = 'geeklens-preview-topology';
 
   const processors = processorCount(nativeTopology);
   const totals = [
-    preview.topology?.cores ? pluralCores(preview.topology.cores) : null,
-    preview.topology?.threads ? `${preview.topology.threads} threads` : null,
+    viewModel.topology?.cores ? pluralCores(viewModel.topology.cores) : null,
+    viewModel.topology?.threads ? `${viewModel.topology.threads} threads` : null,
   ].filter((total): total is string => Boolean(total));
   // Socket count alone is thinner than what Geekbench already prints, so the
   // native string stands until the payload supplies a total to replace it with.
@@ -66,14 +66,14 @@ export function topologyDetails(
     totals.length > 0 ? totals.join(' · ') : nativeTopology || 'Topology unavailable';
   value.appendChild(summary);
 
-  const clusters = preview.topology?.clusters ?? [];
+  const clusters = viewModel.topology?.clusters ?? [];
   // Every cluster carries a name, or none does: the view model only labels a
   // clean assignment, so the legend states the composition without repetition.
   const named = clusters.length > 0 && clusters.every((cluster) => cluster.label !== null);
   // The sentence is the only place core types can appear on parts reporting no
   // clusters at all, which is every sampled AMD result.
-  if (preview.coreComposition && !named)
-    value.appendChild(compositionLine(preview.coreComposition));
+  if (viewModel.coreComposition && !named)
+    value.appendChild(compositionLine(viewModel.coreComposition));
   if (clusters.length === 0) return value;
 
   // The proportional bar is decorative; the legend carries the same facts as text.
@@ -111,15 +111,15 @@ export function topologyDetails(
     legend.appendChild(entry);
   }
   // One source covers every group, so it trails rather than repeats per name.
-  if (named && preview.coreComposition?.source) {
-    legend.appendChild(compositionSourceLink(preview.coreComposition.source));
+  if (named && viewModel.coreComposition?.source) {
+    legend.appendChild(compositionSourceLink(viewModel.coreComposition.source));
   }
   value.append(bar, legend);
   return value;
 }
 
 export function comparisonTopologyRow(
-  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
+  viewModels: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
   nativeTopologies: readonly string[],
 ): HTMLTableRowElement {
   const row = document.createElement('tr');
@@ -128,10 +128,10 @@ export function comparisonTopologyRow(
   labelCell.className = 'geeklens-preview-detail-label';
   labelCell.appendChild(rowLabel('Topology'));
   row.appendChild(labelCell);
-  for (const [index, preview] of previews.entries()) {
+  for (const [index, viewModel] of viewModels.entries()) {
     const cell = document.createElement('td');
     cell.className = 'geeklens-preview-detail-value';
-    if (preview) cell.appendChild(topologyDetails(nativeTopologies[index] ?? '', preview));
+    if (viewModel) cell.appendChild(topologyDetails(nativeTopologies[index] ?? '', viewModel));
     else cell.textContent = 'Not available';
     row.appendChild(cell);
   }

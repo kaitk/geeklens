@@ -103,10 +103,74 @@ Preserve these intentional differences:
 Do not combine the two page adapters themselves. They still own different DOM
 shapes and annotation flows.
 
+### Linearize comparison acquisition at the same boundary
+
+`annotateGeekbenchComparisonPage` currently keeps `primaryContext`,
+`baselineContext`, `validity`, and `checkedValidity` as outer mutable state. The
+baseline-clear callback updates those values through nested destructuring before
+the adapter resumes rendering. This is the hardest control flow in the current
+content code even though the individual fetch rules are intentional.
+
+When result loading is consolidated, extract a comparison acquisition operation
+that returns one explicit result, for example:
+
+```ts
+interface ComparisonData {
+  primaryContext: CachedResultContext | null;
+  baselineContext: CachedResultContext | null;
+  validity: readonly [CachedResultValidity | null, CachedResultValidity | null];
+}
+```
+
+The operation may coordinate the two typed loader calls and validity checks, but
+`withClearedComparisonBaseline` must remain at the comparison boundary. Clear and
+restore the baseline once around all requests that require that state, including
+fresh validity checks. Do not move session mutation into a generic per-result
+loader.
+
+The Geekbench 6 and non-v6 branches in `singleResultPage.ts#getResultContext`
+also share their cache-store and return shape. They may be folded locally when
+this work begins by selecting the generation-specific instruction source first,
+then performing one common merge/store/return path. Preserve the v6 rendered-HTML
+fallback and its precedence over payload instruction data.
+
+### Add coverage at the adapter boundary
+
+The helper and view-model suites are extensive, but the current coverage run does
+not import `singleResultPage.ts` or `comparisonPage.ts`. As a result, the main
+cache/fetch/baseline/render orchestration is outside the reported coverage even
+when the aggregate percentage is high.
+
+Treat the current functional behavior as the baseline. Before moving loading or
+comparison orchestration into new modules, add fixture-backed characterization
+tests against the existing page adapters and land them as a separate change. If
+the adapters need a test seam, introduce the narrowest dependency injection or
+module boundary required without changing fetch order, baseline handling, cache
+merging, statuses, or rendered output. Do not make the extraction itself the
+first executable specification of this behavior.
+
+Those characterization tests, and later the extracted loader tests, should cover
+without real network or IndexedDB access:
+
+- cache hits that require no request;
+- signed-out v5 and v7 behavior without baseline mutation;
+- the signed-out v6 HTML fallback;
+- one clear/restore window for two missing comparison contexts plus validity;
+- partial cache hits and one-sided fetch failures;
+- processor-link precedence and cache writes that preserve stronger facts; and
+- rendering with one missing processor or instruction-set context.
+
+Keep selector/DOM integration tests against captured Geekbench fixtures. A pure
+loader test alone does not prove that the page adapter passed the correct result
+IDs, versions, links, and lane order.
+
 ## Priority and sequencing
 
-Renderer cleanup is complete. Consolidate result loading only when a later
-page-fetch change provides a concrete reason to touch that behavior.
+Renderer cleanup is complete. Consolidate result loading and linearize comparison
+acquisition only when a later page-fetch change provides a concrete reason to
+touch that behavior. Add and land adapter characterization tests before changing
+the orchestration. A narrow test seam may precede the later fetch change, but it
+must not alter fetch or baseline policy merely to improve coverage.
 
 Each step should be independently committable. Avoid mixing visual changes,
 catalogue data additions, or unrelated cleanup into these extractions.
@@ -125,7 +189,10 @@ The task is complete when:
 Result-loading consolidation is explicitly deferred until another change touches
 page-fetch behavior. Once triggered, it becomes complete when single and
 comparison pages share one tested loading policy while retaining their
-page-specific fetch and baseline behavior.
+page-specific fetch and baseline behavior; comparison acquisition returns an
+explicit result instead of mutating outer state; and fixture-backed adapter tests
+that passed before the extraction still cover the signed-in, signed-out,
+partial-cache, and failure paths above.
 
 For the renderer and loading changes, manually exercise one Geekbench 7 CPU
 result and one comparison page in both unpacked builds, as required for DOM

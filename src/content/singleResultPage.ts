@@ -1,11 +1,8 @@
 import { categorizeInstructionSets } from '../isa/categories';
 import { parseGeekbenchGeneration, type GeekbenchGeneration } from '../geekbench/generation';
-import {
-  extractProcessorLinks,
-  mergeProcessorLinks,
-  type CanonicalProcessorLinks,
-} from '../geekbench/processorLinks';
+import { extractProcessorLinks } from '../geekbench/processorLinks';
 import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
+import { parseResultId } from '../geekbench/urls';
 import {
   initialInstructionStatus,
   processorContextStatus,
@@ -31,16 +28,34 @@ import {
   renderSingleProcessorContext,
 } from './processorContextUi';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
+import { debugLog } from '../logger';
+import { loadResultContext } from './resultContextLoader';
 
-// Main function to annotate the Geekbench results
-export async function annotateGeekbenchResults(settings: Settings) {
+interface SingleResultPageDependencies {
+  cache: Pick<typeof resultsCache, 'getResultContext' | 'storeResultContext'>;
+  fetchMetadata: typeof fetchResultMetadataFromPayload;
+  mountSystemInstructionSets: typeof mountSystemInstructionSets;
+  mountWorkloadBadges: typeof mountWorkloadBadges;
+}
+
+const singleResultPageDependencies: SingleResultPageDependencies = {
+  cache: resultsCache,
+  fetchMetadata: fetchResultMetadataFromPayload,
+  mountSystemInstructionSets,
+  mountWorkloadBadges,
+};
+
+export async function annotateGeekbenchResults(
+  settings: Settings,
+  dependencies: SingleResultPageDependencies = singleResultPageDependencies,
+) {
   if (isPageAnnotated()) {
     return; // page already annotated
   }
 
-  console.log('GeekLens: Starting annotation process');
+  debugLog('Starting annotation process');
   const generation = parseGeekbenchGeneration(window.location.pathname);
-  const resultId = window.location.pathname.split('/').filter(Boolean).at(-1);
+  const resultId = parseResultId(window.location.pathname);
   if (!generation || !resultId) return;
 
   const signedOut = isGeekbenchSignedOut();
@@ -50,7 +65,7 @@ export async function annotateGeekbenchResults(settings: Settings) {
   try {
     await waitForElement('table.benchmark-table');
     applyProcessorContextPreferences(settings);
-    const context = await getResultContext(generation, resultId, signedOut);
+    const context = await getResultContext(generation, resultId, signedOut, dependencies);
     const instructionSets = context?.instructionSet ?? null;
     const processorContext = buildProcessorContextViewModel(context);
     if (processorContext) renderSingleProcessorContext(processorContext, settings);
@@ -64,8 +79,13 @@ export async function annotateGeekbenchResults(settings: Settings) {
     }
 
     if (settings.showIsaAnnotations) {
-      annotateSystemInstructionSets(generation, instructionSets, settings);
-      annotateBenchmarkTables(generation, extractIndividualInstructions(instructionSets), settings);
+      annotateSystemInstructionSets(generation, instructionSets, settings, dependencies);
+      annotateBenchmarkTables(
+        generation,
+        extractIndividualInstructions(instructionSets),
+        settings,
+        dependencies,
+      );
     }
     showStatus(singleResultInstructionStatus(generation, true));
   } catch (error) {
@@ -77,71 +97,41 @@ async function getResultContext(
   generation: GeekbenchGeneration,
   resultId: string,
   signedOut: boolean,
+  dependencies: SingleResultPageDependencies,
 ): Promise<CachedResultContext | null> {
-  const cached = await resultsCache.getResultContext(generation, resultId);
-  const processorLinks = mergeProcessorLinks(cached?.processorLinks, extractProcessorLinks());
-
-  // Geekbench 6 renders instruction sets into the page, so keep that as the
-  // compatibility source even when its authenticated payload is unavailable.
-  // The payload still supplies the processor-context metadata shared with v7.
-  if (generation === 6) {
-    const metadata =
-      cached?.metadata ??
-      (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
-    const instructionSets =
-      cached?.instructionSet ??
-      findInstructionSetValueCell()?.textContent?.trim() ??
-      metadata?.instructionSets?.value ??
-      null;
-    if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
-      await resultsCache.storeResultContext(generation, resultId, {
-        instructionSet: instructionSets,
-        metadata,
-        processorLinks,
-      });
-    }
-    return {
-      instructionSet: instructionSets,
-      metadata,
-      processorLinks,
-      lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
-    };
-  }
-
-  // A signed-out payload request is not merely doomed: Geekbench stores the
-  // rejected path as the session's post-login destination, so a later sign-in
-  // lands the user on raw `.gb6` JSON instead of the result page.
-  if (signedOut && !cached?.metadata) {
-    console.log(`GeekLens: Signed out of Geekbench ${generation}, skipping payload fetch`);
-  }
-  const metadata =
-    cached?.metadata ??
-    (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
-  const instructionSets = metadata?.instructionSets?.value ?? cached?.instructionSet ?? null;
-
-  if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
-    await resultsCache.storeResultContext(generation, resultId, {
-      instructionSet: instructionSets,
-      metadata,
-      processorLinks,
-    });
-  }
-  return {
-    instructionSet: instructionSets,
-    metadata,
-    processorLinks,
-    lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
-  };
-}
-
-function hasProcessorLinks(links: CanonicalProcessorLinks): boolean {
-  return Boolean(links.processorPath || links.macPath);
+  return loadResultContext({
+    cache: dependencies.cache,
+    generation,
+    resultId,
+    processorLinks: extractProcessorLinks(),
+    async loadSource(cached) {
+      // A signed-out payload request changes Geekbench's post-login destination,
+      // so payload-backed generations deliberately do not attempt it.
+      if (signedOut && !cached?.metadata && generation !== 6) {
+        debugLog(`Signed out of Geekbench ${generation}, skipping payload fetch`);
+      }
+      const metadata =
+        cached?.metadata ??
+        (signedOut ? null : await dependencies.fetchMetadata(generation, resultId));
+      // The rendered v6 row is the compatibility source and remains stronger
+      // than payload instruction data.
+      const compatibilityInstructions =
+        cached?.instructionSet ??
+        (generation === 6 ? findInstructionSetValueCell()?.textContent?.trim() : null);
+      const instructionSet =
+        generation === 6
+          ? (compatibilityInstructions ?? metadata?.instructionSets?.value ?? null)
+          : (metadata?.instructionSets?.value ?? compatibilityInstructions ?? null);
+      return { instructionSet, metadata };
+    },
+  });
 }
 
 function annotateSystemInstructionSets(
   generation: GeekbenchGeneration,
   instructionSets: string,
   settings: Settings,
+  dependencies: SingleResultPageDependencies,
 ) {
   const valueCell =
     generation === 6 ? findInstructionSetValueCell() : insertGeekbench7InstructionSetRow();
@@ -154,7 +144,11 @@ function annotateSystemInstructionSets(
   }
 
   valueCell.textContent = '';
-  mountSystemInstructionSets(valueCell, categorizeInstructionSets(instructionSets), settings);
+  dependencies.mountSystemInstructionSets(
+    valueCell,
+    categorizeInstructionSets(instructionSets),
+    settings,
+  );
 }
 
 function insertGeekbench7InstructionSetRow(): HTMLTableCellElement | null {
@@ -183,6 +177,7 @@ function annotateBenchmarkTables(
   generation: GeekbenchGeneration,
   allSupportedInstructions: Set<string>,
   settings: Settings,
+  dependencies: SingleResultPageDependencies,
 ) {
   const benchmarkTables = findBenchmarkTables();
 
@@ -212,7 +207,7 @@ function annotateBenchmarkTables(
         return;
       }
 
-      mountWorkloadBadges(benchmarkCell, instructions, settings, confidenceNote);
+      dependencies.mountWorkloadBadges(benchmarkCell, instructions, settings, confidenceNote);
     });
   });
 }

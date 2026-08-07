@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import browser from '../../browserApi';
+  import { logError } from '../../logger';
   import {
     defaultSettings,
     loadSettings,
@@ -16,7 +17,6 @@
   let statusTimeout: ReturnType<typeof setTimeout> | undefined;
   let hasChanges = $derived(JSON.stringify(settings) !== JSON.stringify(savedSettings));
 
-  // Load settings on mount
   onMount(async () => {
     settings = await loadSettings();
     savedSettings = { ...settings };
@@ -24,7 +24,6 @@
 
   onDestroy(() => clearTimeout(statusTimeout));
 
-  // Save settings
   async function onSaveSettings() {
     if (!hasChanges || isSaving) return;
     isSaving = true;
@@ -43,7 +42,7 @@
           statusMessage = 'Saved and page refreshed';
         }
       } catch (error) {
-        console.error('Failed to reload the active Geekbench page:', error);
+        logError('Failed to reload the active Geekbench page', error);
         statusMessage = 'Saved; refresh the page manually';
       }
 

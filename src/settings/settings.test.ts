@@ -1,13 +1,17 @@
 import { describe, expect, mock, test } from 'bun:test';
 
 let stored: Record<string, unknown> = {};
+let loadError: Error | null = null;
 let saveError: Error | null = null;
 
 mock.module('../browserApi', () => ({
   default: {
     storage: {
       sync: {
-        get: async () => stored,
+        get: async () => {
+          if (loadError) throw loadError;
+          return stored;
+        },
         set: async (values: Record<string, unknown>) => {
           if (saveError) throw saveError;
           stored = { ...stored, ...values };
@@ -20,6 +24,35 @@ mock.module('../browserApi', () => ({
 const { defaultSettings, loadSettings, saveSettings } = await import('./settings');
 
 describe('loadSettings', () => {
+  test('treats missing synchronized settings as a silent first run', async () => {
+    const originalConsoleError = console.error;
+    const consoleError = mock(() => {});
+    console.error = consoleError;
+
+    try {
+      stored = {};
+      expect(await loadSettings()).toEqual({ ...defaultSettings });
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  test('logs a synchronized storage rejection and returns defaults', async () => {
+    const originalConsoleError = console.error;
+    const consoleError = mock(() => {});
+    console.error = consoleError;
+    loadError = new Error('storage unavailable');
+
+    try {
+      expect(await loadSettings()).toEqual({ ...defaultSettings });
+      expect(consoleError).toHaveBeenCalledWith('GeekLens: Failed to load settings', loadError);
+    } finally {
+      loadError = null;
+      console.error = originalConsoleError;
+    }
+  });
+
   test('never hands back the shared defaults object', async () => {
     stored = {};
     const settings = await loadSettings();
@@ -85,12 +118,19 @@ describe('loadSettings', () => {
 
 describe('saveSettings', () => {
   test('rejects when synchronized storage fails', async () => {
+    const originalConsoleError = console.error;
+    const consoleError = mock(() => {});
+    console.error = consoleError;
     saveError = new Error('storage unavailable');
 
-    await expect(saveSettings({ ...defaultSettings, tooltips: false })).rejects.toThrow(
-      'storage unavailable',
-    );
-
-    saveError = null;
+    try {
+      await expect(saveSettings({ ...defaultSettings, tooltips: false })).rejects.toThrow(
+        'storage unavailable',
+      );
+      expect(consoleError).toHaveBeenCalledWith('GeekLens: Failed to save settings', saveError);
+    } finally {
+      saveError = null;
+      console.error = originalConsoleError;
+    }
   });
 });

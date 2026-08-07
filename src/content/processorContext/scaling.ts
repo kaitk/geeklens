@@ -45,33 +45,33 @@ function scalingNote(scaling: NonNullable<ProcessorContextViewModel['scaling']>)
 
 function appendScalingNote(
   cell: Element | null | undefined,
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
   alignToScore = false,
 ): void {
-  if (!cell || !preview.scaling || cell.querySelector('[data-geeklens-preview-scaling]')) return;
-  const note = scalingNote(preview.scaling);
+  if (!cell || !viewModel.scaling || cell.querySelector('[data-geeklens-preview-scaling]')) return;
+  const note = scalingNote(viewModel.scaling);
   if (alignToScore) note.classList.add('is-score-aligned');
   cell.appendChild(note);
 }
 
-export function annotateSingleScaling(preview: ProcessorContextViewModel): void {
+export function annotateSingleScaling(viewModel: ProcessorContextViewModel): void {
   const desktopContainers = document.querySelectorAll('.score-container.desktop');
   const scoreContainers = desktopContainers.length
     ? desktopContainers
     : document.querySelectorAll('.score-container');
-  appendScalingNote(scoreContainers[1]?.querySelector('.score'), preview);
+  appendScalingNote(scoreContainers[1]?.querySelector('.score'), viewModel);
   for (const table of Array.from(document.querySelectorAll('table.benchmark-table'))) {
     const scoreRow = Array.from(table.querySelectorAll('thead tr, tbody tr')).find((row) =>
       (row.firstElementChild?.textContent?.trim() ?? '').startsWith('Multi-Core Score'),
     );
     for (const cell of Array.from(scoreRow?.querySelectorAll('.score') ?? [])) {
-      appendScalingNote(cell.parentElement?.querySelector('.graph') ?? cell, preview);
+      appendScalingNote(cell.parentElement?.querySelector('.graph') ?? cell, viewModel);
     }
   }
 }
 
 export function annotateComparisonScaling(
-  previews: readonly (ProcessorContextViewModel | null)[],
+  viewModels: readonly (ProcessorContextViewModel | null)[],
 ): void {
   for (const table of Array.from(document.querySelectorAll('table.comparison-benchmark-table'))) {
     const rows = Array.from(table.querySelectorAll('thead tr, tbody tr')).filter((row) =>
@@ -81,11 +81,11 @@ export function annotateComparisonScaling(
       Array.from(row.querySelectorAll('.score'))
         .slice(0, 2)
         .forEach((cell, index) => {
-          const preview = previews[index];
-          if (preview)
+          const viewModel = viewModels[index];
+          if (viewModel)
             appendScalingNote(
               cell,
-              preview,
+              viewModel,
               !cell.querySelector('[data-geeklens-preview-reference]'),
             );
         });

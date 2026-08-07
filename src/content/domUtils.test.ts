@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { afterEach, describe, expect, test } from 'bun:test';
 import { parseHTML } from 'linkedom';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
 import { getV6SupportedInstructions } from '../isa/benchmarkMap';
@@ -10,12 +10,61 @@ import {
   findInstructionSetValueCell,
   findSystemTableByHeading,
   getComparisonVersions,
+  waitForElement,
 } from './domUtils';
+
+const originalDocument = globalThis.document;
+const originalMutationObserver = globalThis.MutationObserver;
+
+afterEach(() => {
+  if (originalDocument === undefined) delete (globalThis as { document?: Document }).document;
+  else globalThis.document = originalDocument;
+  if (originalMutationObserver === undefined) {
+    delete (globalThis as { MutationObserver?: typeof MutationObserver }).MutationObserver;
+  } else {
+    globalThis.MutationObserver = originalMutationObserver;
+  }
+});
 
 async function fixture(name: string): Promise<Document> {
   const html = await Bun.file(new URL(`__fixtures__/${name}`, import.meta.url)).text();
   return parseHTML(html).document as unknown as Document;
 }
+
+describe('waitForElement', () => {
+  test('returns an existing element after one query', async () => {
+    const { document, MutationObserver } = parseHTML(
+      '<!doctype html><html><body><div class="target"></div></body></html>',
+    );
+    globalThis.document = document as unknown as Document;
+    globalThis.MutationObserver = MutationObserver as unknown as typeof globalThis.MutationObserver;
+
+    const originalQuerySelector = document.querySelector.bind(document);
+    let queryCount = 0;
+    document.querySelector = ((selector: string) => {
+      queryCount += 1;
+      return originalQuerySelector(selector);
+    }) as typeof document.querySelector;
+
+    const element = await waitForElement('.target');
+
+    expect(element).toBe(originalQuerySelector('.target')!);
+    expect(queryCount).toBe(1);
+  });
+
+  test('resolves when an observed mutation adds the element', async () => {
+    const { document, MutationObserver } = parseHTML('<!doctype html><html><body></body></html>');
+    globalThis.document = document as unknown as Document;
+    globalThis.MutationObserver = MutationObserver as unknown as typeof globalThis.MutationObserver;
+
+    const waiting = waitForElement('.target', 100);
+    const element = document.createElement('div');
+    element.className = 'target';
+    document.body.append(element);
+
+    expect(await waiting).toBe(element);
+  });
+});
 
 describe('Geekbench 5 page selectors', () => {
   test('supports the captured single-result structure without inventing instruction data', async () => {

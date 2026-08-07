@@ -2,6 +2,7 @@
  * feature renderers. Score features locate their distinct benchmark tables;
  * single-result memory similarly owns the separate Memory Information table. */
 import type { Settings } from '../../settings/settings';
+import { findSystemTableByHeading } from '../domUtils';
 import { markRowLabel } from '../rowMarker';
 import { markDisputedL3Cache } from './cacheDispute';
 import { renderComparisonFrequency, renderSingleFrequency } from './frequency';
@@ -28,12 +29,10 @@ function l3CacheRow(table: Element | null | undefined): Element | undefined {
 }
 
 export function renderSingleProcessorContext(
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
   settings: Settings,
 ): void {
-  const cpuTable = Array.from(document.querySelectorAll('table.system-table')).find(
-    (table) => table.querySelector('th')?.textContent?.trim() === 'CPU Information',
-  );
+  const cpuTable = findSystemTableByHeading('CPU Information');
   const nameRow = Array.from(cpuTable?.querySelectorAll('tbody tr') ?? []).find((row) =>
     /^(Name|Processor)$/.test(tableRowLabel(row)),
   );
@@ -41,7 +40,7 @@ export function renderSingleProcessorContext(
   if (!nameCell || nameCell.querySelector('[data-geeklens-preview-processor]')) return;
 
   if (settings.showProcessorSummary) {
-    const block = renderIdentity(preview);
+    const block = renderIdentity(viewModel);
     block.dataset.geeklensPreviewProcessor = '';
     nameCell.replaceChildren(block);
     if (nameRow?.firstElementChild) markRowLabel(nameRow.firstElementChild, 'changed');
@@ -56,20 +55,22 @@ export function renderSingleProcessorContext(
     const nativeTopology = valueCell?.textContent?.trim() ?? '';
     if (settings.showCoreTopology) {
       labelCell?.replaceChildren(rowLabel('Topology', 'changed'));
-      valueCell?.replaceChildren(topologyDetails(nativeTopology, preview));
+      valueCell?.replaceChildren(topologyDetails(nativeTopology, viewModel));
     }
-    if (settings.showFrequencyDistribution) renderSingleFrequency(preview, cpuTable, topologyRow);
+    if (settings.showFrequencyDistribution) {
+      renderSingleFrequency(viewModel, cpuTable ?? undefined, topologyRow);
+    }
   }
 
-  markDisputedL3Cache(l3CacheRow(cpuTable)?.lastElementChild, preview.disputedL3Cache);
-  if (settings.showReferenceComparison) annotateSingleScoreReferences(preview);
+  markDisputedL3Cache(l3CacheRow(cpuTable)?.lastElementChild, viewModel.disputedL3Cache);
+  if (settings.showReferenceComparison) annotateSingleScoreReferences(viewModel);
   // References must read untouched numeric scores before scaling adds text.
-  if (settings.showMultiCoreScaling) annotateSingleScaling(preview);
-  if (settings.showMemoryDetails) renderSingleMemory(preview);
+  if (settings.showMultiCoreScaling) annotateSingleScaling(viewModel);
+  if (settings.showMemoryDetails) renderSingleMemory(viewModel);
 }
 
 export function renderComparisonProcessorContext(
-  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
+  viewModels: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
   settings: Settings,
 ): void {
   const table = document.querySelector('table.system-information');
@@ -85,14 +86,14 @@ export function renderComparisonProcessorContext(
       if (cell.querySelector('[data-geeklens-preview-processor]')) return;
       processorTopologies.push(processorTopology(cell));
       if (settings.showProcessorSummary) {
-        const preview = previews[index];
-        if (!preview) return;
-        const block = renderIdentity(preview);
+        const viewModel = viewModels[index];
+        if (!viewModel) return;
+        const block = renderIdentity(viewModel);
         block.dataset.geeklensPreviewProcessor = '';
         cell.replaceChildren(block);
       }
     });
-  if (settings.showProcessorSummary && previews.some(Boolean) && processorRow.firstElementChild) {
+  if (settings.showProcessorSummary && viewModels.some(Boolean) && processorRow.firstElementChild) {
     markRowLabel(processorRow.firstElementChild, 'changed');
   }
 
@@ -100,27 +101,27 @@ export function renderComparisonProcessorContext(
   const cacheRow = l3CacheRow(table);
   Array.from(cacheRow?.children ?? [])
     .slice(1, 3)
-    .forEach((cell, index) => markDisputedL3Cache(cell, previews[index]?.disputedL3Cache));
+    .forEach((cell, index) => markDisputedL3Cache(cell, viewModels[index]?.disputedL3Cache));
 
   const detailRows: HTMLTableRowElement[] = [];
   if (
     settings.showCoreTopology &&
     !table?.querySelector('[data-geeklens-preview-detail="topology"]')
   ) {
-    detailRows.push(comparisonTopologyRow(previews, processorTopologies));
+    detailRows.push(comparisonTopologyRow(viewModels, processorTopologies));
   }
   if (settings.showFrequencyDistribution) {
-    const row = renderComparisonFrequency(previews, table);
+    const row = renderComparisonFrequency(viewModels, table);
     if (row) detailRows.push(row);
   }
   processorRow.after(...detailRows);
 
-  if (settings.showMemoryDetails) renderComparisonMemory(previews, table);
-  if (settings.showReferenceComparison && previews[0] && previews[1]) {
-    annotateComparisonReferences([previews[0], previews[1]]);
+  if (settings.showMemoryDetails) renderComparisonMemory(viewModels, table);
+  if (settings.showReferenceComparison && viewModels[0] && viewModels[1]) {
+    annotateComparisonReferences([viewModels[0], viewModels[1]]);
   }
   // References must read untouched numeric scores before scaling adds text.
-  if (settings.showMultiCoreScaling) annotateComparisonScaling(previews);
+  if (settings.showMultiCoreScaling) annotateComparisonScaling(viewModels);
 }
 
 export function applyProcessorContextPreferences(settings: Settings): void {

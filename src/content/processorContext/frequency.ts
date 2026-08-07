@@ -69,8 +69,8 @@ function distributionChart(
   return chart;
 }
 
-function frequency(preview: ProcessorContextViewModel): HTMLElement {
-  const statistics = preview.frequency!;
+function frequency(viewModel: ProcessorContextViewModel): HTMLElement {
+  const statistics = viewModel.frequency!;
   const wrapper = document.createElement('div');
   wrapper.className = 'geeklens-preview-frequency';
   const heading = document.createElement('span');
@@ -81,18 +81,18 @@ function frequency(preview: ProcessorContextViewModel): HTMLElement {
 }
 
 function comparisonFrequency(
-  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
+  viewModels: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
 ): HTMLElement {
-  const available = previews.filter((preview): preview is ProcessorContextViewModel =>
-    Boolean(preview?.frequency),
+  const available = viewModels.filter((viewModel): viewModel is ProcessorContextViewModel =>
+    Boolean(viewModel?.frequency),
   );
   const scale = {
-    minGHz: Math.min(...available.map((preview) => preview.frequency!.minGHz)),
-    maxGHz: Math.max(...available.map((preview) => preview.frequency!.maxGHz)),
+    minGHz: Math.min(...available.map((viewModel) => viewModel.frequency!.minGHz)),
+    maxGHz: Math.max(...available.map((viewModel) => viewModel.frequency!.maxGHz)),
   };
   const wrapper = document.createElement('div');
   wrapper.className = 'geeklens-preview-frequency-comparison';
-  for (const [index, preview] of previews.entries()) {
+  for (const [index, viewModel] of viewModels.entries()) {
     const role = index === 0 ? 'primary' : 'baseline';
     const lane = document.createElement('div');
     lane.className = `geeklens-preview-frequency-lane is-${role}`;
@@ -100,13 +100,20 @@ function comparisonFrequency(
     // reader to map a role or colour back to the comparison column headers.
     const label = document.createElement('span');
     label.className = 'geeklens-preview-frequency-lane-label';
-    label.textContent = preview ? preview.displayName : role === 'primary' ? 'Primary' : 'Baseline';
+    label.textContent = viewModel
+      ? viewModel.displayName
+      : role === 'primary'
+        ? 'Primary'
+        : 'Baseline';
     label.title = label.textContent;
     lane.appendChild(label);
-    if (preview?.frequency) {
+    if (viewModel?.frequency) {
       // A shared scale can compress one distribution to a few pixels, so keep
       // the exact endpoint readout beside the plot in comparison view.
-      lane.append(distributionChart(preview.frequency, scale), frequencyValues(preview.frequency));
+      lane.append(
+        distributionChart(viewModel.frequency, scale),
+        frequencyValues(viewModel.frequency),
+      );
     } else {
       const unavailable = document.createElement('span');
       unavailable.className = 'geeklens-preview-frequency-unavailable';
@@ -130,11 +137,11 @@ function comparisonFrequency(
 }
 
 export function renderSingleFrequency(
-  preview: ProcessorContextViewModel,
+  viewModel: ProcessorContextViewModel,
   cpuTable: Element | undefined,
   topologyRow: Element,
 ): void {
-  if (!preview.frequency || cpuTable?.querySelector('[data-geeklens-preview-detail="frequency"]'))
+  if (!viewModel.frequency || cpuTable?.querySelector('[data-geeklens-preview-detail="frequency"]'))
     return;
   const frequencyRow = document.createElement('tr');
   frequencyRow.dataset.geeklensPreviewDetail = 'frequency';
@@ -143,17 +150,17 @@ export function renderSingleFrequency(
   frequencyLabel.appendChild(rowLabel('Frequency'));
   const frequencyValue = document.createElement('td');
   frequencyValue.className = topologyRow.lastElementChild?.className ?? 'system-value';
-  frequencyValue.appendChild(frequency(preview));
+  frequencyValue.appendChild(frequency(viewModel));
   frequencyRow.append(frequencyLabel, frequencyValue);
   topologyRow.after(frequencyRow);
 }
 
 export function renderComparisonFrequency(
-  previews: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
+  viewModels: readonly [ProcessorContextViewModel | null, ProcessorContextViewModel | null],
   table: Element | null,
 ): HTMLTableRowElement | null {
   if (
-    !previews.some((preview) => preview?.frequency) ||
+    !viewModels.some((viewModel) => viewModel?.frequency) ||
     table?.querySelector('[data-geeklens-preview-detail="frequency"]')
   )
     return null;
@@ -165,7 +172,7 @@ export function renderComparisonFrequency(
   const chartCell = document.createElement('td');
   chartCell.className = 'geeklens-preview-detail-value';
   chartCell.colSpan = 2;
-  chartCell.appendChild(comparisonFrequency(previews));
+  chartCell.appendChild(comparisonFrequency(viewModels));
   row.append(labelCell, chartCell);
   return row;
 }
