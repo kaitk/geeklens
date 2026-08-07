@@ -1,5 +1,5 @@
-import { GENERATED_PROCESSOR_IDENTITIES } from './processorCatalogue.generated';
-import { GENERATED_MAC_IDENTITIES } from './macCatalogue.generated';
+import { GENERATED_MAC_IDENTITIES } from './generated/macCatalogue.generated';
+import { GENERATED_PROCESSOR_IDENTITIES } from './generated/processorCatalogue.generated';
 import type {
   CatalogueSource,
   HardwareSpecification,
@@ -16,6 +16,7 @@ import {
   APPLE_M4_PRO_MAX_SOURCE,
   APPLE_M5_PRO_MAX_SOURCE,
   APPLE_M5_SOURCE,
+  MAC_CATALOGUE_SOURCE,
   PROCESSOR_CATALOGUE_SOURCE,
   WIKIPEDIA_APPLE_M3_SOURCE,
   WIKIPEDIA_APPLE_M4_SOURCE,
@@ -49,23 +50,34 @@ export const GENERATED_CATALOGUE: readonly ProcessorCatalogueEntry[] =
   }));
 
 export const GENERATED_MAC_CATALOGUE: readonly ProcessorCatalogueEntry[] =
-  GENERATED_MAC_IDENTITIES.map((identity) =>
-    identity.key === 'mac-mac-mini-2024-10c-cpu'
+  GENERATED_MAC_IDENTITIES.map((identity) => ({
+    ...identity,
+    ...(identity.key === 'mac-mac-mini-2024-10c-cpu'
       ? {
-          ...identity,
           processorPaths: ['/processors/apple-m4'],
           requiredConfiguration: {
             ...identity.requiredConfiguration,
             modelIdentifier: 'Mac16,10',
           },
         }
-      : { ...identity, hardware: REVIEWED_HARDWARE[identity.key] },
-  );
+      : { hardware: REVIEWED_HARDWARE[identity.key] }),
+    scoreReferences:
+      'singleCore' in identity && 'multiCore' in identity
+        ? [
+            {
+              generation: MAC_CATALOGUE_SOURCE.generation,
+              singleCore: identity.singleCore,
+              multiCore: identity.multiCore,
+            },
+          ]
+        : undefined,
+  }));
 
 /** Apple identities carry published memory facts only.
  *
  * Apple chips are absent from the Geekbench 7 Processor Benchmark Chart, so
- * these entries intentionally have no `scoreReferences` and render no average.
+ * reviewed chip-family entries intentionally have no `scoreReferences`. Exact
+ * generated Mac identities carry averages from the Geekbench 7 Mac table.
  * Each `requiredConfiguration.physicalCores` keeps the shared family alias
  * unique against the generated Mac entries; see the M1 Ultra note above for the
  * case where an existing unconfigured Mac entry owns the alias instead.

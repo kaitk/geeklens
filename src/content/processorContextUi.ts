@@ -61,10 +61,6 @@ function sourceLink(options: {
   return link;
 }
 
-function nameWithoutVendor(name: string, vendor: string): string {
-  return name.replace(new RegExp(`^${vendor}\\s+`, 'i'), '');
-}
-
 function processorNameAndTopology(cell: Element): { name: string; topology: string } {
   const lines = (cell.textContent ?? '')
     .split('\n')
@@ -190,11 +186,7 @@ function comparisonFrequency(
     // headers or to a colour swatch.
     const label = document.createElement('span');
     label.className = 'geeklens-preview-frequency-lane-label';
-    label.textContent = preview
-      ? nameWithoutVendor(preview.name, preview.vendor)
-      : role === 'primary'
-        ? 'Primary'
-        : 'Baseline';
+    label.textContent = preview ? preview.displayName : role === 'primary' ? 'Primary' : 'Baseline';
     label.title = label.textContent;
     lane.appendChild(label);
 
@@ -314,6 +306,24 @@ function unavailableReference(): HTMLElement {
   return indicator;
 }
 
+function referenceElement(
+  preview: ProcessorContextViewModel,
+  current: number,
+  scoreKind: 'singleCore' | 'multiCore',
+): HTMLElement | null {
+  const reference = preview.reference;
+  if (reference && preview.cataloguePath) {
+    return referenceLink(
+      current,
+      reference[scoreKind],
+      preview.cataloguePath,
+      reference.generation,
+      reference.minimumUniqueResults,
+    );
+  }
+  return preview.hasReferenceDataset ? unavailableReference() : null;
+}
+
 function scoreValue(container: ParentNode): number | null {
   const value = Number(container.querySelector('.score')?.textContent?.replaceAll(',', '').trim());
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -328,21 +338,13 @@ function annotateSingleScoreReferences(preview: ProcessorContextViewModel): void
     if (container.querySelector('[data-geeklens-preview-reference]')) return;
     const current = scoreValue(container);
     if (!current) return;
+    const scoreKind = index === 0 ? 'singleCore' : 'multiCore';
+    const reference = referenceElement(preview, current, scoreKind);
+    if (!reference) return;
     const note = document.createElement('div');
     note.dataset.geeklensPreviewReference = '';
     note.className = 'geeklens-preview-reference';
-    const reference = preview.reference;
-    note.appendChild(
-      reference && preview.cataloguePath
-        ? referenceLink(
-            current,
-            index === 0 ? reference.singleCore : reference.multiCore,
-            preview.cataloguePath,
-            reference.generation,
-            reference.minimumUniqueResults,
-          )
-        : unavailableReference(),
-    );
+    note.appendChild(reference);
     container.querySelector('.score')?.appendChild(note);
   });
 }
@@ -360,18 +362,8 @@ function annotateSinglePerformanceReferences(preview: ProcessorContextViewModel)
     const scoreKind = scoreRow.firstElementChild?.textContent?.trim().startsWith('Single-Core')
       ? 'singleCore'
       : 'multiCore';
-    const reference = preview.reference;
-    scoreCell.appendChild(
-      reference && preview.cataloguePath
-        ? referenceLink(
-            current,
-            reference[scoreKind],
-            preview.cataloguePath,
-            reference.generation,
-            reference.minimumUniqueResults,
-          )
-        : unavailableReference(),
-    );
+    const reference = referenceElement(preview, current, scoreKind);
+    if (reference) scoreCell.appendChild(reference);
   }
 }
 
@@ -470,7 +462,11 @@ function memoryBandwidthLine(facts: readonly MemoryFact[]): HTMLElement | null {
   return line;
 }
 
-function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel): void {
+function appendMemoryDetails(
+  cell: Element,
+  preview: ProcessorContextViewModel,
+  preserveNative = false,
+): void {
   if (cell.querySelector('[data-geeklens-preview-memory]')) return;
   const details = document.createElement('div');
   details.dataset.geeklensPreviewMemory = '';
@@ -491,7 +487,8 @@ function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel):
   details.append(value, info);
   const bandwidth = memoryBandwidthLine(preview.memory);
   if (bandwidth) details.appendChild(bandwidth);
-  cell.replaceChildren(details);
+  if (preserveNative) cell.appendChild(details);
+  else cell.replaceChildren(details);
 }
 
 function rowLabel(label: string, kind: RowMarkerKind = 'added'): DocumentFragment {
@@ -688,9 +685,15 @@ function scalingNote(scaling: NonNullable<ProcessorContextViewModel['scaling']>)
   return note;
 }
 
-function appendScalingNote(cell: Element | null | undefined, preview: ProcessorContextViewModel) {
+function appendScalingNote(
+  cell: Element | null | undefined,
+  preview: ProcessorContextViewModel,
+  alignToScore = false,
+) {
   if (!cell || !preview.scaling || cell.querySelector('[data-geeklens-preview-scaling]')) return;
-  cell.appendChild(scalingNote(preview.scaling));
+  const note = scalingNote(preview.scaling);
+  if (alignToScore) note.classList.add('is-score-aligned');
+  cell.appendChild(note);
 }
 
 function multiCoreScoreCells(tableSelector: string): Element[] {
@@ -717,9 +720,24 @@ function annotateSingleScaling(preview: ProcessorContextViewModel): void {
 }
 
 function annotateComparisonScaling(previews: readonly (ProcessorContextViewModel | null)[]): void {
-  for (const [index, cell] of multiCoreScoreCells('table.comparison-benchmark-table').entries()) {
-    const preview = previews[index];
-    if (preview) appendScalingNote(cell, preview);
+  for (const table of Array.from(document.querySelectorAll('table.comparison-benchmark-table'))) {
+    const rows = Array.from(table.querySelectorAll('thead tr, tbody tr')).filter((row) =>
+      (row.firstElementChild?.textContent?.trim() ?? '').startsWith('Multi-Core Score'),
+    );
+    for (const row of rows) {
+      Array.from(row.querySelectorAll('.score'))
+        .slice(0, 2)
+        .forEach((cell, index) => {
+          const preview = previews[index];
+          if (preview) {
+            appendScalingNote(
+              cell,
+              preview,
+              !cell.querySelector('[data-geeklens-preview-reference]'),
+            );
+          }
+        });
+    }
   }
 }
 
@@ -803,7 +821,7 @@ export function renderSingleProcessorContext(
   if (!nameCell || nameCell.querySelector('[data-geeklens-preview-processor]')) return;
 
   if (settings.showProcessorSummary) {
-    const block = renderIdentity(preview.name, preview);
+    const block = renderIdentity(preview);
     block.dataset.geeklensPreviewProcessor = '';
     nameCell.replaceChildren(block);
     if (nameRow?.firstElementChild) markRowLabel(nameRow.firstElementChild, 'changed');
@@ -853,10 +871,21 @@ export function renderSingleProcessorContext(
   const memoryTable = Array.from(document.querySelectorAll('table.system-table')).find(
     (table) => table.querySelector('th')?.textContent?.trim() === 'Memory Information',
   );
-  const sizeCell = memoryTable?.querySelector('tbody tr td:last-child');
+  const memoryRow = Array.from(memoryTable?.querySelectorAll('tr') ?? []).find(
+    (row) => tableRowLabel(row) === 'Memory',
+  );
+  const sizeCell =
+    memoryRow?.lastElementChild ?? memoryTable?.querySelector('tbody tr td:last-child');
   if (settings.showMemoryDetails && preview.memory.length > 0 && sizeCell) {
-    sizeCell.parentElement?.firstElementChild?.replaceChildren(rowLabel('Details', 'changed'));
-    appendMemoryDetails(sizeCell, preview);
+    const nativeMemory = sizeCell.textContent?.trim() ?? '';
+    const hasNativeClock = /\b\d+(?:\.\d+)?\s*(?:MHz|GHz)\b/i.test(nativeMemory);
+    const preserveNative = hasNativeClock && !preview.hasReportedMemoryTransferRate;
+    const labelCell = sizeCell.parentElement?.firstElementChild;
+    if (labelCell) {
+      if (preserveNative) markRowLabel(labelCell, 'changed');
+      else labelCell.replaceChildren(rowLabel('Details', 'changed'));
+    }
+    appendMemoryDetails(sizeCell, preview, preserveNative);
   }
 }
 
@@ -880,7 +909,7 @@ export function renderComparisonProcessorContext(
       if (settings.showProcessorSummary) {
         const preview = previews[index];
         if (!preview) return;
-        const block = renderIdentity(preview.name, preview);
+        const block = renderIdentity(preview);
         block.dataset.geeklensPreviewProcessor = '';
         cell.replaceChildren(block);
       }
@@ -977,18 +1006,8 @@ function annotateComparisonReferences(
           if (!Number.isFinite(current)) return;
           const preview = previews[index];
           if (!preview) return;
-          const reference = preview.reference;
-          cell.appendChild(
-            reference && preview.cataloguePath
-              ? referenceLink(
-                  current,
-                  reference[scoreKind],
-                  preview.cataloguePath,
-                  reference.generation,
-                  reference.minimumUniqueResults,
-                )
-              : unavailableReference(),
-          );
+          const reference = referenceElement(preview, current, scoreKind);
+          if (reference) cell.appendChild(reference);
         });
     }
   }

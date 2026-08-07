@@ -10,6 +10,8 @@ import {
 function model(name: string, vendor: string, architecture: string): ProcessorContextViewModel {
   return {
     name,
+    displayName: name.replace(new RegExp(`^${vendor}\\s+`, 'i'), ''),
+    status: null,
     vendor,
     vendorKey: vendor.toLowerCase(),
     architecture,
@@ -18,8 +20,10 @@ function model(name: string, vendor: string, architecture: string): ProcessorCon
     topology: null,
     scaling: null,
     coreComposition: null,
+    hasReferenceDataset: true,
     reference: null,
     disputedL3Cache: null,
+    hasReportedMemoryTransferRate: true,
     memory: [],
   };
 }
@@ -93,6 +97,28 @@ describe('processor context DOM integration', () => {
     expect(processorLink?.getAttribute('aria-label')).toBe('Open processor page in a new tab.');
   });
 
+  test('shows the exact reported name only when the presentation was cleaned up', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('AMD Ryzen 9 9950X3D2 16-Core Processor', 'AMD', 'x86');
+    preview.displayName = 'Ryzen 9 9950X3D2';
+
+    renderSingleProcessorContext(preview, settings(true));
+
+    const name = document.querySelector('.geeklens-preview-reported-name');
+    expect(name?.firstChild?.textContent).toBe('Ryzen 9 9950X3D2');
+    expect(name?.getAttribute('tabindex')).toBe('0');
+    expect(name?.getAttribute('aria-label')).toBe(
+      'Ryzen 9 9950X3D2. Reported processor name: AMD Ryzen 9 9950X3D2 16-Core Processor',
+    );
+    expect(name?.querySelector('.geeklens-preview-source-tooltip')?.textContent).toBe(
+      'Reported processor nameAMD Ryzen 9 9950X3D2 16-Core Processor',
+    );
+
+    globalThis.document = await fixture('geekbench7-single.html');
+    renderSingleProcessorContext(model('Generic CPU', 'Unknown', 'x86'), settings(true));
+    expect(document.querySelector('.geeklens-preview-reported-name')).toBeNull();
+  });
+
   test('preserves primary/baseline order and a native missing side', async () => {
     globalThis.document = await fixture('geekbench7-comparison.html');
 
@@ -106,6 +132,27 @@ describe('processor context DOM integration', () => {
     expect(cells[1]?.textContent).toContain('Core Ultra 5 245K');
     expect(cells[2]?.textContent).toContain('Baseline CPU');
     expect(cells[2]?.querySelector('[data-geeklens-preview-processor]')).toBeNull();
+  });
+
+  test('renders engineering-sample status as an accessible compact badge', async () => {
+    globalThis.document = await fixture('geekbench7-single.html');
+    const preview = model('AMD Eng Sample: 100-000001535-05', 'AMD', 'x86');
+    preview.displayName = '100-000001535-05';
+    preview.status = 'engineering-sample';
+
+    renderSingleProcessorContext(preview, settings(true));
+
+    const badge = document.querySelector('.geeklens-preview-badge-status');
+    expect(badge?.firstChild?.textContent).toBe('ES');
+    expect(badge?.getAttribute('title')).toBeNull();
+    expect(badge?.getAttribute('tabindex')).toBe('0');
+    expect(badge?.getAttribute('aria-label')).toBe('Engineering sample');
+    expect(badge?.querySelector('.geeklens-preview-status-tooltip')?.textContent).toBe(
+      'Engineering sample',
+    );
+    expect(document.querySelector('.geeklens-preview-reported-name')?.firstChild?.textContent).toBe(
+      '100-000001535-05',
+    );
   });
 
   test('does not change native processor cells when the setting is disabled', async () => {
@@ -542,9 +589,69 @@ describe('processor context DOM integration', () => {
     ).toEqual(['7.25× single-core', '4.50× single-core']);
     expect(scoreRow?.querySelector('.delta')?.textContent).toBe('181.3%');
     expect(scoreRow?.querySelectorAll('[data-geeklens-preview-reference]')).toHaveLength(2);
+    expect(scoreRow?.querySelector('.geeklens-preview-scaling.is-score-aligned')).toBeNull();
     const row = document.querySelector('[data-geeklens-preview-detail="topology"]');
     expect(row?.firstElementChild?.textContent).toContain('Topology');
     expect(row?.textContent).not.toContain('×');
+  });
+
+  test('right-aligns comparison scaling when no average line is present', async () => {
+    globalThis.document = await fixture('geekbench6-comparison.html');
+    document
+      .querySelector('table.comparison-benchmark-table tbody')
+      ?.insertAdjacentHTML(
+        'afterbegin',
+        '<tr class="test-multi-core"><td class="name">Multi-Core Score</td><td class="score">14500</td><td class="score">8000</td><td class="delta">181.3%</td></tr>',
+      );
+    const primary = model('Intel CPU', 'Intel', 'x86');
+    primary.hasReferenceDataset = false;
+    primary.scaling = { ratio: 7.25, singleCore: 2000, multiCore: 14500 };
+    const baseline = model('AMD CPU', 'AMD', 'x86');
+    baseline.hasReferenceDataset = false;
+    baseline.scaling = { ratio: 4.5, singleCore: 1778, multiCore: 8000 };
+
+    renderComparisonProcessorContext(
+      [primary, baseline],
+      settings(true, {
+        showMultiCoreScaling: true,
+        showReferenceComparison: true,
+      }),
+    );
+
+    const notes = document.querySelectorAll(
+      '.test-multi-core .geeklens-preview-scaling.is-score-aligned',
+    );
+    expect(notes).toHaveLength(2);
+    expect(document.querySelector('.test-multi-core [data-geeklens-preview-reference]')).toBeNull();
+  });
+
+  test('maps scaling by comparison column in every Geekbench 5 score table', async () => {
+    globalThis.document = await fixture('geekbench5-comparison.html');
+    const primary = model('AMD Ryzen 7 7700X', 'AMD', 'x86');
+    primary.hasReferenceDataset = false;
+    primary.scaling = { ratio: 6.5, singleCore: 2141, multiCore: 13921 };
+    const baseline = model('AMD Ryzen 7 5800X3D', 'AMD', 'x86');
+    baseline.hasReferenceDataset = false;
+    baseline.scaling = { ratio: 7.11, singleCore: 1461, multiCore: 10389 };
+
+    renderComparisonProcessorContext(
+      [primary, baseline],
+      settings(true, { showMultiCoreScaling: true }),
+    );
+
+    const multiCoreRows = Array.from(
+      document.querySelectorAll('table.comparison-benchmark-table tr'),
+    ).filter((row) =>
+      (row.firstElementChild?.textContent?.trim() ?? '').startsWith('Multi-Core Score'),
+    );
+    expect(multiCoreRows).toHaveLength(2);
+    for (const row of multiCoreRows) {
+      expect(
+        Array.from(row.querySelectorAll('[data-geeklens-preview-scaling]')).map(
+          (note) => note.firstChild?.textContent,
+        ),
+      ).toEqual(['6.50× single-core', '7.11× single-core']);
+    }
   });
 
   test('suppresses a single-result frequency row when data or the setting is absent', async () => {
@@ -567,8 +674,18 @@ describe('processor context DOM integration', () => {
 
   test('uses one shared comparison scale and preserves a missing frequency lane', async () => {
     globalThis.document = await fixture('geekbench7-comparison.html');
-    const primary = withFrequency(model('AMD Ryzen 7 5800X3D', 'AMD', 'x86'), 4, 5);
-    const baseline = withFrequency(model('Apple M1 Pro', 'Apple', 'ARM'), 2, 4);
+    const primary = withFrequency(
+      model('AMD Ryzen 7 5800X3D 8-Core Processor', 'AMD', 'x86'),
+      4,
+      5,
+    );
+    primary.displayName = 'Ryzen 7 5800X3D';
+    const baseline = withFrequency(
+      model('Intel(R) Core(TM) Ultra 9 290K Plus', 'Intel', 'x86'),
+      2,
+      4,
+    );
+    baseline.displayName = 'Core Ultra 9 290K Plus';
 
     renderComparisonProcessorContext(
       [primary, baseline],
@@ -588,7 +705,7 @@ describe('processor context DOM integration', () => {
       Array.from(row?.querySelectorAll('.geeklens-preview-frequency-lane-label') ?? []).map(
         (label) => label.textContent,
       ),
-    ).toEqual(['Ryzen 7 5800X3D', 'M1 Pro']);
+    ).toEqual(['Ryzen 7 5800X3D', 'Core Ultra 9 290K Plus']);
     expect(row?.querySelector('.geeklens-preview-frequency-axis')?.textContent).toBe(
       '2.00 GHz5.00 GHz',
     );
@@ -749,5 +866,53 @@ describe('processor context DOM integration', () => {
     expect(references.length).toBeGreaterThan(0);
     expect(references[0]?.textContent).toContain('avg');
     expect(references[0]?.getAttribute('aria-label')).toContain('Open reference source');
+  });
+
+  test('omits unavailable averages when the result generation has no average dataset', async () => {
+    globalThis.document = await fixture('geekbench6-single.html');
+    const preview = model('AMD Ryzen 9 9950X', 'AMD', 'x86');
+    preview.hasReferenceDataset = false;
+
+    renderSingleProcessorContext(preview, settings(true, { showReferenceComparison: true }));
+
+    expect(document.querySelector('[data-geeklens-preview-reference]')).toBeNull();
+    expect(document.body.textContent).not.toContain('avg unavailable');
+  });
+
+  test('renders processor context against the captured Geekbench 5 table shape', async () => {
+    globalThis.document = await fixture('geekbench5-single.html');
+    const preview = model('AMD Ryzen 7 7700X 8-Core Processor', 'AMD', 'x86');
+    preview.hasReferenceDataset = false;
+    preview.hasReportedMemoryTransferRate = false;
+    preview.frequency = {
+      minGHz: 5.365,
+      q1GHz: 5.433,
+      medianGHz: 5.441,
+      meanGHz: 5.439,
+      q3GHz: 5.448,
+      maxGHz: 5.463,
+    };
+    preview.memory = [{ kind: 'capacity', value: '32 GB', provenance: 'reported' }];
+
+    renderSingleProcessorContext(
+      preview,
+      settings(true, {
+        showFrequencyDistribution: true,
+        showMemoryDetails: true,
+        showReferenceComparison: true,
+      }),
+    );
+
+    expect(document.querySelector('[data-geeklens-preview-processor]')).not.toBeNull();
+    expect(document.querySelector('[data-geeklens-preview-detail="frequency"]')).not.toBeNull();
+    expect(document.querySelector('[data-geeklens-preview-memory]')?.textContent).toContain(
+      '32 GB',
+    );
+    expect(
+      Array.from(document.querySelectorAll('table.system-table')).find(
+        (table) => table.querySelector('th')?.textContent?.trim() === 'Memory Information',
+      )?.textContent,
+    ).toContain('2993 MHz');
+    expect(document.body.textContent).not.toContain('avg unavailable');
   });
 });

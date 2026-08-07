@@ -15,6 +15,11 @@ const PAYLOAD_OUTPUT = join(ROOT, 'src', 'geekbench', '__fixtures__');
 const HTML_OUTPUT = join(ROOT, 'src', 'content', '__fixtures__');
 
 const PAYLOADS = [
+  '10324204.gb5.json',
+  '1524322.gb5.json',
+  '17536185.gb5.json',
+  '18449406.gb5.json',
+  '18878080.gb5.json',
   '18864843.gb6.json',
   '18873252.gb6.json',
   '1248.gb6.json',
@@ -36,6 +41,8 @@ const PAYLOADS = [
 ] as const;
 
 const HTML_FIXTURES = {
+  'gb5_single.htm': 'geekbench5-single.html',
+  'gb5_comparison.htm': 'geekbench5-comparison.html',
   'M4_wwith_link.htm': 'geekbench7-mac-linked.html',
   'M5_without_link.htm': 'geekbench7-mac-unlinked.html',
 } as const;

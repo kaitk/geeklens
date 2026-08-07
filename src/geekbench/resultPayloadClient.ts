@@ -3,7 +3,7 @@ import { extractResultMetadata, type ResultMetadata } from './resultPayload';
 import { resultPayloadUrl } from './urls';
 
 /**
- * Fetches and normalizes a result's `.gb6` payload once for all metadata users.
+ * Fetches and normalizes a result payload once for all metadata users.
  *
  * The endpoint requires an authenticated session and fails while a comparison
  * baseline is selected. Signed-out visitors get a login response, which

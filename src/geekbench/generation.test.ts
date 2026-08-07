@@ -10,6 +10,7 @@ import { BROWSER_HOST } from './urls';
 
 describe('parseGeekbenchGeneration', () => {
   test('recognizes supported CPU result paths', () => {
+    expect(parseGeekbenchGeneration('/v5/cpu/18449406')).toBe(5);
     expect(parseGeekbenchGeneration('/v6/cpu/11907485')).toBe(6);
     expect(parseGeekbenchGeneration('/v7/cpu/compare/1248')).toBe(7);
   });
@@ -22,6 +23,7 @@ describe('parseGeekbenchGeneration', () => {
 
 describe('isComparisonPath', () => {
   test('routes comparison pages to the comparison adapter', () => {
+    expect(isComparisonPath('/v5/cpu/compare/18449406')).toBe(true);
     expect(isComparisonPath('/v6/cpu/compare/18845365')).toBe(true);
     expect(isComparisonPath('/v7/cpu/compare/1248')).toBe(true);
   });
@@ -48,6 +50,7 @@ describe('versionSupportsInstructionSets', () => {
 });
 
 test('resultCacheKey namespaces result IDs by generation', () => {
+  expect(resultCacheKey(5, '1248')).not.toBe(resultCacheKey(6, '1248'));
   expect(resultCacheKey(6, '1248')).not.toBe(resultCacheKey(7, '1248'));
 });
 

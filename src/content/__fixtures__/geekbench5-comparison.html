@@ -1,0 +1,1525 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1, user-scalable=no" name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta name="csrf-param" content="authenticity_token" />
+    <meta name="csrf-token" content="fixture-csrf-token" />
+    <script async="" src="gb5_comparison_files/google-analytics_analytics_rzej.js"></script>
+    <script src="gb5_comparison_files/application-e6396391cb5c72be649766457befbfe7760759c10978_rzej.js"></script>
+    <link
+      rel="stylesheet"
+      media="screen"
+      href="gb5_comparison_files/application-96e959c034d725b87d3a20301030100c286f4868855_rzej.css"
+    />
+    <title>
+      Default string X670E PG Lightning vs Micro-Star International Co., Ltd. MS-7A34 - Geekbench
+    </title>
+    <script>
+      (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        ((i[r] =
+          i[r] ||
+          function () {
+            (i[r].q = i[r].q || []).push(arguments);
+          }),
+          (i[r].l = 1 * new Date()));
+        ((a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]));
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m);
+      })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+      ga('create', 'UA-83282280-2', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async="" src="gb5_comparison_files/google-analytics_analytics_002_rzej.js"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      gtag('config', 'G-NP04Y57Z6W');
+    </script>
+    <!-- Hotjar Tracking Code for Geekbench Browser -->
+    <script>
+      (function (h, o, t, j, a, r) {
+        h.hj =
+          h.hj ||
+          function () {
+            (h.hj.q = h.hj.q || []).push(arguments);
+          };
+        h._hjSettings = { hjid: 390387, hjsv: 6 };
+        a = o.getElementsByTagName('head')[0];
+        r = o.createElement('script');
+        r.async = 1;
+        r.src = t + h._hjSettings.hjid + j + h._hjSettings.hjsv;
+        a.appendChild(r);
+      })(window, document, 'https://static.hotjar.com/c/hotjar-', '.js?sv=');
+    </script>
+    <script async="" src="gb5_comparison_files/hotjar-390387_rzej.js"></script>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://browser.geekbench.com/assets/rosedale-favicon-87f1249ad68dcfa8fb13716412eb3769cd386c3249fd2bbb501085b01670b12a.png"
+    />
+
+    <link
+      rel="stylesheet"
+      media="screen"
+      href="gb5_comparison_files/geekbench5-116f250c4ba0c58a9aaaf61fdebcd28bd3225c60bc31_rzej.css"
+    />
+    <script type="text/javascript" data-name="TokenSigning" data-by="Web-eID extension">
+      (function pageScript() {
+        let hasDeprecationWarningDisplayed = false;
+        const eidPromises = {};
+        window.addEventListener(
+          'message',
+          function (event) {
+            if (event.source !== window) return;
+            if (event.data.src && event.data.src === 'background.js') {
+              console.log('Page received: ');
+              console.log(event.data);
+              if (event.data.nonce) {
+                const p = eidPromises[event.data.nonce];
+                if (event.data.result === 'ok') {
+                  if (event.data.signature !== undefined) {
+                    p.resolve({ hex: event.data.signature });
+                  } else if (event.data.version !== undefined) {
+                    p.resolve(event.data.extension + '/' + event.data.version);
+                  } else if (event.data.cert !== undefined) {
+                    p.resolve({ hex: event.data.cert });
+                  } else {
+                    console.log('No idea how to handle message');
+                    console.log(event.data);
+                  }
+                } else {
+                  p.reject(new Error(event.data.result));
+                }
+                delete eidPromises[event.data.nonce];
+              } else {
+                console.log('No nonce in event msg');
+              }
+            }
+          },
+          false,
+        );
+        function nonce() {
+          let val = '';
+          const hex = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          for (let i = 0; i < 16; i++) val += hex.charAt(Math.floor(Math.random() * hex.length));
+          return val;
+        }
+        function messagePromise(msg) {
+          if (!hasDeprecationWarningDisplayed) {
+            console.warn(
+              'TokenSigning API is deprecated. Please consider switching to the new Web-eID library.',
+            );
+            hasDeprecationWarningDisplayed = true;
+          }
+          return new Promise(function (resolve, reject) {
+            window.postMessage(msg, '*');
+            eidPromises[msg.nonce] = { resolve, reject };
+          });
+        }
+        window.TokenSigning = class TokenSigning {
+          getCertificate(options) {
+            const msg = {
+              src: 'page.js',
+              nonce: nonce(),
+              type: 'CERT',
+              lang: options.lang,
+              filter: options.filter,
+            };
+            console.log('getCertificate()');
+            return messagePromise(msg);
+          }
+          sign(cert, hash, options) {
+            const msg = {
+              src: 'page.js',
+              nonce: nonce(),
+              type: 'SIGN',
+              cert: cert.hex,
+              hash: hash.hex,
+              hashtype: hash.type,
+              lang: options.lang,
+              info: options.info,
+            };
+            console.log('sign()');
+            return messagePromise(msg);
+          }
+          getVersion() {
+            const msg = {
+              src: 'page.js',
+              nonce: nonce(),
+              type: 'VERSION',
+            };
+            console.log('getVersion()');
+            return messagePromise(msg);
+          }
+        };
+      })();
+    </script>
+  </head>
+  <body class="corktown">
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="https://browser.geekbench.com/">
+          <img
+            height="30"
+            alt="Geekbench Browser"
+            src="gb5_comparison_files/browser-dark-4d9f1af82043f60fd55f5385de9dedf44baec6247d_rzej.svg"
+          />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdownGeekbench6"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                >Geekbench 7</a
+              >
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownGeekbench6">
+                <a class="dropdown-item" href="https://browser.geekbench.com/v7/cpu/singlecore"
+                  >Top Single-Core Results</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/v7/cpu/multicore"
+                  >Top Multi-Core Results</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/v7/cpu"
+                  >Recent CPU Results</a
+                >
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="https://browser.geekbench.com/v7/gpu"
+                  >Recent GPU Results</a
+                >
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdownGeekbenchAI"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                >Geekbench AI</a
+              >
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownGeekbenchAI">
+                <a class="dropdown-item" href="https://browser.geekbench.com/ai/v1"
+                  >Recent Results</a
+                >
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdownBenchmarkCharts"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                >Benchmark Charts</a
+              >
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownBenchmarkCharts">
+                <a class="dropdown-item" href="https://browser.geekbench.com/android-benchmarks"
+                  >Android Benchmark Chart</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/ios-benchmarks"
+                  >iOS Benchmark Chart</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/mac-benchmarks"
+                  >Mac Benchmark Chart</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/processor-benchmarks"
+                  >Processor Benchmark Chart</a
+                >
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="https://browser.geekbench.com/ai-benchmarks"
+                  >AI Benchmark Chart</a
+                >
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="https://browser.geekbench.com/metal-benchmarks"
+                  >Metal Benchmark Chart</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/opencl-benchmarks"
+                  >OpenCL Benchmark Chart</a
+                >
+                <a class="dropdown-item" href="https://browser.geekbench.com/vulkan-benchmarks"
+                  >Vulkan Benchmark Chart</a
+                >
+              </div>
+            </li>
+            <form action="/search" class="form-inline my-2 my-lg-0">
+              <input
+                name="q"
+                class="form-control mr-sm-2"
+                type="search"
+                placeholder="Search"
+                aria-label="Search"
+              />
+              <svg
+                class="search-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+              >
+                <path
+                  d="M2 6a4 4 0 1 1 4 4 4.004 4.004 0 0 1-4-4m11.707 6.293l-2.822-2.822a6.019 6.019 0 1 0-1.414 1.414l2.822 2.822a1 1 0 0 0 1.414-1.414"
+                  fill="#FFFFFF"
+                ></path>
+              </svg>
+            </form>
+          </ul>
+          <ul class="navbar-nav ml-auto right">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdownAccount"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                >fixture-account</a
+              >
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownAccount">
+                <a class="dropdown-item" href="/user/fixture-account">Results</a>
+                <a class="dropdown-item" href="https://browser.geekbench.com/settings/profile"
+                  >Settings</a
+                >
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="https://browser.geekbench.com/session/destroy"
+                  >Log Out</a
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" id="wrap">
+      <div class="row">
+        <div class="primary col-lg-9 order-lg-first">
+          <div class="page-header">
+            <h1>
+              Default string X670E PG Lightning <small>vs</small>
+              Micro-Star International Co., Ltd. MS-7A34
+            </h1>
+          </div>
+          <div class="table-wrapper table-overflow">
+            <table class="table comparison-benchmark-table section-performance">
+              <thead>
+                <tr>
+                  <th class="workload"></th>
+                  <th class="document-title">Default string X670E PG Lightning</th>
+                  <th class="document-title">Micro-Star International Co., Ltd. MS-7A34</th>
+                  <th>Difference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="name">Single-Core Score</td>
+                  <td class="score">2141</td>
+                  <td class="score">1461</td>
+                  <td class="delta"><span class="faster">146.5%</span></td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 75%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="name">Multi-Core Score</td>
+                  <td class="score">13921</td>
+                  <td class="score">10389</td>
+                  <td class="delta"><span class="faster">134.0%</span></td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 68%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="version">
+                  <td></td>
+                  <td class="document-version">Geekbench 5.4.5 Tryout</td>
+                  <td class="document-version">Geekbench 5.4.5 Tryout</td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="heading">
+            <h3>System Information</h3>
+          </div>
+          <div class="table-wrapper table-overflow">
+            <table class="table comparison-benchmark-table system-information">
+              <thead>
+                <tr>
+                  <th class="workload"></th>
+                  <th class="document-title">Default string X670E PG Lightning</th>
+                  <th class="document-title">Micro-Star International Co., Ltd. MS-7A34</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="name">
+                  <td>Operating System</td>
+                  <td class="value">Microsoft Windows 11 Pro (64-bit)</td>
+                  <td class="value">Microsoft Windows 11 Pro (64-bit)</td>
+                </tr>
+                <tr>
+                  <td>Model</td>
+                  <td>Default string X670E PG Lightning</td>
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                </tr>
+                <tr>
+                  <td>Processor</td>
+                  <td>
+                    AMD Ryzen 7 7700X @ 4.50 GHz
+                    <br />
+                    1 Processor, 8 Cores, 16 Threads
+                  </td>
+                  <td>
+                    AMD Ryzen 7 5800X3D @ 3.40 GHz
+                    <br />
+                    1 Processor, 8 Cores, 16 Threads
+                  </td>
+                </tr>
+                <tr>
+                  <td>Processor ID</td>
+                  <td>AuthenticAMD Family 25 Model 97 Stepping 2</td>
+                  <td>AuthenticAMD Family 25 Model 33 Stepping 2</td>
+                </tr>
+                <tr>
+                  <td>Processor Codename</td>
+                  <td>Raphael</td>
+                  <td>Vermeer</td>
+                </tr>
+                <tr>
+                  <td>Processor Package</td>
+                  <td></td>
+                  <td>Socket AM4 (1331)</td>
+                </tr>
+                <tr>
+                  <td>L1 Instruction Cache</td>
+                  <td>32.0 KB x 8</td>
+                  <td>32.0 KB x 8</td>
+                </tr>
+                <tr>
+                  <td>L1 Data Cache</td>
+                  <td>32.0 KB x 8</td>
+                  <td>32.0 KB x 8</td>
+                </tr>
+                <tr>
+                  <td>L2 Cache</td>
+                  <td>1.00 MB x 8</td>
+                  <td>512 KB x 8</td>
+                </tr>
+                <tr>
+                  <td>L3 Cache</td>
+                  <td>32.0 MB x 1</td>
+                  <td>96.0 MB x 1</td>
+                </tr>
+                <tr>
+                  <td>Motherboard</td>
+                  <td>ASRock X670E PG Lightning</td>
+                  <td>Micro-Star International Co., Ltd. B350 TOMAHAWK (MS-7A34)</td>
+                </tr>
+                <tr>
+                  <td>Northbridge</td>
+                  <td>AMD Ryzen SOC 00</td>
+                  <td>AMD Ryzen SOC 00</td>
+                </tr>
+                <tr>
+                  <td>Southbridge</td>
+                  <td>AMD X670 51</td>
+                  <td>AMD B350 51</td>
+                </tr>
+                <tr>
+                  <td>BIOS</td>
+                  <td>American Megatrends International, LLC. 1.11</td>
+                  <td>American Megatrends International, LLC. 1.Q7</td>
+                </tr>
+                <tr>
+                  <td>Memory</td>
+                  <td>32.00 GB DDR5 SDRAM</td>
+                  <td>32.00 GB DDR4 SDRAM</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="heading">
+            <h3>Single-Core Performance</h3>
+          </div>
+          <div class="table-wrapper table-overflow">
+            <table class="table comparison-benchmark-table section-performance">
+              <thead>
+                <tr>
+                  <th class="workload"></th>
+                  <th class="document-title">Default string X670E PG Lightning</th>
+                  <th class="document-title">Micro-Star International Co., Ltd. MS-7A34</th>
+                  <th>Difference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th class="name">Single-Core Score</th>
+                  <th class="score">2141</th>
+                  <th class="score">1461</th>
+                  <th class="delta"><span class="faster">146.5%</span></th>
+                </tr>
+                <tr class="document-graph">
+                  <th>Default string X670E PG Lightning</th>
+                  <th colspan="3">
+                    <div class="benchmark-bar" style="width: 75%">&nbsp;</div>
+                  </th>
+                </tr>
+                <tr class="baseline-graph">
+                  <th>Micro-Star International Co., Ltd. MS-7A34</th>
+                  <th colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </th>
+                </tr>
+                <tr class="scores">
+                  <td class="name">AES-XTS</td>
+                  <td class="score">6717</td>
+                  <td class="score">3453</td>
+                  <td class="delta">
+                    <span class="faster">194.5%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 100%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Text Compression</td>
+                  <td class="score">1992</td>
+                  <td class="score">1439</td>
+                  <td class="delta">
+                    <span class="faster">138.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 71%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Image Compression</td>
+                  <td class="score">2020</td>
+                  <td class="score">1392</td>
+                  <td class="delta">
+                    <span class="faster">145.1%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 74%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Navigation</td>
+                  <td class="score">1754</td>
+                  <td class="score">1493</td>
+                  <td class="delta">
+                    <span class="faster">117.5%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 60%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">HTML5</td>
+                  <td class="score">1688</td>
+                  <td class="score">1136</td>
+                  <td class="delta">
+                    <span class="faster">148.6%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 76%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">SQLite</td>
+                  <td class="score">1621</td>
+                  <td class="score">1147</td>
+                  <td class="delta">
+                    <span class="faster">141.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 72%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">PDF Rendering</td>
+                  <td class="score">1639</td>
+                  <td class="score">1265</td>
+                  <td class="delta">
+                    <span class="faster">129.6%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 66%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Text Rendering</td>
+                  <td class="score">1713</td>
+                  <td class="score">1154</td>
+                  <td class="delta">
+                    <span class="faster">148.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 76%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Clang</td>
+                  <td class="score">1817</td>
+                  <td class="score">1183</td>
+                  <td class="delta">
+                    <span class="faster">153.6%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 78%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Camera</td>
+                  <td class="score">1611</td>
+                  <td class="score">1086</td>
+                  <td class="delta">
+                    <span class="faster">148.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 76%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">N-Body Physics</td>
+                  <td class="score">2090</td>
+                  <td class="score">1380</td>
+                  <td class="delta">
+                    <span class="faster">151.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 77%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Rigid Body Physics</td>
+                  <td class="score">1865</td>
+                  <td class="score">1348</td>
+                  <td class="delta">
+                    <span class="faster">138.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 71%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Gaussian Blur</td>
+                  <td class="score">2239</td>
+                  <td class="score">1619</td>
+                  <td class="delta">
+                    <span class="faster">138.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 71%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Face Detection</td>
+                  <td class="score">2004</td>
+                  <td class="score">1408</td>
+                  <td class="delta">
+                    <span class="faster">142.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 73%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Horizon Detection</td>
+                  <td class="score">1748</td>
+                  <td class="score">1293</td>
+                  <td class="delta">
+                    <span class="faster">135.2%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 69%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Image Inpainting</td>
+                  <td class="score">3826</td>
+                  <td class="score">2673</td>
+                  <td class="delta">
+                    <span class="faster">143.1%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 73%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">HDR</td>
+                  <td class="score">3863</td>
+                  <td class="score">2706</td>
+                  <td class="delta">
+                    <span class="faster">142.8%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 73%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Ray Tracing</td>
+                  <td class="score">2444</td>
+                  <td class="score">1706</td>
+                  <td class="delta">
+                    <span class="faster">143.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 73%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Structure from Motion</td>
+                  <td class="score">1609</td>
+                  <td class="score">1201</td>
+                  <td class="delta">
+                    <span class="faster">134.0%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 68%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Speech Recognition</td>
+                  <td class="score">1947</td>
+                  <td class="score">1368</td>
+                  <td class="delta">
+                    <span class="faster">142.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 73%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Machine Learning</td>
+                  <td class="score">1790</td>
+                  <td class="score">1487</td>
+                  <td class="delta">
+                    <span class="faster">120.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 61%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="heading">
+            <h3>Multi-Core Performance</h3>
+          </div>
+          <div class="table-wrapper table-overflow">
+            <table class="table comparison-benchmark-table section-performance">
+              <thead>
+                <tr>
+                  <th class="workload"></th>
+                  <th class="document-title">Default string X670E PG Lightning</th>
+                  <th class="document-title">Micro-Star International Co., Ltd. MS-7A34</th>
+                  <th>Difference</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th class="name">Multi-Core Score</th>
+                  <th class="score">13921</th>
+                  <th class="score">10389</th>
+                  <th class="delta"><span class="faster">134.0%</span></th>
+                </tr>
+                <tr class="document-graph">
+                  <th>Default string X670E PG Lightning</th>
+                  <th colspan="3">
+                    <div class="benchmark-bar" style="width: 68%">&nbsp;</div>
+                  </th>
+                </tr>
+                <tr class="baseline-graph">
+                  <th>Micro-Star International Co., Ltd. MS-7A34</th>
+                  <th colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </th>
+                </tr>
+                <tr class="scores">
+                  <td class="name">AES-XTS</td>
+                  <td class="score">10793</td>
+                  <td class="score">8506</td>
+                  <td class="delta">
+                    <span class="faster">126.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 65%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Text Compression</td>
+                  <td class="score">16442</td>
+                  <td class="score">15503</td>
+                  <td class="delta">
+                    <span class="faster">106.1%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 54%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Image Compression</td>
+                  <td class="score">19009</td>
+                  <td class="score">13992</td>
+                  <td class="delta">
+                    <span class="faster">135.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 69%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Navigation</td>
+                  <td class="score">6666</td>
+                  <td class="score">5382</td>
+                  <td class="delta">
+                    <span class="faster">123.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 63%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">HTML5</td>
+                  <td class="score">14167</td>
+                  <td class="score">8628</td>
+                  <td class="delta">
+                    <span class="faster">164.2%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 84%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">SQLite</td>
+                  <td class="score">15579</td>
+                  <td class="score">9549</td>
+                  <td class="delta">
+                    <span class="faster">163.1%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 83%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">PDF Rendering</td>
+                  <td class="score">13265</td>
+                  <td class="score">9553</td>
+                  <td class="delta">
+                    <span class="faster">138.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 71%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Text Rendering</td>
+                  <td class="score">10067</td>
+                  <td class="score">7475</td>
+                  <td class="delta">
+                    <span class="faster">134.7%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 69%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Clang</td>
+                  <td class="score">17875</td>
+                  <td class="score">10597</td>
+                  <td class="delta">
+                    <span class="faster">168.7%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 86%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Camera</td>
+                  <td class="score">11983</td>
+                  <td class="score">8514</td>
+                  <td class="delta">
+                    <span class="faster">140.7%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 72%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">N-Body Physics</td>
+                  <td class="score">15946</td>
+                  <td class="score">12023</td>
+                  <td class="delta">
+                    <span class="faster">132.6%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 68%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Rigid Body Physics</td>
+                  <td class="score">17740</td>
+                  <td class="score">14790</td>
+                  <td class="delta">
+                    <span class="faster">119.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 61%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Gaussian Blur</td>
+                  <td class="score">14673</td>
+                  <td class="score">11413</td>
+                  <td class="delta">
+                    <span class="faster">128.6%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 66%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Face Detection</td>
+                  <td class="score">17241</td>
+                  <td class="score">12870</td>
+                  <td class="delta">
+                    <span class="faster">134.0%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 68%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Horizon Detection</td>
+                  <td class="score">13585</td>
+                  <td class="score">10402</td>
+                  <td class="delta">
+                    <span class="faster">130.6%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 67%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Image Inpainting</td>
+                  <td class="score">24191</td>
+                  <td class="score">20709</td>
+                  <td class="delta">
+                    <span class="faster">116.8%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 60%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">HDR</td>
+                  <td class="score">29726</td>
+                  <td class="score">20512</td>
+                  <td class="delta">
+                    <span class="faster">144.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 74%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Ray Tracing</td>
+                  <td class="score">22957</td>
+                  <td class="score">16591</td>
+                  <td class="delta">
+                    <span class="faster">138.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 71%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Structure from Motion</td>
+                  <td class="score">13682</td>
+                  <td class="score">9821</td>
+                  <td class="delta">
+                    <span class="faster">139.3%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 71%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Speech Recognition</td>
+                  <td class="score">11423</td>
+                  <td class="score">13699</td>
+                  <td class="delta">
+                    <span class="slower">83.4%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 42%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="scores">
+                  <td class="name">Machine Learning</td>
+                  <td class="score">5914</td>
+                  <td class="score">5240</td>
+                  <td class="delta">
+                    <span class="faster">112.9%</span>
+                  </td>
+                </tr>
+                <tr class="document-graph">
+                  <td>Default string X670E PG Lightning</td>
+                  <td colspan="3">
+                    <div class="benchmark-bar" style="width: 58%">&nbsp;</div>
+                  </td>
+                </tr>
+                <tr class="baseline-graph">
+                  <td>Micro-Star International Co., Ltd. MS-7A34</td>
+                  <td colspan="3">
+                    <div class="baseline-bar" style="width: 51%">&nbsp;</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="secondary clearfix col-lg-3">
+          <p>
+            <strong> Manage </strong>
+          </p>
+          <a
+            class="secondary-button modify-btn"
+            href="https://browser.geekbench.com/v5/cpu/18449406/edit"
+            >Edit Result</a
+          >
+          <a
+            class="secondary-button modify-btn"
+            data-confirm="This will permanently remove this result from your profile. Are you sure?"
+            href="https://browser.geekbench.com/v5/cpu/18449406/remove"
+            >Remove Result</a
+          >
+          <p>
+            <strong> Compare </strong>
+          </p>
+          <a
+            class="secondary-button secondary-button-two"
+            href="https://browser.geekbench.com/v5/cpu/remove_baseline/18449406"
+            >Remove Baseline</a
+          >
+
+          <a
+            href="https://www.geekbench.com/?utm_source=browser&amp;utm_medium=banner&amp;utm_campaign=rosedale"
+          >
+            <img
+              style="width: 255px"
+              src="gb5_comparison_files/rosedale-255x600@2x-e3a672ca7f22dce2233c859bb4ea4541a87_rzej.jpg"
+              alt="Geekbench 6 now available"
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+            <h6>Products</h6>
+            <ul>
+              <li>
+                <a href="https://www.geekbench.com/">Geekbench 6</a>
+              </li>
+              <li>
+                <a href="https://www.geekbench.com/ai/">Geekbench AI</a>
+              </li>
+              <li>
+                <a href="https://www.voodoopad.com/">VoodooPad</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+            <h6>Support</h6>
+            <ul>
+              <li>
+                <a href="http://support.primatelabs.com/kb">Knowledge Base</a>
+              </li>
+              <li>
+                <a href="https://store.primatelabs.com/store/lost_license/">Lost License</a>
+              </li>
+              <li>
+                <a href="https://www.primatelabs.com/contact/">Contact</a>
+              </li>
+              <li>
+                <a href="https://www.primatelabs.com/legal/privacy.html">Privacy Policy</a>
+              </li>
+              <li>
+                <a href="https://www.primatelabs.com/legal/terms-of-use.html">Terms of Use</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+            <h6>News &amp; Social</h6>
+            <ul>
+              <li>
+                <a href="http://www.primatelabs.com/blog/">Blog</a>
+              </li>
+              <li>
+                <a href="https://mastodon.social/@geekbench">Mastodon</a>
+              </li>
+              <li>
+                <a href="https://discord.gg/KCQ7tWh">Discord</a>
+              </li>
+              <li>
+                <a href="https://www.instagram.com/primatelabs/">Instagram</a>
+              </li>
+              <li>
+                <a href="https://www.youtube.com/channel/UCAr1oShRa70bzaEYwvyLWig/feed">YouTube</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-6 col-sm-6 col-md-3 col-lg-2">
+            <h6>Company</h6>
+            <ul>
+              <li>
+                <a href="https://www.primatelabs.com/contact/">Corporate</a>
+              </li>
+              <li>
+                <a href="https://www.primatelabs.com/careers/">Careers</a>
+              </li>
+              <li>
+                <a href="https://www.primatelabs.com/contact/">Media</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 col-lg-4 order-lg-first">
+            <p class="small">
+              <a href="https://www.primatelabs.com/">
+                <img
+                  height="30"
+                  alt="Geekbench"
+                  src="gb5_comparison_files/geekbench-dark-db84d4a4c0d8883b5973004996df2e8601412332_rzej.svg"
+                />
+              </a>
+            </p>
+            <p>Copyright © 2004-2026 Primate Labs Inc.</p>
+          </div>
+        </div>
+        <div class="row row-centered">
+          <div class="copyright col-12"></div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

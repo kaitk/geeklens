@@ -17,6 +17,41 @@ async function fixture(name: string): Promise<Document> {
   return parseHTML(html).document as unknown as Document;
 }
 
+describe('Geekbench 5 page selectors', () => {
+  test('supports the captured single-result structure without inventing instruction data', async () => {
+    const document = await fixture('geekbench5-single.html');
+
+    expect(findSystemTableByHeading('CPU Information', document)).not.toBeNull();
+    expect(findSystemTableByHeading('Memory Information', document)).not.toBeNull();
+    expect(findInstructionSetValueCell(document)).toBeNull();
+    const tables = findBenchmarkTables('table.benchmark-table', document);
+    expect(tables).toHaveLength(2);
+    expect(
+      Array.from(tables[0].querySelectorAll<HTMLTableRowElement>('tr')).map(extractBenchmarkName),
+    ).toContain('AES-XTS');
+  });
+
+  test('supports the captured comparison structure and row ordering', async () => {
+    const document = await fixture('geekbench5-comparison.html');
+
+    expect(getComparisonVersions(document)).toEqual({
+      primary: 'Geekbench 5.4.5 Tryout',
+      baseline: 'Geekbench 5.4.5 Tryout',
+    });
+    expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(4);
+    expect(document.querySelector('table.system-information')).not.toBeNull();
+    expect(findInstructionSetValueCell(document)).toBeNull();
+
+    const primaryGraph = document.querySelector('tr.scores + tr.document-graph');
+    const baselineGraph = primaryGraph?.nextElementSibling;
+    expect(baselineGraph?.classList.contains('baseline-graph')).toBe(true);
+    expect(extractBenchmarkName(findComparisonScoreRow(primaryGraph!, false)!)).toBe('AES-XTS');
+    expect(findComparisonScoreRow(baselineGraph!, true)).toBe(
+      findComparisonScoreRow(primaryGraph!, false),
+    );
+  });
+});
+
 describe('Geekbench 6 single-result selectors', () => {
   test('reads the instruction-set row that Geekbench 6 renders in page HTML', async () => {
     const document = await fixture('geekbench6-single.html');

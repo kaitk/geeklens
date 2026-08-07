@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GeekLens",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Enhances Geekbench CPU benchmark results with instruction set information",
   "permissions": ["storage"],
   "{{chrome}}.host_permissions": ["*://browser.geekbench.com/*"],
@@ -34,7 +34,11 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://browser.geekbench.com/v6/cpu/*", "*://browser.geekbench.com/v7/cpu/*"],
+      "matches": [
+        "*://browser.geekbench.com/v5/cpu/*",
+        "*://browser.geekbench.com/v6/cpu/*",
+        "*://browser.geekbench.com/v7/cpu/*"
+      ],
       "js": ["src/content/contentScript.ts"]
     }
   ]

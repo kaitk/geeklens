@@ -1,9 +1,10 @@
 # Result metadata and processor context
 
-GeekLens supplements Geekbench 7 result pages with processor context parsed
-from the authenticated `.gb6` payload. Geekbench 6 remains supported for its
-existing instruction annotations and shares metadata presentation only where
-that does not require generation-specific complexity.
+GeekLens supplements Geekbench 5, 6, and 7 result pages with processor context
+parsed from the authenticated result payload (`.gb5` for Geekbench 5 and `.gb6`
+for Geekbench 6 and 7). Geekbench 6 also retains its
+rendered instruction-set row as a signed-out fallback; payload-only processor
+context is unavailable without an authenticated payload.
 
 Geekbench payload metric IDs, result-page links, processor pages, and catalogue
 tables are undocumented external interfaces. Keep their assumptions explicit,
@@ -19,7 +20,7 @@ string and any explicit processor/Mac links, then pass the cached context throug
 the neutral contract in `src/content/processorContext/model.ts`; they do not
 parse pages, fetch payloads, or resolve identities.
 
-The current Geekbench 7 presentation includes:
+The shared Geekbench 5, 6, and 7 presentation includes:
 
 - processor name, vendor, ISA family, and an exact catalogue link;
 - frequency min/mean/max and a compact distribution;
@@ -27,6 +28,13 @@ The current Geekbench 7 presentation includes:
 - core/thread totals, anonymous cluster sizes, published core composition, and
   the submitted run's multi-core/single-core score ratio; and
 - generation-matched Geekbench Browser average scores and signed deltas.
+
+Comparison pages also fetch each rendered result page and add a result-validity
+row when Geekbench displays an invalid-result alert. This cannot come from the
+downloadable payload: observed result `98600` has `valid: 1` at the result,
+section, and workload levels while the Browser invalidates it server-side for a
+timer issue. A failed page fetch remains unavailable rather than being treated
+as valid.
 
 All processor-context controls are independently toggleable and default on.
 Missing or malformed data removes the affected single-result detail; comparison
@@ -91,8 +99,8 @@ there is exactly one feasible cluster-to-group assignment. Ambiguous, homogeneou
 and incomplete shapes remain unnamed.
 
 Geekbench score references are generation-specific mutable averages of
-user-submitted results, not official processor scores. Mac scores are omitted
-when the source page's Geekbench generation is ambiguous.
+user-submitted results, not official processor scores. Exact generated Mac
+identities carry averages from the Geekbench 7 Mac tables.
 
 ## Fixtures and provenance
 
@@ -108,19 +116,23 @@ HTML; and both Geekbench generations where shared parsing is claimed.
 
 ## Updating the bundled catalogue
 
-Catalogue refreshes are maintainer-only. Download complete source pages as HTML
-outside the extension, preserve their tables, then run from the repository root:
+Catalogue refreshes are maintainer-only. The package scripts fetch the canonical
+Geekbench processor, Mac desktop, and Mac laptop pages and write both generated
+snapshots from the repository root:
 
 ```sh
-bun scripts/generateProcessorCatalogue.ts "temp/Processor Benchmarks - Geekbench.html" src/catalogue/processorCatalogue.generated.ts
-bun scripts/generateMacCatalogue.ts "temp/Mac mini (2024) Benchmarks - Geekbench.html" src/catalogue/macCatalogue.generated.ts
+bun run catalogue:generate
 bun run format
 ```
 
+Run `bun run catalogue:generate:processor` or
+`bun run catalogue:generate:mac` to update one snapshot. For a reproducible
+offline regeneration, either generator still accepts an input HTML path and an
+optional output path as its first two arguments.
+
 The processor generator replaces generated AMD, Intel, and Qualcomm identities
-and Geekbench 7 averages. The Mac generator replaces identities and
-configuration constraints only. It must not import scores from a page whose
-generation copy is conflicting or unclear.
+and Geekbench 7 averages. The Mac generator replaces identities, configuration
+constraints, and Geekbench 7 averages.
 
 After regeneration:
 

@@ -12,6 +12,15 @@ async function fixture(name: string): Promise<Document> {
 }
 
 describe('extractProcessorLinks', () => {
+  test('extracts the canonical processor path from Geekbench 5 markup', async () => {
+    const document = await fixture('geekbench5-single.html');
+
+    expect(extractProcessorLinks(document)).toEqual({
+      processorPath: '/processors/amd-ryzen-7-7700x',
+      macPath: null,
+    });
+  });
+
   test('extracts canonical processor and Mac paths from the linked M4 capture', async () => {
     const document = await fixture('geekbench7-mac-linked.html');
 

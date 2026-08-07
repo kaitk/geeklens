@@ -8,6 +8,7 @@ import {
 import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
 import {
   initialInstructionStatus,
+  processorContextStatus,
   singleResultInstructionStatus,
 } from '../geekbench/instructionDataStatus';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
@@ -55,7 +56,11 @@ export async function annotateGeekbenchResults() {
     const processorContext = buildProcessorContextViewModel(context);
     if (processorContext) renderSingleProcessorContext(processorContext, settings);
     if (!instructionSets) {
-      showStatus(singleResultInstructionStatus(generation, false));
+      showStatus(
+        generation === 5
+          ? processorContextStatus(Boolean(processorContext), signedOut)
+          : singleResultInstructionStatus(generation, false),
+      );
       return;
     }
 
@@ -77,20 +82,28 @@ async function getResultContext(
   const cached = await resultsCache.getResultContext(generation, resultId);
   const processorLinks = mergeProcessorLinks(cached?.processorLinks, extractProcessorLinks());
 
-  // Geekbench 6 renders the instruction sets into the page; Geekbench 7 omits
-  // the row entirely and only exposes them in the authenticated JSON payload.
+  // Geekbench 6 renders instruction sets into the page, so keep that as the
+  // compatibility source even when its authenticated payload is unavailable.
+  // The payload still supplies the processor-context metadata shared with v7.
   if (generation === 6) {
+    const metadata =
+      cached?.metadata ??
+      (signedOut ? null : await fetchResultMetadataFromPayload(generation, resultId));
     const instructionSets =
-      cached?.instructionSet ?? findInstructionSetValueCell()?.textContent?.trim() ?? null;
-    if (instructionSets || hasProcessorLinks(processorLinks)) {
+      cached?.instructionSet ??
+      findInstructionSetValueCell()?.textContent?.trim() ??
+      metadata?.instructionSets?.value ??
+      null;
+    if (metadata || instructionSets || hasProcessorLinks(processorLinks)) {
       await resultsCache.storeResultContext(generation, resultId, {
         instructionSet: instructionSets,
+        metadata,
         processorLinks,
       });
     }
     return {
       instructionSet: instructionSets,
-      metadata: cached?.metadata ?? null,
+      metadata,
       processorLinks,
       lastAccessedAt: cached?.lastAccessedAt ?? Date.now(),
     };
@@ -100,7 +113,7 @@ async function getResultContext(
   // rejected path as the session's post-login destination, so a later sign-in
   // lands the user on raw `.gb6` JSON instead of the result page.
   if (signedOut && !cached?.metadata) {
-    console.log('GeekLens: Signed out of Geekbench 7, skipping payload fetch');
+    console.log(`GeekLens: Signed out of Geekbench ${generation}, skipping payload fetch`);
   }
   const metadata =
     cached?.metadata ??

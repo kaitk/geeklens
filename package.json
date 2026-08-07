@@ -1,6 +1,6 @@
 {
   "name": "GeekLens",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,9 @@
     "build": "vite build",
     "build:chrome": "TARGET=chrome vite build",
     "build:firefox": "TARGET=firefox vite build",
+    "catalogue:generate": "bun run catalogue:generate:processor && bun run catalogue:generate:mac",
+    "catalogue:generate:mac": "bun scripts/generateMacCatalogue.ts",
+    "catalogue:generate:processor": "bun scripts/generateProcessorCatalogue.ts",
     "lint:ext": "web-ext lint --source-dir dist/firefox",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "bun test",

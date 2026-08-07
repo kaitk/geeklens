@@ -5,7 +5,7 @@
  * background action toggle. It deliberately does NOT cover `src/manifest.json`,
  * which is static JSON and must be updated by hand — see docs/architecture.md.
  */
-export const SUPPORTED_GENERATIONS = [6, 7] as const;
+export const SUPPORTED_GENERATIONS = [5, 6, 7] as const;
 
 export type GeekbenchGeneration = (typeof SUPPORTED_GENERATIONS)[number];
 

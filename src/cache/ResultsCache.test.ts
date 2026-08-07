@@ -76,6 +76,7 @@ describe('ResultsCache records', () => {
       instructionSet: null,
       metadata: null,
       processorLinks: { processorPath: null, macPath: null },
+      validity: null,
       lastAccessedAt: 100,
     });
   });
@@ -100,6 +101,27 @@ describe('ResultsCache records', () => {
       instructionSet: 'sse2 avx2',
       processorLinks: { processorPath: '/processors/example-cpu', macPath: null },
       lastAccessedAt: 200,
+    });
+  });
+
+  test('merges validity without erasing other cached result data', () => {
+    const existing = mergeStoredResultRecord(
+      'v7:cpu:123',
+      undefined,
+      { instructionSet: 'avx2' },
+      100,
+    );
+    const validity = {
+      level: 'invalid' as const,
+      message: 'Invalid timers.',
+      checkedAt: 200,
+      source: 'validation-widget-v2' as const,
+    };
+    const updated = mergeStoredResultRecord(existing.cacheKey, existing, { validity }, 201);
+
+    expect(normalizeStoredResultRecord(updated)).toMatchObject({
+      instructionSet: 'avx2',
+      validity,
     });
   });
 

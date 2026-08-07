@@ -77,7 +77,7 @@ export interface GeekbenchScoreReference {
   generation: 7;
   singleCore: number;
   multiCore: number;
-  minimumUniqueResults: number;
+  minimumUniqueResults?: number;
 }
 
 export interface CatalogueSource {

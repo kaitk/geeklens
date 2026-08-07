@@ -1,5 +1,11 @@
+import type { ProcessorStatus } from '../processorPresentation';
+
 export interface ProcessorContextViewModel {
+  /** Exact payload value retained for provenance and identity-related context. */
   name: string;
+  /** Compact presentation-only form; never used as catalogue evidence. */
+  displayName: string;
+  status: ProcessorStatus | null;
   vendor: string;
   vendorKey: string;
   architecture: string;
@@ -20,6 +26,8 @@ export interface ProcessorContextViewModel {
   } | null;
   scaling: { ratio: number; singleCore: number; multiCore: number } | null;
   coreComposition: ProvenanceFact | null;
+  /** Whether an average dataset applies to this result generation. */
+  hasReferenceDataset: boolean;
   reference: {
     singleCore: number;
     multiCore: number;
@@ -27,6 +35,7 @@ export interface ProcessorContextViewModel {
     minimumUniqueResults?: number;
   } | null;
   disputedL3Cache: { detail: string; source: { url: string; label: string } } | null;
+  hasReportedMemoryTransferRate: boolean;
   memory: MemoryFact[];
 }
 

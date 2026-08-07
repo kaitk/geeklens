@@ -14,7 +14,10 @@ import { dirname, join } from 'path';
 
 const rootDirectory = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distPath = join(rootDirectory, 'dist/chrome');
-const startUrl = 'https://browser.geekbench.com/v7/cpu/1248';
+const startUrls = [
+  'https://browser.geekbench.com/v5/cpu/18449406',
+  'https://browser.geekbench.com/v7/cpu/1248',
+];
 
 const children: ChildProcess[] = [];
 
@@ -72,6 +75,6 @@ const waitForBuild = setInterval(() => {
     '--source-dir',
     distPath,
     '--start-url',
-    startUrl,
+    ...startUrls,
   ]);
 }, 250);

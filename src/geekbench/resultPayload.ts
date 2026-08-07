@@ -406,7 +406,7 @@ export function extractResultMetadata(
   if (!payload || typeof payload !== 'object') return null;
   const result = payload as GeekbenchResultPayload;
   const generation = finiteNumber(result.document_version);
-  if (generation !== 6 && generation !== 7) return null;
+  if (generation !== 5 && generation !== 6 && generation !== 7) return null;
   if (expectedGeneration !== undefined && generation !== expectedGeneration) return null;
   if (!Array.isArray(result.metrics)) return null;
 

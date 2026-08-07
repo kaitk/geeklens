@@ -3,19 +3,62 @@ import type { CachedResultContext } from '../cache/ResultsCache';
 import { extractResultMetadata } from '../geekbench/resultPayload';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
 
-async function context(resultId: string): Promise<CachedResultContext> {
+async function context(resultId: string, generation: 5 | 6 | 7 = 7): Promise<CachedResultContext> {
+  const extension = generation === 5 ? 'gb5' : 'gb6';
   const payload = await Bun.file(
-    new URL(`../geekbench/__fixtures__/${resultId}.gb6.json`, import.meta.url),
+    new URL(`../geekbench/__fixtures__/${resultId}.${extension}.json`, import.meta.url),
   ).json();
   return {
     instructionSet: null,
-    metadata: extractResultMetadata(payload, 7),
+    metadata: extractResultMetadata(payload, generation),
     processorLinks: { processorPath: null, macPath: null },
     lastAccessedAt: 1,
   };
 }
 
 describe('buildProcessorContextViewModel', () => {
+  test.each([
+    ['10324204', 'ARM', 'Unknown', 'ARM'],
+    ['1524322', 'Intel Core i7-1065G7', 'Intel', 'x86'],
+    ['17536185', 'Intel Core i5-4670', 'Intel', 'x86'],
+    ['18449406', 'AMD Ryzen 7 7700X 8-Core Processor', 'AMD', 'x86'],
+    ['18878080', 'AMD Ryzen 7 5800X3D 8-Core Processor', 'AMD', 'x86'],
+  ])('maps Geekbench 5 payload %s into processor context', async (id, name, vendor, isa) => {
+    const viewModel = buildProcessorContextViewModel(await context(id, 5));
+
+    expect(viewModel).toMatchObject({
+      name,
+      vendor,
+      architecture: isa,
+      frequency: expect.any(Object),
+      topology: expect.any(Object),
+      scaling: expect.any(Object),
+    });
+    expect(viewModel?.memory.length).toBeGreaterThan(0);
+    expect(viewModel?.hasReportedMemoryTransferRate).toBeFalse();
+    expect(viewModel?.hasReferenceDataset).toBeFalse();
+    expect(viewModel?.reference).toBeNull();
+  });
+
+  test.each([
+    ['18864843', 'Apple M5 Max', 'Apple', 'ARM'],
+    ['18873252', 'AMD Ryzen 9 9950X', 'AMD', 'x86'],
+  ])('maps Geekbench 6 payload %s into shared processor context', async (id, name, vendor, isa) => {
+    const viewModel = buildProcessorContextViewModel(await context(id, 6));
+
+    expect(viewModel).toMatchObject({
+      name,
+      vendor,
+      architecture: isa,
+      frequency: expect.any(Object),
+      topology: expect.any(Object),
+      scaling: expect.any(Object),
+    });
+    expect(viewModel?.memory.length).toBeGreaterThan(0);
+    expect(viewModel?.hasReferenceDataset).toBeFalse();
+    expect(viewModel?.reference).toBeNull();
+  });
+
   test.each([
     ['1248', 'AMD Ryzen 7 5800X3D', 'AMD', 'x86'],
     ['64437', 'Intel(R) Core(TM) Ultra 5 250K Plus', 'Intel', 'x86'],
@@ -26,6 +69,22 @@ describe('buildProcessorContextViewModel', () => {
     const viewModel = buildProcessorContextViewModel(await context(id));
 
     expect(viewModel).toMatchObject({ name, vendor, architecture: isa });
+  });
+
+  test('keeps the exact payload name separate from its compact presentation', async () => {
+    const intel = buildProcessorContextViewModel(await context('64437'));
+    expect(intel).toMatchObject({
+      name: 'Intel(R) Core(TM) Ultra 5 250K Plus',
+      displayName: 'Core Ultra 5 250K Plus',
+      status: null,
+    });
+
+    const amd = buildProcessorContextViewModel(await context('18878080', 5));
+    expect(amd).toMatchObject({
+      name: 'AMD Ryzen 7 5800X3D 8-Core Processor',
+      displayName: 'Ryzen 7 5800X3D',
+      status: null,
+    });
   });
 
   test('maps cached MHz statistics to exact GHz display values', async () => {
@@ -465,6 +524,7 @@ describe('buildProcessorContextViewModel', () => {
       singleCore: expect.any(Number),
       multiCore: expect.any(Number),
     });
+    expect(amd?.hasReferenceDataset).toBeTrue();
     expect(buildProcessorContextViewModel(await context('58949'))?.reference).toBeNull();
     expect(buildProcessorContextViewModel(await context('18873252'))?.reference ?? null).toBeNull();
   });
