@@ -52,6 +52,17 @@ table.system-information td {
   color: #212529;
 }
 
+.geeklens-preview-reported-name {
+  position: relative;
+  cursor: help;
+  outline: none;
+}
+
+.geeklens-preview-reported-name:hover > .geeklens-preview-row-tooltip,
+.geeklens-preview-reported-name:focus > .geeklens-preview-row-tooltip {
+  visibility: visible;
+}
+
 .geeklens-preview-badge {
   display: inline-flex;
   box-sizing: border-box;
@@ -80,6 +91,19 @@ table.system-information td {
 .geeklens-preview-badge-intel {
   background: #e5f0f8;
   color: #17608e;
+}
+
+.geeklens-preview-badge-status {
+  position: relative;
+  background: #fff1cf;
+  color: #805500;
+  cursor: help;
+  outline: none;
+}
+
+.geeklens-preview-badge-status:hover > .geeklens-preview-status-tooltip,
+.geeklens-preview-badge-status:focus > .geeklens-preview-status-tooltip {
+  visibility: visible;
 }
 
 .geeklens-preview-badge-nvidia {

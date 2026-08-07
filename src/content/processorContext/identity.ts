@@ -9,20 +9,50 @@ function linkHost(url: string): string | undefined {
   }
 }
 
-export function renderIdentity(name: string, preview: ProcessorContextViewModel): HTMLElement {
+export function renderIdentity(preview: ProcessorContextViewModel): HTMLElement {
   const wrapper = document.createElement('div');
   wrapper.className = 'geeklens-preview-processor';
   const heading = document.createElement('div');
   heading.className = 'geeklens-preview-identity';
   const nameElement = document.createElement('strong');
-  nameElement.textContent = name.replace(new RegExp(`^${preview.vendor}\\s+`, 'i'), '');
+  nameElement.textContent = preview.displayName;
+  if (preview.displayName !== preview.name) {
+    nameElement.className = 'geeklens-preview-reported-name';
+    nameElement.tabIndex = 0;
+    nameElement.setAttribute(
+      'aria-label',
+      `${preview.displayName}. Reported processor name: ${preview.name}`,
+    );
+    const tooltip = document.createElement('span');
+    tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-source-tooltip';
+    const title = document.createElement('strong');
+    title.className = 'geeklens-preview-source-tooltip-title';
+    title.textContent = 'Reported processor name';
+    const detail = document.createElement('span');
+    detail.textContent = preview.name;
+    tooltip.append(title, detail);
+    nameElement.appendChild(tooltip);
+  }
   const vendorBadge = document.createElement('span');
   vendorBadge.className = `geeklens-preview-badge geeklens-preview-badge-${preview.vendorKey}`;
   vendorBadge.textContent = preview.vendor;
   const architectureBadge = document.createElement('span');
   architectureBadge.className = 'geeklens-preview-badge geeklens-preview-badge-architecture';
   architectureBadge.textContent = preview.architecture;
-  heading.append(vendorBadge, nameElement, architectureBadge);
+  heading.append(vendorBadge, nameElement);
+  if (preview.status === 'engineering-sample') {
+    const statusBadge = document.createElement('span');
+    statusBadge.className = 'geeklens-preview-badge geeklens-preview-badge-status';
+    statusBadge.textContent = 'ES';
+    statusBadge.tabIndex = 0;
+    statusBadge.setAttribute('aria-label', 'Engineering sample');
+    const tooltip = document.createElement('span');
+    tooltip.className = 'geeklens-preview-row-tooltip geeklens-preview-status-tooltip';
+    tooltip.textContent = 'Engineering sample';
+    statusBadge.appendChild(tooltip);
+    heading.appendChild(statusBadge);
+  }
+  heading.appendChild(architectureBadge);
 
   if (preview.cataloguePath) {
     const link = document.createElement('a');

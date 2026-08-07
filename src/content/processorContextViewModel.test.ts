@@ -71,6 +71,22 @@ describe('buildProcessorContextViewModel', () => {
     expect(viewModel).toMatchObject({ name, vendor, architecture: isa });
   });
 
+  test('keeps the exact payload name separate from its compact presentation', async () => {
+    const intel = buildProcessorContextViewModel(await context('64437'));
+    expect(intel).toMatchObject({
+      name: 'Intel(R) Core(TM) Ultra 5 250K Plus',
+      displayName: 'Core Ultra 5 250K Plus',
+      status: null,
+    });
+
+    const amd = buildProcessorContextViewModel(await context('18878080', 5));
+    expect(amd).toMatchObject({
+      name: 'AMD Ryzen 7 5800X3D 8-Core Processor',
+      displayName: 'Ryzen 7 5800X3D',
+      status: null,
+    });
+  });
+
   test('maps cached MHz statistics to exact GHz display values', async () => {
     const viewModel = buildProcessorContextViewModel(await context('1248'));
 

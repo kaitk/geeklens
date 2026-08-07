@@ -29,5 +29,5 @@ Successful HTML checks are stored with the existing generation-scoped result
 record in IndexedDB and reused for seven days. The stored value includes the
 validity level and tooltip message. Failed requests are not cached as
 valid. After expiry, comparison-page loading fetches the individual result page
-again and refreshes the record. The cache remains subject to the shared
+again with HTTP cache revalidation and refreshes the record. The cache remains subject to the shared
 least-recently-used eviction limits.

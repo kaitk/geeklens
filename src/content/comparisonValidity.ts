@@ -44,7 +44,7 @@ export async function fetchBrowserResultValidity(
 ): Promise<BrowserResultValidity | null> {
   try {
     const response = await fetch(resultPageUrl(generation, resultId), {
-      cache: 'default',
+      cache: 'no-cache',
       credentials: 'same-origin',
     });
     if (!response.ok) return null;
@@ -77,7 +77,14 @@ export async function loadBrowserResultValidity(
   if (!fetched) return null;
 
   const validity = { ...fetched, checkedAt: Date.now(), source: 'validation-widget-v2' as const };
-  await resultsCache.storeResultContext(generation, resultId, { validity });
+  // Validity is useful even when its best-effort cache write fails. The cache
+  // currently absorbs its own storage errors, and this boundary also protects
+  // page annotation if that implementation detail changes later.
+  try {
+    await resultsCache.storeResultContext(generation, resultId, { validity });
+  } catch (error) {
+    console.error(`GeekLens: Could not cache validity for result ${resultId}`, error);
+  }
   return validity;
 }
 

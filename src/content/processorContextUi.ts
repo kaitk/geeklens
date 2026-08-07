@@ -61,10 +61,6 @@ function sourceLink(options: {
   return link;
 }
 
-function nameWithoutVendor(name: string, vendor: string): string {
-  return name.replace(new RegExp(`^${vendor}\\s+`, 'i'), '');
-}
-
 function processorNameAndTopology(cell: Element): { name: string; topology: string } {
   const lines = (cell.textContent ?? '')
     .split('\n')
@@ -190,11 +186,7 @@ function comparisonFrequency(
     // headers or to a colour swatch.
     const label = document.createElement('span');
     label.className = 'geeklens-preview-frequency-lane-label';
-    label.textContent = preview
-      ? nameWithoutVendor(preview.name, preview.vendor)
-      : role === 'primary'
-        ? 'Primary'
-        : 'Baseline';
+    label.textContent = preview ? preview.displayName : role === 'primary' ? 'Primary' : 'Baseline';
     label.title = label.textContent;
     lane.appendChild(label);
 
@@ -829,7 +821,7 @@ export function renderSingleProcessorContext(
   if (!nameCell || nameCell.querySelector('[data-geeklens-preview-processor]')) return;
 
   if (settings.showProcessorSummary) {
-    const block = renderIdentity(preview.name, preview);
+    const block = renderIdentity(preview);
     block.dataset.geeklensPreviewProcessor = '';
     nameCell.replaceChildren(block);
     if (nameRow?.firstElementChild) markRowLabel(nameRow.firstElementChild, 'changed');
@@ -917,7 +909,7 @@ export function renderComparisonProcessorContext(
       if (settings.showProcessorSummary) {
         const preview = previews[index];
         if (!preview) return;
-        const block = renderIdentity(preview.name, preview);
+        const block = renderIdentity(preview);
         block.dataset.geeklensPreviewProcessor = '';
         cell.replaceChildren(block);
       }

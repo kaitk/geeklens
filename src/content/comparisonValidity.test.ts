@@ -1,8 +1,10 @@
-import { beforeEach, describe, expect, test } from 'bun:test';
-import { parseHTML } from 'linkedom';
+import { beforeEach, describe, expect, spyOn, test } from 'bun:test';
+import { DOMParser, parseHTML } from 'linkedom';
+import { resultsCache } from '../cache/ResultsCache';
 import {
   combinePayloadValidity,
   isResultValidityFresh,
+  loadBrowserResultValidity,
   parseBrowserResultValidity,
   renderComparisonResultValidity,
 } from './comparisonValidity';
@@ -66,6 +68,39 @@ describe('comparison result validity', () => {
     expect(isResultValidityFresh(validity, 1_000 + 7 * 24 * 60 * 60 * 1000 - 1)).toBeTrue();
     expect(isResultValidityFresh(validity, 1_000 + 7 * 24 * 60 * 60 * 1000)).toBeFalse();
     expect(isResultValidityFresh({ ...validity, source: undefined } as never, 1_001)).toBeFalse();
+  });
+
+  test('revalidates HTTP state and keeps fetched validity when its cache write rejects', async () => {
+    const fetchMock = spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('<div class="validation-widget validation-success">Valid</div>'),
+    );
+    const parser = Object.getOwnPropertyDescriptor(globalThis, 'DOMParser');
+    Object.defineProperty(globalThis, 'DOMParser', { configurable: true, value: DOMParser });
+    const store = spyOn(resultsCache, 'storeResultContext').mockRejectedValue(
+      new Error('cache unavailable'),
+    );
+    const error = spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      await expect(loadBrowserResultValidity(7, '123', null)).resolves.toMatchObject({
+        level: 'valid',
+        source: 'validation-widget-v2',
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://browser.geekbench.com/v7/cpu/123',
+        expect.objectContaining({ cache: 'no-cache' }),
+      );
+      expect(error).toHaveBeenCalledWith(
+        'GeekLens: Could not cache validity for result 123',
+        expect.any(Error),
+      );
+    } finally {
+      fetchMock.mockRestore();
+      store.mockRestore();
+      error.mockRestore();
+      if (parser) Object.defineProperty(globalThis, 'DOMParser', parser);
+      else Reflect.deleteProperty(globalThis, 'DOMParser');
+    }
   });
 
   test('uses payload false only as an additional invalid signal', () => {

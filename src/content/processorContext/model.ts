@@ -1,5 +1,11 @@
+import type { ProcessorStatus } from '../processorPresentation';
+
 export interface ProcessorContextViewModel {
+  /** Exact payload value retained for provenance and identity-related context. */
   name: string;
+  /** Compact presentation-only form; never used as catalogue evidence. */
+  displayName: string;
+  status: ProcessorStatus | null;
   vendor: string;
   vendorKey: string;
   architecture: string;

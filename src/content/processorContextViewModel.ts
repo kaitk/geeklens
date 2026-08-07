@@ -5,6 +5,7 @@ import type {
   ResultMetadata,
 } from '../geekbench/resultPayload';
 import type { ProcessorContextViewModel } from './processorContext/model';
+import { processorPresentation } from './processorPresentation';
 import { resolveProcessorIdentity } from '../catalogue/processorIdentity';
 import type { ProcessorIdentityMatch } from '../catalogue/processorIdentity';
 import {
@@ -353,9 +354,16 @@ export function buildProcessorContextViewModel(
   const name = processorName(context.metadata);
   if (!name) return null;
   const identity = resolveProcessorIdentity(context);
+  const presentation = processorPresentation(
+    name,
+    context.metadata.processor.vendor.value,
+    context.metadata.topology.physicalCores?.value ?? null,
+  );
 
   return {
     name,
+    displayName: presentation.name,
+    status: presentation.status,
     vendor: VENDOR_LABELS[context.metadata.processor.vendor.value],
     vendorKey: context.metadata.processor.vendor.value,
     architecture: ARCHITECTURE_LABELS[context.metadata.architecture.value],
