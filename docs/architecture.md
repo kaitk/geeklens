@@ -47,12 +47,24 @@ mounting), so neither adapter creates DOM containers itself. Mount containers
 carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
 guards must use those markers rather than Svelte component CSS classes.
 
-The processor-context presentation is orchestrated by
-`src/content/processorContextUi.ts`, with its neutral contract and feature renderers
-under `src/content/processorContext/`. It is not a parser
-or data source. Page adapters pass it real cached contexts through a pure
-view-model boundary; never embed preview values or fetch from the renderer. All
-currently exposed processor-context slices are wired and default on.
+The processor-context presentation is implemented under
+`src/content/processorContext/`: `model.ts` owns the neutral contract;
+`identity.ts`, `frequency.ts`, `memory.ts`, `topology.ts`,
+`scoreReferences.ts`, `scaling.ts`, and `cacheDispute.ts` own feature
+presentation; and `render.ts` owns single/comparison orchestration and preference
+application. `sourceLink.ts` and `rows.ts` are narrowly shared processor-context
+DOM primitives. `processorContextUi.ts` is only the stable page-adapter facade.
+The renderer is not a parser or data source. Page adapters pass it real cached
+contexts through a pure view-model boundary; never embed preview values or fetch
+from the renderer. All currently exposed processor-context slices are wired and
+default on.
+
+Orchestration locates the shared Geekbench CPU/System Information table and its
+processor, topology, and cache rows, then passes those anchors to feature
+renderers. Features locate only distinct DOM they exclusively own: score
+references and scaling locate benchmark score tables, and single-result memory
+locates the separate Memory Information table. This exception keeps the anchor
+rule explicit while avoiding unrelated table knowledge in orchestration.
 `src/content/rowMarker.ts` owns the common marker for rows GeekLens creates.
 See [Result metadata and processor context](result-metadata.md) for payload,
 identity, provenance, fixture, and catalogue-maintenance rules.
@@ -80,8 +92,9 @@ inferred Geekbench 7 mapping without its warning. A `suspected` workload returns
 the note with an empty instruction list, so the two annotation call sites render
 on either signal rather than on badge count alone. The `mappingWarnings` setting
 suppresses the warning at render time in `TableInstructionSets.svelte`, not at
-lookup time, so toggling it re-renders open pages; a suspected workload drops its
-container entirely when warnings are hidden, since the warning was its only
+lookup time. Badge components receive a settings snapshot, so saving the popup
+setting reloads the active Geekbench tab to apply it; a suspected workload drops
+its container entirely when warnings are hidden, since the warning was its only
 content.
 
 `src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized

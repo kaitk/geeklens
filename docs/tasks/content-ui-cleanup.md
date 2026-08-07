@@ -1,32 +1,22 @@
 # Content UI and settings cleanup
 
-**Status:** in progress; settings and adjacent Svelte cleanup complete.  
+**Status:** complete.
 **Raised:** 2026-08-07.
 
-The remaining work is the processor-context renderer split. Its presentation is
-still concentrated in `processorContextUi.ts`. The data contract and identity
-renderer have already been extracted, but frequency, memory, topology, score
-references, scaling, cache warnings, and page orchestration still share one
-large imperative module.
+The processor-context renderer is split by feature under
+`content/processorContext/`, and `processorContextUi.ts` is now a small stable
+page-adapter facade.
 
 This remains a behavior-preserving cleanup, not authorization for a visual
 redesign or a Svelte rewrite of Geekbench-owned tables.
 
-## 1. Split the processor-context DOM renderer
+## 1. Split the processor-context DOM renderer — complete
 
-Continue the extraction already started under `content/processorContext/`.
-`model.ts` owns the neutral view-model contract and `identity.ts` owns identity
-rendering; do not redo those moves.
-
-Extract the remaining features incrementally, in roughly this order:
-
-1. `frequency.ts` for distribution charts and single/comparison frequency UI;
-2. `memory.ts` for memory summaries, provenance, bandwidth, and tooltips;
-3. `topology.ts` for topology parsing, cluster presentation, and composition;
-4. `scoreReferences.ts` for averages, deltas, and unavailable states;
-5. `scaling.ts` for single/comparison multi-core scaling notes;
-6. `cacheDispute.ts` for L3 dispute detection and presentation; and
-7. `render.ts` for single/comparison orchestration and preference application.
+`model.ts` owns the neutral view-model contract. `identity.ts`, `frequency.ts`,
+`memory.ts`, `topology.ts`, `scoreReferences.ts`, `scaling.ts`, and
+`cacheDispute.ts` own their feature presentation. `render.ts` owns
+single/comparison orchestration and preference application; `sourceLink.ts` and
+`rows.ts` contain only narrowly shared processor-context DOM behavior.
 
 The exact boundaries may follow dependencies discovered during extraction.
 Keep shared DOM helpers narrowly scoped and avoid a generic UI utility layer.
@@ -36,10 +26,15 @@ tables owned by Geekbench. Do not convert those tables or the whole processor
 context feature to Svelte. Svelte remains appropriate for GeekLens-owned leaf
 components mounted inside explicit GeekLens containers.
 
-Keep `renderSingleProcessorContext`, `renderComparisonProcessorContext`, and
-`applyProcessorContextPreferences` as the stable page-adapter API. During the
-split, `processorContextUi.ts` may remain as a compatibility facade so each
-feature extraction is independently reviewable.
+`renderSingleProcessorContext`, `renderComparisonProcessorContext`, and
+`applyProcessorContextPreferences` remain the stable API re-exported by the
+`processorContextUi.ts` compatibility facade.
+
+DOM-anchor ownership is orchestration-first: `render.ts` locates the shared
+CPU/System Information table and its processor, topology, and cache rows, then
+passes anchors into feature modules. Score references and scaling locate their
+exclusive benchmark score DOM. Single-result memory is the documented exception
+because it owns the distinct Geekbench Memory Information table.
 
 Run the existing processor-context DOM integration tests after every extraction.
 Do not change selectors, ownership markers, class names, DOM order, settings
@@ -49,14 +44,24 @@ This section overlaps section 4 of
 `docs/tasks/processor-context-architecture.md`. Update that task as features are
 extracted so the two notes do not disagree about completed work.
 
-## 2. Finish the facade and documentation
+## 2. Finish the facade and documentation — complete
 
-After the feature modules have been extracted, reduce `processorContextUi.ts` to
-orchestration or a compatibility facade. Update `docs/architecture.md` and
-`docs/tasks/processor-context-architecture.md` so they describe the resulting
-module ownership and do not retain completed extraction work as open work.
+The facade now contains only stable re-exports, and architecture documentation
+records the shipped module and DOM-anchor ownership.
 
-## Sequencing
+## 3. Adjacent review findings — complete
+
+- `InstructionBadge.svelte` renders its described tooltip as a sibling, keeping
+  the instruction as the button name and the tooltip as its description.
+- Escape removes the badge's keyboard focus trigger; pointer hover and normal
+  focus behavior remain unchanged.
+- `SettingsTab.svelte` clears its transient status timeout when destroyed.
+- `BadgePresentationPreferences` lives beside the badge components rather than
+  in their mounting adapter.
+
+No review finding required deferral or a broader UI redesign.
+
+## Historical sequencing
 
 Keep the remaining work in reviewable units:
 

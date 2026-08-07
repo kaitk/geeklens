@@ -1,6 +1,7 @@
 # Processor-context architecture cleanup
 
-**Status:** open; not scheduled.
+**Status:** renderer architecture cleanup complete; result loading remains
+explicitly deferred until fetch behavior changes.
 **Raised:** 2026-08-01.
 
 The processor-context feature has sound data boundaries, but continued growth has
@@ -8,29 +9,22 @@ left one reversed type dependency, a large DOM renderer, duplicated context-load
 policy, and a few missing integrity guards. Address these incrementally; this is not
 authorization for a broad UI rewrite.
 
-## 1. Move the view-model contract out of the renderer
+## 1. Move the view-model contract out of the renderer — complete
 
-`processorContextViewModel.ts` currently imports `ProcessorContextViewModel` from
-`processorContextUi.ts`, even though the renderer conceptually consumes the model.
+`content/processorContext/model.ts` now owns `ProcessorContextViewModel`,
+`ProvenanceFact`, `MemoryFact`, and the directly related types. The builder and
+renderers import the contract from that neutral module.
 
-Create a neutral model module owned by neither the builder nor the renderer. Move
-`ProcessorContextViewModel`, `ProvenanceFact`, `MemoryFact`, and directly related
-types into it, then update both sides to import the contract from there.
-
-Do this before splitting the renderer so the new renderer modules all depend in
-the correct direction:
+The renderer modules therefore depend in the intended direction:
 
 ```text
 payload/cache/catalogue -> view-model builder -> model contract -> DOM renderer
 ```
 
-## 2. Add maintenance integrity guards
+## 2. Add maintenance integrity guards — complete
 
-Add a version synchronization test that fails when `package.json` and
-`src/manifest.json` disagree.
-
-Add an assembled-catalogue integrity suite, preferably
-`src/catalogue/processorCatalogue.test.ts`, covering:
+`src/version.test.ts` checks that `package.json` and `src/manifest.json` agree.
+`src/catalogue/processorCatalogue.test.ts` covers:
 
 - unique catalogue keys;
 - unique canonical processor paths;
@@ -40,26 +34,21 @@ Add an assembled-catalogue integrity suite, preferably
 - every reviewed dispute key targets a base identity; and
 - catalogue assembly attaches overlays without creating or dropping identities.
 
-Keep exact data assertions in the domain tests where they already belong. These
-new tests protect relationships between datasets rather than snapshotting the
-whole catalogue.
+Exact data assertions remain in the domain tests; these guards protect
+relationships between datasets rather than snapshotting the whole catalogue.
 
-## 3. Repair architecture documentation drift
+## 3. Repair architecture documentation drift — complete
 
-Update `docs/result-metadata.md` to describe the shipped unique cluster-to-group
-matcher. It currently says core names are never assigned to topology segments,
-which is no longer true when exactly one assignment is feasible.
+`docs/result-metadata.md` describes the shipped unique cluster-to-group matcher,
+and catalogue maintenance paths point at the extracted source and overlay
+modules. Completed task notes retain historical paths only where called out.
 
-Update catalogue maintenance paths to point at the extracted source and overlay
-modules rather than `processorCatalogue.ts`. Mark completed task notes as
-historical where their old paths or assumptions are intentionally retained.
+## 4. Split the processor-context DOM renderer by feature — complete
 
-## 4. Split the processor-context DOM renderer by feature
-
-`processorContextUi.ts` handles identity, source links, frequency charts, memory,
-topology, score references, scaling, L3 warnings, single/comparison orchestration,
-and preference application. Split these into cohesive modules while preserving a
-small public orchestration surface for the page adapters.
+The model contract and feature renderers now live under
+`content/processorContext/`. `render.ts` owns single/comparison orchestration and
+preference application; `processorContextUi.ts` is only the compatibility facade
+for the stable page-adapter exports.
 
 A reasonable target is:
 
@@ -71,18 +60,22 @@ src/content/processorContext/
   memory.ts
   topology.ts
   scoreReferences.ts
+  scaling.ts
+  cacheDispute.ts
   render.ts
 ```
 
-The exact filenames may follow the code discovered during extraction. Keep shared
-DOM primitives narrowly scoped rather than introducing a generic UI utility layer.
-Preserve the existing imperative DOM approach: GeekLens is augmenting tables owned
-by Geekbench, so rewriting the feature wholesale in Svelte is out of scope.
+`rows.ts` owns shared row labels and idempotent label reading. `sourceLink.ts`
+owns the other narrowly shared processor-context affordance; no generic UI
+utility layer was introduced. The imperative DOM approach remains because
+GeekLens augments Geekbench-owned tables.
 
-Keep `renderSingleProcessorContext`, `renderComparisonProcessorContext`, and
-`applyProcessorContextPreferences` as the stable page-adapter API, either through
-the existing module as a compatibility facade or through one clearly named entry
-module.
+Orchestration locates shared CPU/System Information tables and rows and passes
+those anchors to features. Score features locate their exclusive benchmark score
+DOM, and single-result memory owns the distinct Memory Information table as a
+documented exception. `renderSingleProcessorContext`,
+`renderComparisonProcessorContext`, and `applyProcessorContextPreferences` remain
+the stable facade API.
 
 ## 5. Consolidate result-context acquisition when next touching fetch behavior
 
@@ -112,15 +105,8 @@ shapes and annotation flows.
 
 ## Priority and sequencing
 
-Implement in this order to keep diffs reviewable:
-
-1. Move the model types without changing behavior.
-2. Add version and catalogue integrity tests.
-3. Correct the documentation.
-4. Split the renderer one feature at a time.
-5. Consolidate result loading only when the next page-fetch change provides a
-   concrete reason to touch that behavior. Keep the existing single and
-   comparison tests green throughout.
+Renderer cleanup is complete. Consolidate result loading only when a later
+page-fetch change provides a concrete reason to touch that behavior.
 
 Each step should be independently committable. Avoid mixing visual changes,
 catalogue data additions, or unrelated cleanup into these extractions.

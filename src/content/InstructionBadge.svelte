@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getCategoryStyle } from '../isa/badgeColors';
   import type { InstructionCategory } from '../isa/instructions';
+  import { dismissBadgeTooltip } from './badgeTooltip';
 
   interface Props {
     instruction: string;
@@ -16,15 +17,19 @@
 </script>
 
 {#if description}
-  <button
-    type="button"
-    class="gb-instruction-badge"
-    aria-describedby={tooltipId}
-    style="background-color: {backgroundColor}; color: {color}; cursor: help"
-  >
-    {instruction}
+  <!-- Keep the description outside the button so it augments, rather than
+       becoming part of, the button's accessible name. -->
+  <span class="gb-instruction-badge-tooltip-anchor">
+    <button
+      type="button"
+      class="gb-instruction-badge"
+      aria-describedby={tooltipId}
+      onkeydown={dismissBadgeTooltip}
+      style="background-color: {backgroundColor}; color: {color}; cursor: help"
+      >{instruction}</button
+    >
     <span id={tooltipId} role="tooltip" class="gb-instruction-tooltip">{description}</span>
-  </button>
+  </span>
 {:else}
   <span
     class="gb-instruction-badge"
@@ -43,10 +48,14 @@
     border-radius: 4px;
     font-size: 10px;
     font-weight: 500;
-    position: relative;
     border: 0;
     font-family: inherit;
     line-height: inherit;
+  }
+
+  .gb-instruction-badge-tooltip-anchor {
+    display: inline-block;
+    position: relative;
   }
 
   .gb-instruction-tooltip {
@@ -83,8 +92,8 @@
     border-top-color: #6c757d;
   }
 
-  .gb-instruction-badge:hover .gb-instruction-tooltip,
-  .gb-instruction-badge:focus .gb-instruction-tooltip {
+  .gb-instruction-badge-tooltip-anchor:hover .gb-instruction-tooltip,
+  .gb-instruction-badge-tooltip-anchor:focus-within .gb-instruction-tooltip {
     visibility: visible;
   }
 

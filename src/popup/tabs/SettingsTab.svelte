@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import browser from '../../browserApi';
   import {
     defaultSettings,
@@ -21,6 +21,8 @@
     settings = await loadSettings();
     savedSettings = { ...settings };
   });
+
+  onDestroy(() => clearTimeout(statusTimeout));
 
   // Save settings
   async function onSaveSettings() {

@@ -1,14 +1,9 @@
 import { mount } from 'svelte';
 import type { Instruction } from '../isa/instructions';
 import type { InstructionCategory } from '../isa/instructions';
+import type { BadgePresentationPreferences } from './badgePresentation';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
-
-export interface BadgePresentationPreferences {
-  coloredBadges: boolean;
-  tooltips: boolean;
-  mappingWarnings: boolean;
-}
 
 /**
  * Svelte components are always mounted into a container element of our own

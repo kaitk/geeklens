@@ -1,6 +1,6 @@
 <script lang="ts">
   import { instructionsByName, type InstructionCategory } from '../isa/instructions';
-  import type { BadgePresentationPreferences } from './mountBadges';
+  import type { BadgePresentationPreferences } from './badgePresentation';
   import InstructionBadge from './InstructionBadge.svelte';
 
   interface Props {
