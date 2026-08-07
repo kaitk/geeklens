@@ -1,6 +1,6 @@
 # GeekLens
 
-A browser extension that enhances Geekbench CPU benchmark results formatting by annotating tests with instruction set architecture (ISA) information.
+A browser extension that adds processor context to Geekbench CPU results and comparisons. GeekLens presents processor identity, topology, frequency and memory details, score context, result validity and, where supported by available evidence, instruction-set annotations.
 
 ![GeekLens Screenshot](screenshots/screenshot1.png)
 
@@ -18,14 +18,22 @@ A browser extension that enhances Geekbench CPU benchmark results formatting by 
 
 ## Features
 
-- 🔍 Automatically annotates Geekbench CPU result pages with instruction set information
-- 🎨 Color-codes instruction sets by type (AVX, AVX-512, SSE, AES, SHA)
-- 📊 Shows which instruction sets are utilized by each benchmark test
-- ⚡ Adds processor context to Geekbench 5, 6, and 7 CPU results
+- Supports Geekbench 5, 6 and 7 CPU result and comparison pages.
+- Identifies the processor vendor and architecture, cleans up reported names and links exact matches to the Geekbench processor catalogue.
+- Presents core, thread and cluster topology, including sourced core-type names when the reported layout can be matched unambiguously.
+- Summarises the submitted run's frequency samples as a range and compact distribution.
+- Adds memory capacity, configuration and bandwidth details from reported, computed or published data, with sources shown where applicable.
+- Shows multi-core scaling and generation-matched Geekbench Browser average scores and deltas.
+- Carries Geekbench result-validity information over to comparison pages and explains invalid results.
+- Marks identified engineering samples and warns about known reporting problems, such as incorrect L3 totals on affected Ryzen X3D results.
+- Adds system and per-workload instruction-set annotations when reliable capability and workload data are available. Unconfirmed mappings are labelled as such.
+- Provides separate settings for each data group, badge colours, tooltips and mapping warnings.
 
-## Why GeekLens?
+## Scope and data quality
 
-Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruction sets are being used in each test. GeekLens fills this gap by overlaying this information directly on benchmark result pages, helping users understand which CPU features are being tested and why certain CPUs might perform better on specific tests.
+Geekbench results contain useful hardware and run metadata, but much of it is terse, split across views or absent from comparison pages. GeekLens presents that information in place without changing the benchmark scores.
+
+Reported, computed and published facts are kept distinct. Published processor and system details come from a reviewed, bundled catalogue and include source links. Ambiguous hardware matches are left unresolved rather than guessed.
 
 ## Installation
 
@@ -60,24 +68,20 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 
 1. Install the extension
 2. Visit a supported CPU result page (for example, https://browser.geekbench.com/v7/cpu/1248)
-3. GeekLens will automatically enhance the page
+3. GeekLens adds the available processor and result context to the page
 
 Geekbench 7 instruction data is only available while signed in to Geekbench,
 including on single-result pages.
 
-Geekbench 5 exposes no instruction-set capability data in the captured result
-pages or payloads, so GeekLens provides processor context there without ISA
-workload annotations.
+Geekbench 5 exposes no instruction-set capability data in the captured result pages or payloads. Processor context remains available, but ISA workload annotations do not.
 
 ## Data Sources
 
+- Processor and system context is derived from Geekbench result metadata and a bundled catalogue of reviewed hardware facts. Published values retain their source links.
 - Geekbench 6 workload mappings are based on the [Geekbench 6 benchmark internals documentation](https://www.geekbench.com/doc/geekbench6-benchmark-internals.pdf).
-- Geekbench 7 system instruction sets are read from the result payload.
-  Per-test instruction information is currently extremely limited and marked
-  with an amber warning until Primate Labs publishes
-  `geekbench7-benchmark-internals.pdf`.
-- See [Geekbench 7 data sources and confidence](docs/geekbench7-sources.md) for mapping provenance, known unknowns, and research requirements.
-- If you have any good sources for instruction set data, **particularly for RISC-V** please submit a pull request!
+- Geekbench 7 system instruction sets are read from the result payload. Per-workload mappings remain deliberately limited and carry an amber warning until equivalent benchmark-internals documentation or direct instruction traces are available.
+- [Geekbench 7 data sources and confidence](docs/geekbench7-sources.md) records the mapping provenance, open questions and evidence requirements.
+- [Processor catalogue sources](docs/processor-catalogue-sources.md) records the source hierarchy and maintenance policy for published hardware data.
 
 ## Development
 
@@ -143,7 +147,7 @@ workload annotations.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Open an issue before making a substantial behavioural or data-model change. Corrections to processor data should include a suitable source; see the catalogue source policy above.
 
 ## License
 
@@ -151,8 +155,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Links
 
-- [Geekbench](https://www.geekbench.com/) for their excellent benchmarking tool
+- [Geekbench](https://www.geekbench.com/)
 
----
-
-_GeekLens is not affiliated with Primate Labs Inc. or Geekbench. All trademarks are the property of their respective owners._
+GeekLens is not affiliated with Primate Labs Inc. or Geekbench. All trademarks belong to their respective owners.

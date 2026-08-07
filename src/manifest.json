@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "GeekLens",
   "version": "0.7.0",
-  "description": "Enhances Geekbench CPU benchmark results with instruction set information",
+  "description": "Adds processor identity, topology, frequency, memory, score context, validity details and ISA annotations to Geekbench CPU results.",
   "permissions": ["storage"],
   "{{chrome}}.host_permissions": ["*://browser.geekbench.com/*"],
   "{{chrome}}.minimum_chrome_version": "111",

@@ -9,8 +9,8 @@
 
   <h2>GeekLens {extensionVersion}</h2>
   <p>
-    GeekLens enhances Geekbench CPU benchmark results by adding instruction set annotations, helping
-    you understand which CPU features are being utilized in each test.
+    GeekLens adds processor, memory, score and validity context to Geekbench CPU results and
+    comparisons, with instruction-set annotations where supported by available evidence.
   </p>
 
   <div class="links">
