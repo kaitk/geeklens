@@ -29,17 +29,49 @@ The content entry delegates to two page adapters:
 Both adapters route between Geekbench 5, 6, and 7 based on the URL generation.
 Geekbench 5 uses an authenticated `.gb5` payload for processor context. Its
 captured payloads and rendered pages expose no instruction-set capability
-string, so GeekLens deliberately provides no ISA workload badges for v5.
-Geekbench 6 exposes instruction sets in result-page HTML. Geekbench 7 omits that
-row, so GeekLens fetches and normalizes the result's `.gb6` JSON payload once,
-reads metric `20000` from the cached metadata, and adds an Instruction Sets row
-to the rendered system information.
+string, so GeekLens deliberately provides no ISA workload badges for v5. Of the
+supported HTML shapes, only Geekbench 6.4 and newer single-result pages render an
+Instruction Sets row. Older Geekbench 6 results and all captured comparison pages
+omit it. Geekbench 7 also omits the row, so GeekLens fetches and normalizes the
+result's `.gb6` JSON payload once, reads metric `20000` from the cached metadata,
+and adds an Instruction Sets row to the rendered system information.
 
 All three generations share payload-backed processor context when the visitor
 is signed in. Geekbench 6 retains its rendered instruction-set row as a public
 fallback, so signed-out visitors still receive ISA annotations but not payload-
 only processor context. Generation-matched Browser averages remain available
 only where the bundled catalogue carries a reference for that generation.
+
+The rendered Geekbench 6 row is a direct, page-local opportunity, not a general
+HTML data API. The current comparison adapter recovers it indirectly by fetching
+baseline-free per-result HTML because comparison pages never carry the row
+themselves. Do not extend that compatibility path to another generation or page
+shape. The accepted simplification is tracked in
+[`tasks/simplify-result-context-loading.md`](tasks/simplify-result-context-loading.md):
+keep direct single-result parsing, make comparisons payload/cache-only for ISA
+and processor context, and leave result-validity HTML as a separate concern.
+
+### Complexity should follow reach
+
+The amount and placement of code should broadly reflect how much of GeekLens a
+source or feature serves. Shared abstractions are justified for the common path;
+a compatibility case affecting one generation, version range, page shape, or
+authentication state should remain a small, visibly scoped branch near that page
+adapter.
+
+| Data or behavior        | Reach                                      | Source                         | Expected code shape                  |
+| ----------------------- | ------------------------------------------ | ------------------------------ | ------------------------------------ |
+| Processor context       | Geekbench 5–7, single and comparison pages | Authenticated payload or cache | Shared primary path                  |
+| Payload ISA metadata    | Geekbench 6–7 where payloads are available | Payload metric `20000`         | Part of normalized result metadata   |
+| Rendered ISA fallback   | Geekbench 6.4+, single-result page only    | Row already present in the DOM | Local compatibility branch           |
+| Browser result validity | Comparison result lanes                    | Rendered result HTML           | Separate feature-specific fetch path |
+
+Before adding a shared helper, require at least two real production call sites
+with the same policy—not merely similar parameters. Comments on exceptional
+branches should name the affected generation, version range, page shape, and
+authentication state when those constraints are not obvious from the types. If
+an edge case needs more machinery than the common path, reconsider the feature's
+value before generalizing the machinery.
 
 Shared selectors and benchmark-name extraction live in
 `src/content/domUtils.ts`. Svelte components in `src/content/` render badges;
@@ -49,6 +81,14 @@ they should not contain Geekbench page-parsing logic. Both adapters share
 mounting), so neither adapter creates DOM containers itself. Mount containers
 carry explicit `data-geeklens-*` ownership markers; parsing and duplicate
 guards must use those markers rather than Svelte component CSS classes.
+
+The status pill describes GeekLens as a whole, not ISA acquisition. Processor
+context, validity, score context, and ISA badges are independent enhancements;
+the expected absence of one slice must not turn an otherwise successful page
+amber. Use feature-neutral copy such as “Loading result details” and “Sign in to
+load result details.” Reserve warning presentation for an actual annotation
+failure or unsupported page state. A signed-out visitor, an older result without
+ISA metadata, and a one-sided comparison are normal limited-data states.
 
 The processor-context presentation is implemented under
 `src/content/processorContext/`: `model.ts` owns the neutral contract;
@@ -159,13 +199,14 @@ public result is available.
 
 - Exact benchmark display names are keys in the benchmark map.
 - Comparison parsing depends on row classes and relative row ordering.
-- Geekbench rejects both GB6 comparison HTML requests and GB7 `.gb6` payload
-  requests while a comparison baseline is selected. The comparison adapter
-  therefore clears the baseline once, fetches missing primary and baseline data
-  in parallel, then restores the baseline once in a `finally`.
+- Geekbench rejects both the current GB6 compatibility HTML requests and `.gb6`
+  payload requests while a comparison baseline is selected. The comparison
+  adapter therefore clears the baseline once, fetches missing primary and
+  baseline data in parallel, then restores the baseline once in a `finally`.
 - Signed-out Geekbench 5 and 7 visitors cannot load payload metadata. Comparison
   pages must not clear the selected baseline for either generation when signed
-  out; Geekbench 6 is the sole public HTML fallback.
+  out. Geekbench 6.4+ single-result HTML is the sole public ISA fallback; its
+  current comparison bridge is intentionally scheduled for removal.
 - Geekbench 7 instruction data requires being signed in; logged-out pages carry
   none at all. The comparison adapter therefore skips fetching entirely for a
   signed-out Geekbench 7 visitor rather than disturbing the baseline for a
