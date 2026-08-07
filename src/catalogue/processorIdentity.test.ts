@@ -15,7 +15,6 @@ async function context(resultId: string): Promise<CachedResultContext> {
     new URL(`../geekbench/__fixtures__/${resultId}.gb6.json`, import.meta.url),
   ).json();
   return {
-    instructionSet: null,
     metadata: extractResultMetadata(payload, 7),
     processorLinks: { processorPath: null, macPath: null },
     lastAccessedAt: 1,

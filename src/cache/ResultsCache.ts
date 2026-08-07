@@ -20,7 +20,6 @@ export interface CachedResultValidity {
 
 export interface StoredResultRecord {
   cacheKey: string;
-  instructionSet?: string;
   lastAccessedAt: number;
   metadata?: ResultMetadata;
   processorLinks?: CanonicalProcessorLinks;
@@ -28,7 +27,6 @@ export interface StoredResultRecord {
 }
 
 export interface CachedResultContext {
-  instructionSet: string | null;
   metadata: ResultMetadata | null;
   processorLinks: CanonicalProcessorLinks;
   validity?: CachedResultValidity | null;
@@ -36,7 +34,6 @@ export interface CachedResultContext {
 }
 
 export interface ResultContextUpdate {
-  instructionSet?: string | null;
   metadata?: ResultMetadata | null;
   processorLinks?: CanonicalProcessorLinks;
   validity?: CachedResultValidity | null;
@@ -50,7 +47,6 @@ interface ResultsCacheOptions {
 
 export function normalizeStoredResultRecord(record: StoredResultRecord): CachedResultContext {
   return {
-    instructionSet: record.instructionSet || record.metadata?.instructionSets?.value || null,
     metadata: record.metadata ?? null,
     processorLinks: mergeProcessorLinks(null, record.processorLinks),
     validity: record.validity ?? null,
@@ -66,14 +62,9 @@ export function mergeStoredResultRecord(
 ): StoredResultRecord {
   const metadata =
     update.metadata === undefined ? existing?.metadata : (update.metadata ?? undefined);
-  const instructionSet =
-    update.instructionSet === undefined
-      ? (existing?.instructionSet ?? metadata?.instructionSets?.value)
-      : (update.instructionSet ?? undefined);
 
   return {
     cacheKey,
-    instructionSet,
     metadata,
     processorLinks: mergeProcessorLinks(existing?.processorLinks, update.processorLinks),
     validity: update.validity === undefined ? existing?.validity : (update.validity ?? undefined),

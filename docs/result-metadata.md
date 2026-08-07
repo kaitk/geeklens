@@ -24,11 +24,13 @@ later validity decision.
 ## Runtime boundary
 
 `src/geekbench/resultPayload.ts` converts a payload into typed, normalized
-metadata. Page adapters cache that metadata with the compatibility instruction
-string and any explicit processor/Mac links, then pass the cached context through
-`src/content/processorContextViewModel.ts`. The processor-context renderers consume
-the neutral contract in `src/content/processorContext/model.ts`; they do not
-parse pages, fetch payloads, or resolve identities.
+metadata. Page adapters cache that metadata and any explicit processor/Mac links,
+then pass the cached context through
+`src/content/processorContextViewModel.ts`. Payload ISA remains inside
+`metadata.instructionSets`; the rendered Geekbench 6 single-result value stays
+local to that adapter and is not cached. The processor-context renderers consume
+the neutral contract in `src/content/processorContext/model.ts`; they do not parse
+pages, fetch payloads, or resolve identities.
 
 The shared Geekbench 5, 6, and 7 presentation includes:
 
@@ -49,8 +51,9 @@ as valid.
 All processor-context controls are independently toggleable and default on.
 Missing or malformed data removes the affected single-result detail; comparison
 pages preserve the native Geekbench value or show that the affected side is
-unavailable. Existing ISA annotations continue to use the instruction string
-from the same cached context.
+unavailable. Comparisons derive ISA annotations only from cached or freshly
+fetched payload metadata. Geekbench 6 single-result annotations use the rendered
+row, while Geekbench 7 single-result annotations use payload metadata.
 
 ## Payload rules
 
@@ -65,7 +68,7 @@ The observed fields currently used are:
   desktop memory configuration;
 - `processor_frequency.frequencies` for frequency samples;
 - `score` and `multicore_score` for submitted scores; and
-- metric `20000` for the compatibility instruction-set string.
+- metric `20000` for the instruction-set capability string.
 
 Frequency parsing ignores non-finite and non-positive samples and treats an
 empty set as unavailable. Sample count is variable. Cluster parsing rejects

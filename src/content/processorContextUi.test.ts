@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { parseHTML } from 'linkedom';
 import type { Settings } from '../settings/settings';
+import type { ProcessorContextViewModel } from './processorContext/model';
 import {
   renderComparisonProcessorContext,
   renderSingleProcessorContext,
-  type ProcessorContextViewModel,
-} from './processorContextUi';
+} from './processorContext/render';
 
 function model(name: string, vendor: string, architecture: string): ProcessorContextViewModel {
   return {

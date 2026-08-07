@@ -1,9 +1,14 @@
 import { mount } from 'svelte';
 import type { Instruction } from '../isa/instructions';
 import type { InstructionCategory } from '../isa/instructions';
-import type { BadgePresentationPreferences } from './badgePresentation';
+import type { Settings } from '../settings/settings';
 import SystemInstructionSetsComponent from './SystemInstructionSets.svelte';
 import TableInstructionSetsComponent from './TableInstructionSets.svelte';
+
+type BadgePresentationPreferences = Pick<
+  Settings,
+  'coloredBadges' | 'tooltips' | 'mappingWarnings'
+>;
 
 /**
  * Svelte components are always mounted into a container element of our own

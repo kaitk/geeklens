@@ -4,7 +4,6 @@ import {
   isComparisonPath,
   parseGeekbenchGeneration,
   resultCacheKey,
-  versionSupportsInstructionSets,
 } from './generation';
 import { BROWSER_HOST } from './urls';
 
@@ -32,20 +31,6 @@ describe('isComparisonPath', () => {
     expect(isComparisonPath('/v7/cpu/1248')).toBe(false);
     expect(isComparisonPath('/v8/cpu/compare/1')).toBe(false);
     expect(isComparisonPath('/v7/gpu/compare/1')).toBe(false);
-  });
-});
-
-describe('versionSupportsInstructionSets', () => {
-  test('accepts Geekbench 6.4 and newer', () => {
-    expect(versionSupportsInstructionSets('Geekbench 6.4.0')).toBe(true);
-    expect(versionSupportsInstructionSets('Geekbench 6.7.1')).toBe(true);
-    expect(versionSupportsInstructionSets('Geekbench 7.0.0')).toBe(true);
-  });
-
-  test('rejects older releases and unreadable values', () => {
-    expect(versionSupportsInstructionSets('Geekbench 6.3.0')).toBe(false);
-    expect(versionSupportsInstructionSets('Geekbench 6')).toBe(false);
-    expect(versionSupportsInstructionSets(null)).toBe(false);
   });
 });
 

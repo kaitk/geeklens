@@ -20,11 +20,11 @@ shape and owns annotation at DOM ready.
 The content entry delegates to two page adapters:
 
 - `src/content/singleResultPage.ts` reads the result's system table, loads one
-  cached result context, and annotates benchmark tables from its compatibility
-  instruction-set string.
-- `src/content/comparisonPage.ts` obtains result contexts for both results (from
-  IndexedDB or fetched result pages), adds instruction sets to the comparison
-  system table, and annotates both CPUs' graph rows.
+  payload/cache-backed result context, and keeps the rendered Geekbench 6 ISA
+  row as a local annotation source.
+- `src/content/comparisonPage.ts` obtains payload/cache-backed contexts for both
+  results, adds their metadata instruction sets to the comparison system table,
+  and annotates both CPUs' graph rows.
 
 Both adapters route between Geekbench 5, 6, and 7 based on the URL generation.
 Geekbench 5 uses an authenticated `.gb5` payload for processor context. Its
@@ -43,13 +43,9 @@ only processor context. Generation-matched Browser averages remain available
 only where the bundled catalogue carries a reference for that generation.
 
 The rendered Geekbench 6 row is a direct, page-local opportunity, not a general
-HTML data API. The current comparison adapter recovers it indirectly by fetching
-baseline-free per-result HTML because comparison pages never carry the row
-themselves. Do not extend that compatibility path to another generation or page
-shape. The accepted simplification is tracked in
-[`tasks/simplify-result-context-loading.md`](tasks/simplify-result-context-loading.md):
-keep direct single-result parsing, make comparisons payload/cache-only for ISA
-and processor context, and leave result-validity HTML as a separate concern.
+HTML data API. Comparison pages never fetch result HTML for instruction sets or
+processor links; they use authenticated payload metadata or a cached payload for
+both ISA and processor context. Result-validity HTML remains a separate concern.
 
 ### Complexity should follow reach
 
@@ -96,11 +92,10 @@ The processor-context presentation is implemented under
 `scoreReferences.ts`, `scaling.ts`, and `cacheDispute.ts` own feature
 presentation; and `render.ts` owns single/comparison orchestration and preference
 application. `sourceLink.ts` and `rows.ts` are narrowly shared processor-context
-DOM primitives. `processorContextUi.ts` is only the stable page-adapter facade.
-The renderer is not a parser or data source. Page adapters pass it real cached
-contexts through a pure view-model boundary; never embed preview values or fetch
-from the renderer. All currently exposed processor-context slices are wired and
-default on.
+DOM primitives. Page adapters import `render.ts` directly. The renderer is not a
+parser or data source. Page adapters pass it real cached contexts through a pure
+view-model boundary; never embed preview values or fetch from the renderer. All
+currently exposed processor-context slices are wired and default on.
 
 Orchestration locates the shared Geekbench CPU/System Information table and its
 processor, topology, and cache rows, then passes those anchors to feature
@@ -140,18 +135,19 @@ settings snapshot, so saving the popup setting reloads the active Geekbench tab
 to apply it.
 
 `src/cache/ResultsCache.ts` stores a result context in IndexedDB: normalized
-payload metadata when available, a compatibility instruction-set string, and
-explicit Geekbench processor/Mac links found in result HTML. It also stores the
-last HTML-derived result-validity check; see [Result validity](result-validity.md).
-Cache keys include
-the Geekbench generation and result ID (`v<generation>:cpu:<resultId>`) so
-results cannot collide across generations. Database version 3 replaces the
-legacy instruction-set-only store with the result-oriented `results` store;
-the old cache is intentionally discarded during that upgrade. Successful reads
-update `lastAccessedAt` on a best-effort basis. Once the cache exceeds 5,000
-results, opportunistic background cleanup removes least-recently-used entries
-until 4,000 remain. Cache writes never prevent otherwise successful page
-annotation, including when an upgrade is blocked by a tab using an older schema.
+payload metadata when available and explicit Geekbench processor/Mac links found
+in rendered system tables. Payload-backed ISA is read only from
+`metadata.instructionSets`; the rendered Geekbench 6 string is never cached. The
+cache also stores the last HTML-derived result-validity check; see
+[Result validity](result-validity.md). Cache keys include the Geekbench generation
+and result ID (`v<generation>:cpu:<resultId>`) so results cannot collide across
+generations. Database version 3 replaces the legacy instruction-set-only store
+with the result-oriented `results` store; the old cache is intentionally
+discarded during that upgrade. Successful reads update `lastAccessedAt` on a
+best-effort basis. Once the cache exceeds 5,000 results, opportunistic background
+cleanup removes least-recently-used entries until 4,000 remain. Cache writes
+never prevent otherwise successful page annotation, including when an upgrade is
+blocked by a tab using an older schema.
 
 Canonical-link parsing lives in `src/geekbench/processorLinks.ts`. It accepts
 only same-origin `/processors/<slug>` and `/macs/<slug>` paths from system tables.
@@ -199,23 +195,19 @@ public result is available.
 
 - Exact benchmark display names are keys in the benchmark map.
 - Comparison parsing depends on row classes and relative row ordering.
-- Geekbench rejects both the current GB6 compatibility HTML requests and `.gb6`
-  payload requests while a comparison baseline is selected. The comparison
-  adapter therefore clears the baseline once, fetches missing primary and
-  baseline data in parallel, then restores the baseline once in a `finally`.
-- Signed-out Geekbench 5 and 7 visitors cannot load payload metadata. Comparison
-  pages must not clear the selected baseline for either generation when signed
-  out. Geekbench 6.4+ single-result HTML is the sole public ISA fallback; its
-  current comparison bridge is intentionally scheduled for removal.
-- Geekbench 7 instruction data requires being signed in; logged-out pages carry
-  none at all. The comparison adapter therefore skips fetching entirely for a
-  signed-out Geekbench 7 visitor rather than disturbing the baseline for a
-  request that cannot succeed. Recheck this whenever a new Geekbench version
-  ships: if logged-out pages start exposing instruction sets again — either as a
-  rendered Instruction Sets row or in a payload readable while signed out — then
-  the skip becomes a silent regression that hides data GeekLens could show.
-  Re-verify against a logged-out single result and comparison page, and prefer
-  reading the row directly over fetching, as Geekbench 6 does.
+- Geekbench rejects payload and result-validity requests while a comparison
+  baseline is selected. When either source is needed, the comparison adapter
+  clears the baseline once, loads missing lanes in parallel, then restores the
+  baseline once in a `finally`.
+- Signed-out visitors cannot load payload metadata for any supported generation.
+  Comparisons use cached payload metadata when present and otherwise remain
+  limited; they never substitute rendered result HTML for ISA. A stale validity
+  check may still require a baseline-clear window because validity is an
+  independent Browser-side source.
+- Geekbench 6.4+ single-result HTML is the sole public ISA fallback. Recheck this
+  whenever a new Geekbench version ships: if another page shape exposes an
+  Instruction Sets row or payloads become public, make that source policy
+  explicit rather than silently widening the Geekbench 6 branch.
 - The popup settings use synchronized browser storage, while result metadata uses
   page-origin IndexedDB.
 - Settings are consumed by badge components.

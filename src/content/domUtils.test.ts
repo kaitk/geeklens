@@ -9,7 +9,6 @@ import {
   findComparisonScoreRow,
   findInstructionSetValueCell,
   findSystemTableByHeading,
-  getComparisonVersions,
   waitForElement,
 } from './domUtils';
 
@@ -83,10 +82,6 @@ describe('Geekbench 5 page selectors', () => {
   test('supports the captured comparison structure and row ordering', async () => {
     const document = await fixture('geekbench5-comparison.html');
 
-    expect(getComparisonVersions(document)).toEqual({
-      primary: 'Geekbench 5.4.5 Tryout',
-      baseline: 'Geekbench 5.4.5 Tryout',
-    });
     expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(4);
     expect(document.querySelector('table.system-information')).not.toBeNull();
     expect(findInstructionSetValueCell(document)).toBeNull();
@@ -167,14 +162,10 @@ describe('Geekbench 7 processor catalogue link fixtures', () => {
 });
 
 describe('Geekbench 6 comparison selectors', () => {
-  test('finds versions and comparison tables from stored HTML', async () => {
+  test('finds comparison tables from stored HTML', async () => {
     const document = await fixture('geekbench6-comparison.html');
 
     expect(isGeekbenchSignedOut(document)).toBe(true);
-    expect(getComparisonVersions(document)).toEqual({
-      primary: 'Geekbench 6.7.1',
-      baseline: 'Geekbench 6.5.0',
-    });
     expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(3);
     expect(document.querySelector('table.system-information')).not.toBeNull();
   });
@@ -236,14 +227,10 @@ describe('Geekbench 7 single-result selectors', () => {
 });
 
 describe('Geekbench 7 comparison selectors', () => {
-  test('finds versions and comparison tables from stored HTML', async () => {
+  test('finds comparison tables from stored HTML', async () => {
     const document = await fixture('geekbench7-comparison.html');
 
     expect(isGeekbenchSignedOut(document)).toBe(true);
-    expect(getComparisonVersions(document)).toEqual({
-      primary: 'Geekbench 7.0.0',
-      baseline: 'Geekbench 7.0.0',
-    });
     expect(findBenchmarkTables('table.comparison-benchmark-table', document)).toHaveLength(3);
     expect(document.querySelector('table.system-information')).not.toBeNull();
   });

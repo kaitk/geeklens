@@ -1,7 +1,6 @@
 <script lang="ts">
   import { getCategoryStyle } from '../isa/badgeColors';
   import type { InstructionCategory } from '../isa/instructions';
-  import { dismissBadgeTooltip } from './badgeTooltip';
 
   interface Props {
     instruction: string;
@@ -14,6 +13,11 @@
   const tooltipId = `geeklens-instruction-tooltip-${crypto.randomUUID()}`;
 
   const { backgroundColor, color } = $derived(getCategoryStyle(groupType, coloredBadges));
+
+  /** Escape closes the CSS-only tooltip by removing its focus trigger. */
+  function dismissTooltip(event: KeyboardEvent): void {
+    if (event.key === 'Escape') (event.currentTarget as HTMLButtonElement).blur();
+  }
 </script>
 
 {#if description}
@@ -24,7 +28,7 @@
       type="button"
       class="gb-instruction-badge"
       aria-describedby={tooltipId}
-      onkeydown={dismissBadgeTooltip}
+      onkeydown={dismissTooltip}
       style="background-color: {backgroundColor}; color: {color}; cursor: help"
       >{instruction}</button
     >

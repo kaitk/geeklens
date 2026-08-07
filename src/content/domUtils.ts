@@ -68,20 +68,6 @@ export function findSystemTableByHeading(
   );
 }
 
-export function getComparisonVersions(root: ParentNode = document): {
-  primary: string | null;
-  baseline: string | null;
-} {
-  const versionRow = root.querySelector('tr.version');
-  const primaryCell = versionRow?.querySelector('td.document-version');
-  const baselineCell = primaryCell?.nextElementSibling;
-
-  return {
-    primary: primaryCell?.textContent?.trim() || null,
-    baseline: baselineCell?.textContent?.trim() || null,
-  };
-}
-
 export function findComparisonScoreRow(
   graphRow: Element,
   isBaseline: boolean,

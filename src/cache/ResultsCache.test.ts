@@ -73,7 +73,6 @@ describe('ResultsCache records', () => {
     expect(stored.cacheKey).toBe('v7:cpu:123');
     expect(stored.lastAccessedAt).toBe(100);
     expect(normalizeStoredResultRecord(stored)).toEqual({
-      instructionSet: null,
       metadata: null,
       processorLinks: { processorPath: null, macPath: null },
       validity: null,
@@ -85,7 +84,7 @@ describe('ResultsCache records', () => {
     const existing = mergeStoredResultRecord(
       'v7:cpu:123',
       undefined,
-      { instructionSet: 'sse2 avx2' },
+      { processorLinks: { processorPath: null, macPath: '/macs/example' } },
       100,
     );
 
@@ -98,8 +97,7 @@ describe('ResultsCache records', () => {
 
     expect(updated).toMatchObject({
       cacheKey: existing.cacheKey,
-      instructionSet: 'sse2 avx2',
-      processorLinks: { processorPath: '/processors/example-cpu', macPath: null },
+      processorLinks: { processorPath: '/processors/example-cpu', macPath: '/macs/example' },
       lastAccessedAt: 200,
     });
   });
@@ -108,7 +106,7 @@ describe('ResultsCache records', () => {
     const existing = mergeStoredResultRecord(
       'v7:cpu:123',
       undefined,
-      { instructionSet: 'avx2' },
+      { processorLinks: { processorPath: '/processors/example-cpu', macPath: null } },
       100,
     );
     const validity = {
@@ -120,12 +118,12 @@ describe('ResultsCache records', () => {
     const updated = mergeStoredResultRecord(existing.cacheKey, existing, { validity }, 201);
 
     expect(normalizeStoredResultRecord(updated)).toMatchObject({
-      instructionSet: 'avx2',
+      processorLinks: { processorPath: '/processors/example-cpu', macPath: null },
       validity,
     });
   });
 
-  test('derives the compatibility instruction string from cached metadata', () => {
+  test('stores instruction sets only as part of normalized payload metadata', () => {
     const metadata = extractResultMetadata(
       {
         document_version: 7,
@@ -138,8 +136,23 @@ describe('ResultsCache records', () => {
 
     const stored = mergeStoredResultRecord('v7:cpu:456', undefined, { metadata }, 300);
 
-    expect(stored.instructionSet).toBe('neon sme2');
+    expect(stored).not.toHaveProperty('instructionSet');
     expect(normalizeStoredResultRecord(stored).metadata).toEqual(metadata);
+  });
+
+  test('ignores the obsolete standalone instruction field in existing cache records', () => {
+    const legacyRecord = {
+      cacheKey: 'v6:cpu:legacy',
+      instructionSet: 'sse2 avx2',
+      lastAccessedAt: 100,
+    } as StoredResultRecord & { instructionSet: string };
+
+    expect(normalizeStoredResultRecord(legacyRecord)).toEqual({
+      metadata: null,
+      processorLinks: { processorPath: null, macPath: null },
+      validity: null,
+      lastAccessedAt: 100,
+    });
   });
 
   test('new explicit links override stale links without erasing undiscovered kinds', () => {
@@ -212,7 +225,9 @@ describe('ResultsCache IndexedDB behavior', () => {
     legacyDb.close();
 
     const cache = new ResultsCache({ databaseName: name });
-    await cache.storeResultContext(7, 'new', { instructionSet: 'neon' });
+    await cache.storeResultContext(7, 'new', {
+      processorLinks: { processorPath: '/processors/new', macPath: null },
+    });
 
     const db = await openDatabase(name);
     expect(Array.from(db.objectStoreNames)).toEqual(['results']);
@@ -230,13 +245,23 @@ describe('ResultsCache IndexedDB behavior', () => {
     let now = 100;
     Date.now = () => now++;
 
-    await cache.storeResultContext(7, 'a', { instructionSet: 'a' });
-    await cache.storeResultContext(7, 'b', { instructionSet: 'b' });
-    await cache.storeResultContext(7, 'c', { instructionSet: 'c' });
-    expect((await cache.getResultContext(7, 'a'))?.instructionSet).toBe('a');
+    await cache.storeResultContext(7, 'a', {
+      processorLinks: { processorPath: '/processors/a', macPath: null },
+    });
+    await cache.storeResultContext(7, 'b', {
+      processorLinks: { processorPath: '/processors/b', macPath: null },
+    });
+    await cache.storeResultContext(7, 'c', {
+      processorLinks: { processorPath: '/processors/c', macPath: null },
+    });
+    expect((await cache.getResultContext(7, 'a'))?.processorLinks.processorPath).toBe(
+      '/processors/a',
+    );
     await waitForRecords(name, (records) => records.some((record) => record.lastAccessedAt >= 103));
 
-    await cache.storeResultContext(7, 'd', { instructionSet: 'd' });
+    await cache.storeResultContext(7, 'd', {
+      processorLinks: { processorPath: '/processors/d', macPath: null },
+    });
     const remaining = await waitForRecords(name, (records) => records.length === 2);
 
     expect(remaining.map((record) => record.cacheKey).toSorted()).toEqual(['v7:cpu:a', 'v7:cpu:d']);
@@ -245,14 +270,18 @@ describe('ResultsCache IndexedDB behavior', () => {
   test('returns a cache hit even when its best-effort recency touch fails', async () => {
     const name = databaseName();
     const cache = new ResultsCache({ databaseName: name });
-    await cache.storeResultContext(7, '123', { instructionSet: 'avx2' });
+    await cache.storeResultContext(7, '123', {
+      processorLinks: { processorPath: '/processors/example', macPath: null },
+    });
     const internals = cache as unknown as { touchResult: () => Promise<void> };
     internals.touchResult = async () => {
       throw new Error('touch failed');
     };
     const error = spyOn(console, 'error').mockImplementation(() => {});
 
-    expect((await cache.getResultContext(7, '123'))?.instructionSet).toBe('avx2');
+    expect((await cache.getResultContext(7, '123'))?.processorLinks.processorPath).toBe(
+      '/processors/example',
+    );
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(error).toHaveBeenCalled();
     error.mockRestore();
@@ -261,7 +290,9 @@ describe('ResultsCache IndexedDB behavior', () => {
   test('drops a version-changed handle so a deleted cache can reopen', async () => {
     const name = databaseName();
     const cache = new ResultsCache({ databaseName: name });
-    await cache.storeResultContext(7, 'before', { instructionSet: 'sse2' });
+    await cache.storeResultContext(7, 'before', {
+      processorLinks: { processorPath: '/processors/before', macPath: null },
+    });
     await waitForRecords(name, (records) => records.length === 1);
 
     await new Promise<void>((resolve, reject) => {
@@ -269,7 +300,9 @@ describe('ResultsCache IndexedDB behavior', () => {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
-    await cache.storeResultContext(7, 'after', { instructionSet: 'neon' });
+    await cache.storeResultContext(7, 'after', {
+      processorLinks: { processorPath: '/processors/after', macPath: null },
+    });
 
     expect((await resultRecords(name)).map((record) => record.cacheKey)).toEqual(['v7:cpu:after']);
   });
@@ -294,8 +327,12 @@ describe('ResultsCache IndexedDB behavior', () => {
     );
 
     legacyDb.close();
-    await cache.storeResultContext(7, 'after', { instructionSet: 'neon' });
-    expect((await cache.getResultContext(7, 'after'))?.instructionSet).toBe('neon');
+    await cache.storeResultContext(7, 'after', {
+      processorLinks: { processorPath: '/processors/after', macPath: null },
+    });
+    expect((await cache.getResultContext(7, 'after'))?.processorLinks.processorPath).toBe(
+      '/processors/after',
+    );
     error.mockRestore();
   });
 
@@ -315,9 +352,7 @@ describe('ResultsCache IndexedDB behavior', () => {
       evictions += 1;
     };
 
-    await expect(cache.storeResultContext(7, '123', { instructionSet: 'avx2' })).resolves.toBe(
-      undefined,
-    );
+    await expect(cache.storeResultContext(7, '123', {})).resolves.toBe(undefined);
     expect({ attempts, evictions }).toEqual({ attempts: 2, evictions: 1 });
   });
 });

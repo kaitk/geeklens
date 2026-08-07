@@ -32,6 +32,7 @@ export default defineConfig({
         target: browser === 'firefox' ? 'firefox-desktop' : 'chromium',
         startUrl: [
           'https://browser.geekbench.com/v5/cpu/18449406',
+          'https://browser.geekbench.com/v6/cpu/16897404',
           'https://browser.geekbench.com/v7/cpu/1248',
         ],
       },

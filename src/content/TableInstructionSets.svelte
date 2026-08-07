@@ -1,8 +1,12 @@
 <script lang="ts">
   import type { Instruction } from '../isa/instructions';
-  import type { BadgePresentationPreferences } from './badgePresentation';
+  import type { Settings } from '../settings/settings';
   import InstructionBadge from './InstructionBadge.svelte';
 
+  type BadgePresentationPreferences = Pick<
+    Settings,
+    'coloredBadges' | 'tooltips' | 'mappingWarnings'
+  >;
   interface Props {
     instructions: Instruction[];
     confidenceNote?: string;
