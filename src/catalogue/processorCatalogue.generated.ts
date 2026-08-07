@@ -1,5 +1,5 @@
 /** Generated from the Geekbench 7 Processor Benchmark Chart.
- s* Source capture and provenance are documented in processorCatalogue.ts.
+ * Source capture and provenance are documented in processorCatalogue.ts.
  * Regenerate with scripts/generateProcessorCatalogue.ts; do not edit by hand.
  */
 export const GENERATED_PROCESSOR_IDENTITIES = [

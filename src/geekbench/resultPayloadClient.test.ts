@@ -10,6 +10,24 @@ afterEach(() => {
 });
 
 describe('fetchResultMetadataFromPayload', () => {
+  test('uses the Geekbench 5 payload extension', async () => {
+    const fetchMock = mock(async () =>
+      Response.json({
+        document_version: 5,
+        platform: { architecture: 'x86_64' },
+        metrics: [{ id: 9, value: 'AMD Ryzen 7 7700X 8-Core Processor' }],
+      }),
+    );
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    const metadata = await fetchResultMetadataFromPayload(5, '18449406');
+
+    expect(fetchMock).toHaveBeenCalledWith('https://browser.geekbench.com/v5/cpu/18449406.gb5', {
+      credentials: 'same-origin',
+    });
+    expect(metadata?.generation).toBe(5);
+  });
+
   test('makes one authenticated request and returns normalized metadata', async () => {
     const fetchMock = mock(async () =>
       Response.json({

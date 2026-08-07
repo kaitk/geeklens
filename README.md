@@ -9,7 +9,7 @@ A browser extension that enhances Geekbench CPU benchmark results formatting by 
 - 🔍 Automatically annotates Geekbench CPU result pages with instruction set information
 - 🎨 Color-codes instruction sets by type (AVX, AVX-512, SSE, AES, SHA)
 - 📊 Shows which instruction sets are utilized by each benchmark test
-- ⚡ Works with Geekbench 6 and Geekbench 7 CPU results
+- ⚡ Adds processor context to Geekbench 5, 6, and 7 CPU results
 
 ## Why GeekLens?
 
@@ -48,10 +48,14 @@ Geekbench is a powerful benchmarking tool, but it doesn't show which CPU instruc
 
 1. Install the extension
 2. Visit a supported CPU result page (for example, https://browser.geekbench.com/v7/cpu/1248)
-3. GeekLens will automatically enhance the page with instruction set annotations
+3. GeekLens will automatically enhance the page
 
 Geekbench 7 instruction data is only available while signed in to Geekbench,
 including on single-result pages.
+
+Geekbench 5 exposes no instruction-set capability data in the captured result
+pages or payloads, so GeekLens provides processor context there without ISA
+workload annotations.
 
 ## Data Sources
 

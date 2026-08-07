@@ -16,6 +16,7 @@ import { comparisonUrl } from '../geekbench/urls';
 import {
   comparisonInstructionStatus,
   initialInstructionStatus,
+  processorContextStatus,
 } from '../geekbench/instructionDataStatus';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
 import { workloadInstructions } from '../isa/workloadInstructions';
@@ -39,13 +40,14 @@ import {
   renderComparisonProcessorContext,
 } from './processorContextUi';
 import { buildProcessorContextViewModel } from './processorContextViewModel';
+import { needsComparisonResultFetch } from './comparisonFetch';
 
 // Extract result IDs from the URL
 function extractResultIds(): { baseline: string | null; primary: string | null } {
   const url = new URL(window.location.href);
   const pathParts = url.pathname.split('/');
 
-  // URL format: /v6/cpu/compare/[primary]?baseline=[baseline]
+  // URL format: /v<generation>/cpu/compare/[primary]?baseline=[baseline]
   return {
     primary: pathParts[pathParts.length - 1] || null,
     baseline: url.searchParams.get('baseline'),
@@ -144,6 +146,9 @@ async function loadResultContext(
       };
     }
 
+    // Geekbench 5 never rendered instruction-set data. If its payload was
+    // unavailable above, there is no HTML source to fall back to.
+    if (generation === 5) return cached;
     if (version && !versionSupportsInstructionSets(version)) return cached;
     if (cached?.instructionSet) return cached;
 
@@ -226,22 +231,22 @@ export async function annotateGeekbenchComparisonPage() {
     let baselineContext = baselineCached;
     let primaryInstructions = primaryContext?.instructionSet ?? null;
     let baselineInstructions = baselineContext?.instructionSet ?? null;
-    const needsPrimaryFetch =
-      generation === 7
-        ? !primaryCached?.metadata
-        : !signedOut
-          ? !primaryCached?.metadata
-          : !primaryInstructions &&
-            (primaryVersion === null || versionSupportsInstructionSets(primaryVersion));
-    const needsBaselineFetch =
-      generation === 7
-        ? !baselineCached?.metadata
-        : !signedOut
-          ? !baselineCached?.metadata
-          : !baselineInstructions &&
-            (baselineVersion === null || versionSupportsInstructionSets(baselineVersion));
+    const needsPrimaryFetch = needsComparisonResultFetch({
+      generation,
+      signedOut,
+      hasMetadata: Boolean(primaryCached?.metadata),
+      hasInstructions: Boolean(primaryInstructions),
+      version: primaryVersion,
+    });
+    const needsBaselineFetch = needsComparisonResultFetch({
+      generation,
+      signedOut,
+      hasMetadata: Boolean(baselineCached?.metadata),
+      hasInstructions: Boolean(baselineInstructions),
+      version: baselineVersion,
+    });
     const needsFetch = needsPrimaryFetch || needsBaselineFetch;
-    const cannotFetch = generation === 7 && signedOut;
+    const cannotFetch = signedOut && generation !== 6;
 
     if (needsFetch && !cannotFetch) {
       await withClearedComparisonBaseline(generation, primary, baseline, async () => {
@@ -293,21 +298,23 @@ export async function annotateGeekbenchComparisonPage() {
     }
 
     showStatus(
-      comparisonInstructionStatus(
-        generation,
-        Boolean(primaryInstructions),
-        Boolean(baselineInstructions),
-        {
-          primary:
-            generation === 6 &&
-            primaryVersion !== null &&
-            !versionSupportsInstructionSets(primaryVersion),
-          baseline:
-            generation === 6 &&
-            baselineVersion !== null &&
-            !versionSupportsInstructionSets(baselineVersion),
-        },
-      ),
+      generation === 5
+        ? processorContextStatus(Boolean(primaryProcessor || baselineProcessor), signedOut)
+        : comparisonInstructionStatus(
+            generation,
+            Boolean(primaryInstructions),
+            Boolean(baselineInstructions),
+            {
+              primary:
+                generation === 6 &&
+                primaryVersion !== null &&
+                !versionSupportsInstructionSets(primaryVersion),
+              baseline:
+                generation === 6 &&
+                baselineVersion !== null &&
+                !versionSupportsInstructionSets(baselineVersion),
+            },
+          ),
     );
   } catch (error) {
     console.error('GeekLens: Failed to annotate comparison page', error);

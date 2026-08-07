@@ -30,7 +30,10 @@ export default defineConfig({
       disableAutoLaunch: browser !== 'firefox',
       webExtConfig: {
         target: browser === 'firefox' ? 'firefox-desktop' : 'chromium',
-        startUrl: ['https://browser.geekbench.com/v7/cpu/1248'],
+        startUrl: [
+          'https://browser.geekbench.com/v5/cpu/18449406',
+          'https://browser.geekbench.com/v7/cpu/1248',
+        ],
       },
     }),
   ],

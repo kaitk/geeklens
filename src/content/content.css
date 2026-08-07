@@ -242,6 +242,14 @@ table.system-information td {
   cursor: help;
 }
 
+/* Comparison scores are right-aligned by Geekbench. When no average line is
+ * present, keep the scaling note directly under that score instead of centring
+ * it in the whole cell. */
+table.comparison-benchmark-table .geeklens-preview-scaling.is-score-aligned {
+  margin-inline: auto 0;
+  text-align: right;
+}
+
 .geeklens-preview-frequency {
   display: grid;
   grid-template-columns: 1fr;

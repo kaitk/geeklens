@@ -3,7 +3,10 @@ import { extractInstructionSetsFromPayload, extractResultMetadata } from './resu
 import { RESULT_PAYLOAD_FIXTURES } from './__fixtures__/manifest';
 
 async function fixture(resultId: string): Promise<unknown> {
-  return Bun.file(new URL(`__fixtures__/${resultId}.gb6.json`, import.meta.url)).json();
+  const generation =
+    RESULT_PAYLOAD_FIXTURES[resultId as keyof typeof RESULT_PAYLOAD_FIXTURES]?.generation;
+  const extension = generation === 5 ? 'gb5' : 'gb6';
+  return Bun.file(new URL(`__fixtures__/${resultId}.${extension}.json`, import.meta.url)).json();
 }
 
 /** Minimal payload carrying only the two identity metrics vendor classification

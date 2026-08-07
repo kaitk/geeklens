@@ -10,6 +10,41 @@ export interface ResultPayloadFixture {
 }
 
 export const RESULT_PAYLOAD_FIXTURES = {
+  '10324204': {
+    cpu: 'ARM',
+    vendor: 'unknown',
+    architecture: 'arm',
+    generation: 5,
+    notableFor: ['Geekbench 5 compatibility', 'iPhone 13 mini', 'generic ARM identity'],
+  },
+  '1524322': {
+    cpu: 'Intel Core i7-1065G7',
+    vendor: 'intel',
+    architecture: 'x86',
+    generation: 5,
+    notableFor: ['Geekbench 5 compatibility', 'Ice Lake', 'missing memory type'],
+  },
+  '17536185': {
+    cpu: 'Intel Core i5-4670',
+    vendor: 'intel',
+    architecture: 'x86',
+    generation: 5,
+    notableFor: ['Geekbench 5 compatibility', 'Haswell', 'DDR3'],
+  },
+  '18449406': {
+    cpu: 'AMD Ryzen 7 7700X 8-Core Processor',
+    vendor: 'amd',
+    architecture: 'x86',
+    generation: 5,
+    notableFor: ['Geekbench 5 compatibility', 'Zen 4', 'DDR5 without transfer rate'],
+  },
+  '18878080': {
+    cpu: 'AMD Ryzen 7 5800X3D 8-Core Processor',
+    vendor: 'amd',
+    architecture: 'x86',
+    generation: 5,
+    notableFor: ['Geekbench 5 compatibility', 'Zen 3 X3D', 'DDR4 without transfer rate'],
+  },
   '1248': {
     cpu: 'AMD Ryzen 7 5800X3D',
     vendor: 'amd',

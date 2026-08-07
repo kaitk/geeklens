@@ -11,10 +11,34 @@ export interface InstructionDataStatus {
   action?: 'sign-in';
 }
 
+export function processorContextStatus(
+  hasContext: boolean,
+  signedOut: boolean,
+): InstructionDataStatus {
+  if (hasContext) return { text: 'GeekLens Active', type: 'info' };
+  return signedOut
+    ? {
+        text: 'GeekLens: Sign in to load processor data',
+        type: 'warning',
+        action: 'sign-in',
+      }
+    : { text: 'GeekLens: No processor data available', type: 'warning' };
+}
+
 export function initialInstructionStatus(
   generation: GeekbenchGeneration,
   signedOut: boolean,
 ): InstructionDataStatus {
+  if (generation === 5) {
+    return signedOut
+      ? {
+          text: 'GeekLens: Sign in to load processor data',
+          type: 'warning',
+          action: 'sign-in',
+        }
+      : { text: 'GeekLens: Loading processor data…', type: 'info' };
+  }
+
   if (generation === 7 && signedOut) {
     return {
       text: 'GeekLens: Sign in to load instruction data',

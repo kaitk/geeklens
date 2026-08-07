@@ -2,10 +2,41 @@ import { describe, expect, test } from 'bun:test';
 import {
   comparisonInstructionStatus,
   initialInstructionStatus,
+  processorContextStatus,
   singleResultInstructionStatus,
 } from './instructionDataStatus';
 
+describe('processorContextStatus', () => {
+  test('reports loaded, signed-out, and unavailable processor context', () => {
+    expect(processorContextStatus(true, true)).toEqual({
+      text: 'GeekLens Active',
+      type: 'info',
+    });
+    expect(processorContextStatus(false, true)).toEqual({
+      text: 'GeekLens: Sign in to load processor data',
+      type: 'warning',
+      action: 'sign-in',
+    });
+    expect(processorContextStatus(false, false)).toEqual({
+      text: 'GeekLens: No processor data available',
+      type: 'warning',
+    });
+  });
+});
+
 describe('initialInstructionStatus', () => {
+  test('describes Geekbench 5 as processor data rather than instruction data', () => {
+    expect(initialInstructionStatus(5, false)).toEqual({
+      text: 'GeekLens: Loading processor data…',
+      type: 'info',
+    });
+    expect(initialInstructionStatus(5, true)).toEqual({
+      text: 'GeekLens: Sign in to load processor data',
+      type: 'warning',
+      action: 'sign-in',
+    });
+  });
+
   test('immediately guides signed-out Geekbench 7 users', () => {
     expect(initialInstructionStatus(7, true)).toEqual({
       text: 'GeekLens: Sign in to load instruction data',

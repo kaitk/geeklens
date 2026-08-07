@@ -23,14 +23,17 @@ The content entry delegates to two page adapters:
   IndexedDB or fetched result pages), adds instruction sets to the comparison
   system table, and annotates both CPUs' graph rows.
 
-Both adapters route between Geekbench 6 and 7 based on the URL generation.
+Both adapters route between Geekbench 5, 6, and 7 based on the URL generation.
+Geekbench 5 uses an authenticated `.gb5` payload for processor context. Its
+captured payloads and rendered pages expose no instruction-set capability
+string, so GeekLens deliberately provides no ISA workload badges for v5.
 Geekbench 6 exposes instruction sets in result-page HTML. Geekbench 7 omits that
 row, so GeekLens fetches and normalizes the result's `.gb6` JSON payload once,
 reads metric `20000` from the cached metadata, and adds an Instruction Sets row
 to the rendered system information.
 
-Both generations share payload-backed processor context when the visitor is
-signed in. Geekbench 6 retains its rendered instruction-set row as a public
+All three generations share payload-backed processor context when the visitor
+is signed in. Geekbench 6 retains its rendered instruction-set row as a public
 fallback, so signed-out visitors still receive ISA annotations but not payload-
 only processor context. Generation-matched Browser averages remain available
 only where the bundled catalogue carries a reference for that generation.
@@ -54,9 +57,9 @@ currently exposed processor-context slices are wired and default on.
 See [Result metadata and processor context](result-metadata.md) for payload,
 identity, provenance, fixture, and catalogue-maintenance rules.
 
-Geekbench Browser URL shapes live in `src/geekbench/urls.ts`, and the
-authenticated `.gb6` payload fetch in `src/geekbench/resultPayloadClient.ts`.
-Keep both generations' URL literals there rather than at the call sites.
+Geekbench Browser URL shapes live in `src/geekbench/urls.ts`, and authenticated
+result-payload fetching lives in `src/geekbench/resultPayloadClient.ts`.
+Keep all generations' URL literals there rather than at the call sites.
 
 ## Data flow
 
@@ -69,7 +72,9 @@ Geekbench's space-separated instruction-set string is:
 4. rendered as instruction badges.
 
 `src/isa/workloadInstructions.ts` is the only place that chooses between the
-Geekbench 6 and Geekbench 7 benchmark maps. It returns a `confidenceNote` for
+generation-specific benchmark maps. Geekbench 5 intentionally resolves no
+workload instructions because its captures expose no capability string. The
+resolver returns a `confidenceNote` for
 inferred mappings and omits it for documented ones, so callers cannot render an
 inferred Geekbench 7 mapping without its warning. A `suspected` workload returns
 the note with an empty instruction list, so the two annotation call sites render
@@ -141,6 +146,9 @@ public result is available.
   requests while a comparison baseline is selected. The comparison adapter
   therefore clears the baseline once, fetches missing primary and baseline data
   in parallel, then restores the baseline once in a `finally`.
+- Signed-out Geekbench 5 and 7 visitors cannot load payload metadata. Comparison
+  pages must not clear the selected baseline for either generation when signed
+  out; Geekbench 6 is the sole public HTML fallback.
 - Geekbench 7 instruction data requires being signed in; logged-out pages carry
   none at all. The comparison adapter therefore skips fetching entirely for a
   signed-out Geekbench 7 visitor rather than disturbing the baseline for a

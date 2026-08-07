@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [v0.7.0] - 2026-08-07
+
+### Added
+
+- Added processor context to Geekbench 5 CPU result and comparison pages,
+  including processor identity, topology and multi-core scaling, frequency
+  distributions, and memory details.
+- Extended the same processor-context information to Geekbench 6 pages.
+
+### Notes
+
+- Geekbench 5 and Geekbench 6 versions before 6.4 do not report instruction-set
+  capabilities, so ISA annotations are not available for those results.
+- Geekbench Browser averages are available only for Geekbench 7 results as the Older
+  version pages are not accessible anymore.
+
 ## [v0.6.0] - 2026-08-01
 
 ### Added

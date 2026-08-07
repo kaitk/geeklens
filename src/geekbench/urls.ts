@@ -13,13 +13,15 @@ export const BROWSER_ORIGIN = `https://${BROWSER_HOST}`;
  */
 
 /**
- * Undocumented per-result JSON payload. Geekbench 7 exposes the detected
- * instruction sets as metric 20000 here and nowhere in the page HTML.
+ * Undocumented per-result JSON payload. Geekbench 5 uses its own `.gb5`
+ * extension; Geekbench 6 and 7 both use `.gb6`. Geekbench 7 exposes the
+ * detected instruction sets as metric 20000 here and nowhere in page HTML.
  * Requires an authenticated session, and appears to require that no comparison
  * baseline is selected.
  */
 export function resultPayloadUrl(generation: GeekbenchGeneration, resultId: string): string {
-  return `${BROWSER_ORIGIN}/v${generation}/cpu/${encodeURIComponent(resultId)}.gb6`;
+  const extension = generation === 5 ? 'gb5' : 'gb6';
+  return `${BROWSER_ORIGIN}/v${generation}/cpu/${encodeURIComponent(resultId)}.${extension}`;
 }
 
 /**

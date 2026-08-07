@@ -329,7 +329,7 @@ function referenceElement(
       reference.minimumUniqueResults,
     );
   }
-  return preview.referenceGeneration ? unavailableReference() : null;
+  return preview.hasReferenceDataset ? unavailableReference() : null;
 }
 
 function scoreValue(container: ParentNode): number | null {
@@ -470,7 +470,11 @@ function memoryBandwidthLine(facts: readonly MemoryFact[]): HTMLElement | null {
   return line;
 }
 
-function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel): void {
+function appendMemoryDetails(
+  cell: Element,
+  preview: ProcessorContextViewModel,
+  preserveNative = false,
+): void {
   if (cell.querySelector('[data-geeklens-preview-memory]')) return;
   const details = document.createElement('div');
   details.dataset.geeklensPreviewMemory = '';
@@ -491,7 +495,8 @@ function appendMemoryDetails(cell: Element, preview: ProcessorContextViewModel):
   details.append(value, info);
   const bandwidth = memoryBandwidthLine(preview.memory);
   if (bandwidth) details.appendChild(bandwidth);
-  cell.replaceChildren(details);
+  if (preserveNative) cell.appendChild(details);
+  else cell.replaceChildren(details);
 }
 
 function rowLabel(label: string, kind: RowMarkerKind = 'added'): DocumentFragment {
@@ -688,9 +693,15 @@ function scalingNote(scaling: NonNullable<ProcessorContextViewModel['scaling']>)
   return note;
 }
 
-function appendScalingNote(cell: Element | null | undefined, preview: ProcessorContextViewModel) {
+function appendScalingNote(
+  cell: Element | null | undefined,
+  preview: ProcessorContextViewModel,
+  alignToScore = false,
+) {
   if (!cell || !preview.scaling || cell.querySelector('[data-geeklens-preview-scaling]')) return;
-  cell.appendChild(scalingNote(preview.scaling));
+  const note = scalingNote(preview.scaling);
+  if (alignToScore) note.classList.add('is-score-aligned');
+  cell.appendChild(note);
 }
 
 function multiCoreScoreCells(tableSelector: string): Element[] {
@@ -717,9 +728,24 @@ function annotateSingleScaling(preview: ProcessorContextViewModel): void {
 }
 
 function annotateComparisonScaling(previews: readonly (ProcessorContextViewModel | null)[]): void {
-  for (const [index, cell] of multiCoreScoreCells('table.comparison-benchmark-table').entries()) {
-    const preview = previews[index];
-    if (preview) appendScalingNote(cell, preview);
+  for (const table of Array.from(document.querySelectorAll('table.comparison-benchmark-table'))) {
+    const rows = Array.from(table.querySelectorAll('thead tr, tbody tr')).filter((row) =>
+      (row.firstElementChild?.textContent?.trim() ?? '').startsWith('Multi-Core Score'),
+    );
+    for (const row of rows) {
+      Array.from(row.querySelectorAll('.score'))
+        .slice(0, 2)
+        .forEach((cell, index) => {
+          const preview = previews[index];
+          if (preview) {
+            appendScalingNote(
+              cell,
+              preview,
+              !cell.querySelector('[data-geeklens-preview-reference]'),
+            );
+          }
+        });
+    }
   }
 }
 
@@ -853,10 +879,21 @@ export function renderSingleProcessorContext(
   const memoryTable = Array.from(document.querySelectorAll('table.system-table')).find(
     (table) => table.querySelector('th')?.textContent?.trim() === 'Memory Information',
   );
-  const sizeCell = memoryTable?.querySelector('tbody tr td:last-child');
+  const memoryRow = Array.from(memoryTable?.querySelectorAll('tr') ?? []).find(
+    (row) => tableRowLabel(row) === 'Memory',
+  );
+  const sizeCell =
+    memoryRow?.lastElementChild ?? memoryTable?.querySelector('tbody tr td:last-child');
   if (settings.showMemoryDetails && preview.memory.length > 0 && sizeCell) {
-    sizeCell.parentElement?.firstElementChild?.replaceChildren(rowLabel('Details', 'changed'));
-    appendMemoryDetails(sizeCell, preview);
+    const nativeMemory = sizeCell.textContent?.trim() ?? '';
+    const hasNativeClock = /\b\d+(?:\.\d+)?\s*(?:MHz|GHz)\b/i.test(nativeMemory);
+    const preserveNative = hasNativeClock && !preview.hasReportedMemoryTransferRate;
+    const labelCell = sizeCell.parentElement?.firstElementChild;
+    if (labelCell) {
+      if (preserveNative) markRowLabel(labelCell, 'changed');
+      else labelCell.replaceChildren(rowLabel('Details', 'changed'));
+    }
+    appendMemoryDetails(sizeCell, preview, preserveNative);
   }
 }
 

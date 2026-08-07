@@ -8,6 +8,7 @@ import {
 import { fetchResultMetadataFromPayload } from '../geekbench/resultPayloadClient';
 import {
   initialInstructionStatus,
+  processorContextStatus,
   singleResultInstructionStatus,
 } from '../geekbench/instructionDataStatus';
 import { isGeekbenchSignedOut } from '../geekbench/authentication';
@@ -55,7 +56,11 @@ export async function annotateGeekbenchResults() {
     const processorContext = buildProcessorContextViewModel(context);
     if (processorContext) renderSingleProcessorContext(processorContext, settings);
     if (!instructionSets) {
-      showStatus(singleResultInstructionStatus(generation, false));
+      showStatus(
+        generation === 5
+          ? processorContextStatus(Boolean(processorContext), signedOut)
+          : singleResultInstructionStatus(generation, false),
+      );
       return;
     }
 
@@ -108,7 +113,7 @@ async function getResultContext(
   // rejected path as the session's post-login destination, so a later sign-in
   // lands the user on raw `.gb6` JSON instead of the result page.
   if (signedOut && !cached?.metadata) {
-    console.log('GeekLens: Signed out of Geekbench 7, skipping payload fetch');
+    console.log(`GeekLens: Signed out of Geekbench ${generation}, skipping payload fetch`);
   }
   const metadata =
     cached?.metadata ??

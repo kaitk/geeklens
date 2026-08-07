@@ -5,6 +5,10 @@ const names = (result: { instructions: { name: string }[] }) =>
   result.instructions.map((instruction) => instruction.name);
 
 describe('workloadInstructions', () => {
+  test('does not infer Geekbench 5 badges without a captured capability string', () => {
+    expect(names(workloadInstructions(5, 'AES-XTS', new Set(['AESNI', 'NEON'])))).toEqual([]);
+  });
+
   test('resolves Geekbench 6 mappings without a confidence note', () => {
     const result = workloadInstructions(6, 'File Compression', new Set(['AESNI', 'SHA1']));
 

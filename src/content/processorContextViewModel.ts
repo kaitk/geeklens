@@ -364,9 +364,10 @@ export function buildProcessorContextViewModel(
     topology: topology(context.metadata, identity),
     coreComposition: coreComposition(identity),
     scaling: scoreScaling(context.metadata),
-    referenceGeneration: context.metadata.generation === 7 ? 'Geekbench 7' : null,
+    hasReferenceDataset: context.metadata.generation === 7,
     reference: reference(context.metadata, identity),
     disputedL3Cache: disputedL3Cache(identity),
+    hasReportedMemoryTransferRate: context.metadata.memory.transferRateMTs !== null,
     memory: memory(context.metadata, identity),
   };
 }

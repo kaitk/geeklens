@@ -20,8 +20,8 @@ export interface ProcessorContextViewModel {
   } | null;
   scaling: { ratio: number; singleCore: number; multiCore: number } | null;
   coreComposition: ProvenanceFact | null;
-  /** The average dataset applicable to this result generation, if one exists. */
-  referenceGeneration: 'Geekbench 7' | null;
+  /** Whether an average dataset applies to this result generation. */
+  hasReferenceDataset: boolean;
   reference: {
     singleCore: number;
     multiCore: number;
@@ -29,6 +29,7 @@ export interface ProcessorContextViewModel {
     minimumUniqueResults?: number;
   } | null;
   disputedL3Cache: { detail: string; source: { url: string; label: string } } | null;
+  hasReportedMemoryTransferRate: boolean;
   memory: MemoryFact[];
 }
 

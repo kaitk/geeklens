@@ -28,6 +28,11 @@ export function workloadInstructions(
   benchmarkName: string,
   availableInstructions: Set<string>,
 ): WorkloadInstructions {
+  // Captured Geekbench 5 payloads and pages expose no CPU instruction-set
+  // capability string, so there is nothing trustworthy to intersect with its
+  // distinct workload suite. Processor context remains supported separately.
+  if (generation === 5) return NONE;
+
   if (generation === 6) {
     return { instructions: getV6SupportedInstructions(benchmarkName, availableInstructions) };
   }

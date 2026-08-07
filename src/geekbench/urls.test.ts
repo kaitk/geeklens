@@ -3,6 +3,9 @@ import { baselineUrl, comparisonUrl, resultPayloadUrl } from './urls';
 
 describe('Geekbench Browser URLs', () => {
   test('builds the generation-specific endpoints GeekLens depends on', () => {
+    expect(resultPayloadUrl(5, '18449406')).toBe(
+      'https://browser.geekbench.com/v5/cpu/18449406.gb5',
+    );
     expect(resultPayloadUrl(7, '1356')).toBe('https://browser.geekbench.com/v7/cpu/1356.gb6');
     expect(comparisonUrl(6, '18845365')).toBe(
       'https://browser.geekbench.com/v6/cpu/compare/18845365/',
@@ -17,6 +20,7 @@ describe('Geekbench Browser URLs', () => {
   });
 
   test('escapes result IDs taken from the page URL', () => {
+    expect(resultPayloadUrl(5, 'a/b?c')).toBe('https://browser.geekbench.com/v5/cpu/a%2Fb%3Fc.gb5');
     expect(resultPayloadUrl(7, 'a/b?c')).toBe('https://browser.geekbench.com/v7/cpu/a%2Fb%3Fc.gb6');
   });
 });
