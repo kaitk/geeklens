@@ -26,6 +26,22 @@ describe('processorPresentation', () => {
     );
   });
 
+  test('removes NVIDIA GPU and CPU topology when the CPU count is corroborated', () => {
+    expect(
+      processorPresentation('RTX Spark N1X (5120-core GPU, 18-core CPU)', 'nvidia', 18),
+    ).toEqual({ name: 'RTX Spark N1X', status: null });
+    expect(
+      processorPresentation('RTX Spark N1X (5120-core GPU, 18-core CPU)', 'nvidia', 20).name,
+    ).toBe('RTX Spark N1X (5120-core GPU, 18-core CPU)');
+  });
+
+  test('removes the separately badged Zhaoxin vendor', () => {
+    expect(processorPresentation('ZHAOXIN KaiXian KX-U6980S@2.8GHz', 'zhaoxin', 8)).toEqual({
+      name: 'KaiXian KX-U6980S@2.8GHz',
+      status: null,
+    });
+  });
+
   test('extracts engineering-sample status without changing its identifier', () => {
     expect(processorPresentation('AMD Eng Sample: 100-000001535-05', 'amd', 128)).toEqual({
       name: '100-000001535-05',

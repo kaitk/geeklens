@@ -30,6 +30,16 @@ export function processorPresentation(
     name = name.slice(0, coreSuffix.index).trimEnd();
   }
 
+  const nvidiaTopologySuffix =
+    vendor === 'nvidia' ? name.match(/\s+\(\d+-core GPU,\s*(\d+)-core CPU\)$/i) : null;
+  if (
+    nvidiaTopologySuffix &&
+    physicalCores !== null &&
+    Number(nvidiaTopologySuffix[1]) === physicalCores
+  ) {
+    name = name.slice(0, nvidiaTopologySuffix.index).trimEnd();
+  }
+
   return {
     name: name || rawName.trim(),
     status: engineeringSample ? 'engineering-sample' : null,

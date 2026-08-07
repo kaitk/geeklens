@@ -27,6 +27,7 @@ const VENDOR_LABELS: Record<ProcessorVendor, string> = {
   intel: 'Intel',
   qualcomm: 'Qualcomm',
   nvidia: 'NVIDIA',
+  zhaoxin: 'Zhaoxin',
   google: 'Google',
   samsung: 'Samsung',
   mediatek: 'MediaTek',

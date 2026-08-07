@@ -2,7 +2,19 @@
 
 A browser extension that enhances Geekbench CPU benchmark results formatting by annotating tests with instruction set architecture (ISA) information.
 
-![GeekLens Screenshot](screenshots/screenshot4.png)
+![GeekLens Screenshot](screenshots/screenshot1.png)
+
+<details>
+  <summary>More screenshots</summary>
+  <br>
+  <p align="center">
+    <a href="screenshots/screenshot2.png"><img src="screenshots/screenshot2.png" width="49%" alt="GeekLens single-result annotations"></a>
+    <a href="screenshots/screenshot3.png"><img src="screenshots/screenshot3.png" width="49%" alt="GeekLens mobile CPU comparison"></a>
+    <a href="screenshots/screenshot4.png"><img src="screenshots/screenshot4.png" width="49%" alt="GeekLens cross-architecture comparison"></a>
+    <a href="screenshots/screenshot5.png"><img src="screenshots/screenshot5.png" width="49%" alt="GeekLens processor details comparison"></a>
+    <a href="screenshots/screenshot6.png"><img src="screenshots/screenshot6.png" width="49%" alt="GeekLens workload comparison"></a>
+  </p>
+</details>
 
 ## Features
 

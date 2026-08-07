@@ -111,6 +111,11 @@ table.system-information td {
   color: #426b14;
 }
 
+.geeklens-preview-badge-zhaoxin {
+  background: #f5e8e8;
+  color: #883838;
+}
+
 /* Match the prominence of Geekbench's result-page validity label without
  * changing the compact processor-context badges that share this palette. */
 .geeklens-result-validity-badge {

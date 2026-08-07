@@ -100,6 +100,14 @@ describe('extractResultMetadata', () => {
     );
   });
 
+  test('classifies Zhaoxin from its explicit processor name', () => {
+    expect(vendorOf('ZHAOXIN KaiXian KX-U6980S@2.8GHz', 'KaiTian N7 G1d')).toBe('zhaoxin');
+
+    // Centaur's vendor ID also appears on older VIA hardware and is not enough
+    // by itself to identify a processor as Zhaoxin.
+    expect(vendorOf('CentaurHauls Family 7 Model 11 Stepping 1', 'Example System')).toBe('unknown');
+  });
+
   test('extracts DDR4 and DDR5 configuration with generation-aware channel widths', async () => {
     const amd = extractResultMetadata(await fixture('1248'), 7);
     const intel = extractResultMetadata(await fixture('64437'), 7);

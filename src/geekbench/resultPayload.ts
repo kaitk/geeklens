@@ -26,6 +26,7 @@ export type ProcessorVendor =
   | 'intel'
   | 'qualcomm'
   | 'nvidia'
+  | 'zhaoxin'
   | 'google'
   | 'samsung'
   | 'mediatek'
@@ -222,6 +223,7 @@ function vendorFromText(value: string): ProcessorVendor | null {
     return 'qualcomm';
   }
   if (normalized.includes('nvidia')) return 'nvidia';
+  if (normalized.includes('zhaoxin')) return 'zhaoxin';
   if (normalized.includes('google') || normalized.includes('tensor')) return 'google';
   // Mobile vendors are matched on their SoC brands first. Callers pass the
   // processor-name candidates ahead of system/board names, so a Samsung-chassis
