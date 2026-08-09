@@ -1,4 +1,5 @@
 import browser from '../browserApi';
+import { logError } from '../logger';
 
 export interface Settings {
   enabled: boolean;
@@ -47,23 +48,19 @@ export async function loadSettings(): Promise<Settings> {
       return {
         ...defaultSettings,
         ...result.geekLensSettings,
-        // Keep approved-but-unwired features off even if the visual prototype
-        // previously stored them as enabled. Remove an override only when that
-        // feature is backed by a real result-context view model.
       };
     }
-    console.debug('Failed to load geekLensSettings, returning default');
   } catch (e) {
-    console.error('Failed to load settings:', e);
+    logError('Failed to load settings', e);
   }
   return { ...defaultSettings };
 }
 
-// Save settings
-export async function saveSettings(settings: Settings) {
+export async function saveSettings(settings: Settings): Promise<void> {
   try {
     await browser.storage.sync.set({ geekLensSettings: settings });
   } catch (e) {
-    console.error('Failed to save settings:', e);
+    logError('Failed to save settings', e);
+    throw e;
   }
 }

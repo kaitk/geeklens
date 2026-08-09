@@ -8,8 +8,8 @@ const LAST_ACCESSED_INDEX_NAME = 'lastAccessedAt';
 const DB_VERSION = 3;
 const MAX_WRITES_BETWEEN_CLEANUPS = 50;
 
-export const CACHE_HIGH_WATER_ENTRIES = 5_000;
-export const CACHE_LOW_WATER_ENTRIES = 4_000;
+const CACHE_HIGH_WATER_ENTRIES = 5_000;
+const CACHE_LOW_WATER_ENTRIES = 4_000;
 
 export interface CachedResultValidity {
   level: 'valid' | 'warning' | 'invalid';
@@ -20,7 +20,6 @@ export interface CachedResultValidity {
 
 export interface StoredResultRecord {
   cacheKey: string;
-  instructionSet?: string;
   lastAccessedAt: number;
   metadata?: ResultMetadata;
   processorLinks?: CanonicalProcessorLinks;
@@ -28,7 +27,6 @@ export interface StoredResultRecord {
 }
 
 export interface CachedResultContext {
-  instructionSet: string | null;
   metadata: ResultMetadata | null;
   processorLinks: CanonicalProcessorLinks;
   validity?: CachedResultValidity | null;
@@ -36,13 +34,12 @@ export interface CachedResultContext {
 }
 
 export interface ResultContextUpdate {
-  instructionSet?: string | null;
   metadata?: ResultMetadata | null;
   processorLinks?: CanonicalProcessorLinks;
   validity?: CachedResultValidity | null;
 }
 
-export interface ResultsCacheOptions {
+interface ResultsCacheOptions {
   databaseName?: string;
   highWaterEntries?: number;
   lowWaterEntries?: number;
@@ -50,7 +47,6 @@ export interface ResultsCacheOptions {
 
 export function normalizeStoredResultRecord(record: StoredResultRecord): CachedResultContext {
   return {
-    instructionSet: record.instructionSet || record.metadata?.instructionSets?.value || null,
     metadata: record.metadata ?? null,
     processorLinks: mergeProcessorLinks(null, record.processorLinks),
     validity: record.validity ?? null,
@@ -66,14 +62,9 @@ export function mergeStoredResultRecord(
 ): StoredResultRecord {
   const metadata =
     update.metadata === undefined ? existing?.metadata : (update.metadata ?? undefined);
-  const instructionSet =
-    update.instructionSet === undefined
-      ? (existing?.instructionSet ?? metadata?.instructionSets?.value)
-      : (update.instructionSet ?? undefined);
 
   return {
     cacheKey,
-    instructionSet,
     metadata,
     processorLinks: mergeProcessorLinks(existing?.processorLinks, update.processorLinks),
     validity: update.validity === undefined ? existing?.validity : (update.validity ?? undefined),
@@ -311,21 +302,6 @@ export class ResultsCache {
     };
 
     await done;
-  }
-
-  async storeInstructionSet(
-    generation: GeekbenchGeneration,
-    resultId: string,
-    instructionSet: string,
-  ): Promise<void> {
-    await this.storeResultContext(generation, resultId, { instructionSet });
-  }
-
-  async getInstructionSet(
-    generation: GeekbenchGeneration,
-    resultId: string,
-  ): Promise<string | null> {
-    return (await this.getResultContext(generation, resultId))?.instructionSet ?? null;
   }
 }
 

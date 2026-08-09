@@ -41,16 +41,16 @@ Reported, computed and published facts are kept distinct. Published processor an
 
 1. Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/geeklens/mkhncioijfcdjhaanpfodcaloniodabf)
 2. Or install manually:
-   - Download this repository
+   - Download this repository, run `bun install`, then run `bun run build:chrome`
    - Go to `chrome://extensions/`
    - Enable "Developer mode"
-   - Click "Load unpacked" and select the repository folder
+   - Click "Load unpacked" and select the `dist/chrome` directory
 
 ### Edge
 
 1. Install from [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/geeklens/llppfcakgcedojgfjfemijfekjnpekma)
 2. Or install manually:
-   - Download this repository
+   - Download this repository, run `bun install`, then run `bun run build:chrome`
    - Go to `edge://extensions/`
    - Enable "Developer mode"
    - Click "Load unpacked" and select the `dist/chrome` directory
@@ -59,10 +59,10 @@ Reported, computed and published facts are kept distinct. Published processor an
 
 1. Install from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/geeklens/)
 2. Or install manually:
-   - Download this repository
+   - Download this repository, run `bun install`, then run `bun run build:firefox`
    - Go to `about:debugging#/runtime/this-firefox`
    - Click "Load Temporary Add-on"
-   - Select any file in the repository folder
+   - Select the `manifest.json` file in the `dist/firefox` directory
 
 ## Usage
 

@@ -30,12 +30,12 @@
 
       <div class="instruction-grid">
         {#each Object.entries(category.instructions) as [key, instruction]}
+          {@const categoryStyle = getCategoryStyle(instruction.category)}
           <div class="instruction-card">
             <div class="instruction-header">
               <span
                 class="instruction-badge"
-                style="background-color: {getCategoryStyle(instruction.category)
-                  .backgroundColor}; color: {getCategoryStyle(instruction.category).color};"
+                style="background-color: {categoryStyle.backgroundColor}; color: {categoryStyle.color};"
               >
                 {key}
               </span>

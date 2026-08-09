@@ -64,9 +64,7 @@ uses. Apple is the only range this applies to today: its older posts say
 current pages call performance and efficiency cores, and reproducing each
 phrasing made rows differ where the silicon does not. `super` survives that
 settling because it marks a real design boundary — see `APPLE_CORE_TIERS` in the
-catalogue for what that costs, and
-[tasks/apple-qualcomm-core-compositions.md](tasks/apple-qualcomm-core-compositions.md)
-for the decisions taken when the Apple and Qualcomm ranges were added.
+catalogue and its tests for the generation-specific boundary.
 
 Group counts are nominal: they bound a reported cluster rather than equalling it,
 because a result with cores disabled in firmware reports fewer than the part

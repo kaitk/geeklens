@@ -6,7 +6,7 @@
  * imply the extension invented data it only reformatted.
  *
  * A value GeekLens disputes but leaves alone is neither, and is not marked this
- * way at all: it carries the warning affordance in `processorContextUi` instead.
+ * way at all: it carries the warning affordance in `cacheDispute.ts` instead.
  */
 export type RowMarkerKind = 'added' | 'changed';
 

@@ -2,23 +2,35 @@
 
 GeekLens supplements Geekbench 5, 6, and 7 result pages with processor context
 parsed from the authenticated result payload (`.gb5` for Geekbench 5 and `.gb6`
-for Geekbench 6 and 7). Geekbench 6 also retains its
-rendered instruction-set row as a signed-out fallback; payload-only processor
-context is unavailable without an authenticated payload.
+for Geekbench 6 and 7). Geekbench 6.4 and newer single-result pages also render
+an instruction-set row, which is the sole public ISA fallback. Older Geekbench 6
+results, Geekbench 6 comparison pages, and captured Geekbench 5 and 7 HTML do not
+expose that capability string. Payload-only processor context is unavailable
+without an authenticated payload.
 
 Geekbench payload metric IDs, result-page links, processor pages, and catalogue
 tables are undocumented external interfaces. Keep their assumptions explicit,
 parse them defensively, and prefer missing output to a plausible but unsupported
 hardware claim.
 
+Treat rendered ISA data as page-local enhancement data: read it directly when it
+already exists, but do not turn HTML fetching into a second result-data API.
+Processor context is already payload-backed across all supported generations,
+and comparisons should use authenticated payload metadata or an existing cache
+entry for both processor context and ISA. Browser-side result validity remains a
+separate HTML-only source because the payload can disagree with the server's
+later validity decision.
+
 ## Runtime boundary
 
 `src/geekbench/resultPayload.ts` converts a payload into typed, normalized
-metadata. Page adapters cache that metadata with the compatibility instruction
-string and any explicit processor/Mac links, then pass the cached context through
-`src/content/processorContextViewModel.ts`. The processor-context renderers consume
-the neutral contract in `src/content/processorContext/model.ts`; they do not
-parse pages, fetch payloads, or resolve identities.
+metadata. Page adapters cache that metadata and any explicit processor/Mac links,
+then pass the cached context through
+`src/content/processorContextViewModel.ts`. Payload ISA remains inside
+`metadata.instructionSets`; the rendered Geekbench 6 single-result value stays
+local to that adapter and is not cached. The processor-context renderers consume
+the neutral contract in `src/content/processorContext/model.ts`; they do not parse
+pages, fetch payloads, or resolve identities.
 
 The shared Geekbench 5, 6, and 7 presentation includes:
 
@@ -39,8 +51,9 @@ as valid.
 All processor-context controls are independently toggleable and default on.
 Missing or malformed data removes the affected single-result detail; comparison
 pages preserve the native Geekbench value or show that the affected side is
-unavailable. Existing ISA annotations continue to use the instruction string
-from the same cached context.
+unavailable. Comparisons derive ISA annotations only from cached or freshly
+fetched payload metadata. Geekbench 6 single-result annotations use the rendered
+row, while Geekbench 7 single-result annotations use payload metadata.
 
 ## Payload rules
 
@@ -55,7 +68,7 @@ The observed fields currently used are:
   desktop memory configuration;
 - `processor_frequency.frequencies` for frequency samples;
 - `score` and `multicore_score` for submitted scores; and
-- metric `20000` for the compatibility instruction-set string.
+- metric `20000` for the instruction-set capability string.
 
 Frequency parsing ignores non-finite and non-positive samples and treats an
 empty set as unavailable. Sample count is variable. Cluster parsing rejects
@@ -97,6 +110,11 @@ Performance-/Efficient-cores) instead of normalizing vendors into a fabricated
 taxonomy. The matcher assigns those names to reported topology clusters only when
 there is exactly one feasible cluster-to-group assignment. Ambiguous, homogeneous,
 and incomplete shapes remain unnamed.
+
+Reviewed L3 disputes are also keyed by exact catalogue identity. GeekLens marks
+the native value for affected asymmetric multi-die X3D parts but does not replace
+it or infer a die layout. The warning disappears if Geekbench stops rendering a
+multiplied per-die value, so an upstream correction cannot leave a stale claim.
 
 Geekbench score references are generation-specific mutable averages of
 user-submitted results, not official processor scores. Exact generated Mac
@@ -155,7 +173,7 @@ Retain explicitly observed processor and Mac links that are absent from it.
 
 - Cache metrics `17`–`24` are not parsed or displayed. ARM captures and
   asymmetric dual-die X3D processors make generic interpretation unsafe; see
-  [Cache metadata](tasks/cache-metadata.md).
+  [Cache metadata](tasks/cache-metadata.md) for the remaining open work.
 - GPU name metric `34` is outside CPU benchmark context.
 - Metrics `66`–`69` resemble temperature/frequency extrema on some x86 results
   but have no confirmed schema.

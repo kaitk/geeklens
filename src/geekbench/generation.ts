@@ -30,20 +30,3 @@ export function isComparisonPath(pathname: string): boolean {
 export function resultCacheKey(generation: GeekbenchGeneration, resultId: string): string {
   return `v${generation}:cpu:${resultId}`;
 }
-
-/**
- * Whether a result's reporting Geekbench version records instruction sets at
- * all. Geekbench started reporting them in 6.4, so older results are skipped
- * rather than fetched. Versions are read from the rendered comparison table,
- * so an unparseable value is treated as unsupported.
- */
-export function versionSupportsInstructionSets(version: string | null): boolean {
-  if (!version) return false;
-
-  // Extract version number (e.g., "Geekbench 6.4.0" -> "6.4.0")
-  const match = version.match(/(\d+\.\d+\.\d+)/);
-  if (!match) return false;
-
-  const [major, minor] = match[1].split('.').map(Number);
-  return major > 6 || (major === 6 && minor >= 4);
-}

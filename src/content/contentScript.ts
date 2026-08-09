@@ -7,11 +7,9 @@ import { annotateGeekbenchResults } from './singleResultPage';
 export async function annotateCurrentPage() {
   const settings = await loadSettings();
   if (!settings.enabled) return;
-
-  if (isComparisonPath(window.location.pathname)) {
-    return annotateGeekbenchComparisonPage();
-  }
-  return annotateGeekbenchResults();
+  return isComparisonPath(window.location.pathname)
+    ? annotateGeekbenchComparisonPage(settings)
+    : annotateGeekbenchResults(settings);
 }
 
 if (document.readyState === 'loading') {

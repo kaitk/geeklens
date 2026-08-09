@@ -16,6 +16,7 @@ const rootDirectory = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distPath = join(rootDirectory, 'dist/chrome');
 const startUrls = [
   'https://browser.geekbench.com/v5/cpu/18449406',
+  'https://browser.geekbench.com/v6/cpu/16897404',
   'https://browser.geekbench.com/v7/cpu/1248',
 ];
 
