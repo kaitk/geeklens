@@ -16,8 +16,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 16,
     },
-    singleCore: 3333,
-    multiCore: 21768,
   },
   {
     key: 'mac-mac-mini-2024-14c-cpu',
@@ -32,8 +30,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 14,
       gpuCores: 20,
     },
-    singleCore: 3309,
-    multiCore: 24599,
   },
   {
     key: 'mac-mac-mini-2024-10c-cpu',
@@ -48,8 +44,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 3274,
-    multiCore: 15288,
   },
   {
     key: 'mac-imac-24-inch-2024-10c-cpu',
@@ -64,8 +58,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 3243,
-    multiCore: 15453,
   },
   {
     key: 'mac-imac-24-inch-2024-8c-cpu',
@@ -80,8 +72,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 8,
     },
-    singleCore: 3135,
-    multiCore: 12917,
   },
   {
     key: 'mac-imac-24-inch-2023-8c-gpu',
@@ -96,8 +86,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 8,
     },
-    singleCore: 2767,
-    multiCore: 12038,
   },
   {
     key: 'mac-imac-24-inch-2023-10c-gpu',
@@ -112,8 +100,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 10,
     },
-    singleCore: 2767,
-    multiCore: 12038,
   },
   {
     key: 'mac-mac-mini-2023-10c-cpu',
@@ -128,8 +114,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 16,
     },
-    singleCore: 2399,
-    multiCore: 13590,
   },
   {
     key: 'mac-mac-mini-2023-12c-cpu',
@@ -144,8 +128,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 19,
     },
-    singleCore: 2395,
-    multiCore: 15943,
   },
   {
     key: 'mac-mac-mini-2023-8c-cpu',
@@ -160,8 +142,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 10,
     },
-    singleCore: 2386,
-    multiCore: 9710,
   },
   {
     key: 'mac-mac-studio-apple-m1-ultra',
@@ -175,8 +155,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 20,
     },
-    singleCore: 2227,
-    multiCore: 23720,
   },
   {
     key: 'mac-mac-studio-apple-m1-max',
@@ -190,8 +168,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 10,
     },
-    singleCore: 2220,
-    multiCore: 14159,
   },
   {
     key: 'mac-mac-mini-late-2020',
@@ -205,8 +181,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2195,
-    multiCore: 8697,
   },
   {
     key: 'mac-imac-24-inch-mid-2021',
@@ -220,8 +194,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2175,
-    multiCore: 8304,
   },
   {
     key: 'mac-imac-24-inch-mid-2021-apple-m1-3-2-ghz-8-cores',
@@ -235,8 +207,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2175,
-    multiCore: 8304,
   },
   {
     key: 'mac-macbook-pro-14-inch-2025',
@@ -251,8 +221,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 3625,
-    multiCore: 17917,
   },
   {
     key: 'mac-macbook-pro-16-inch-2024-14c-cpu-32c-gpu',
@@ -267,8 +235,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 14,
       gpuCores: 32,
     },
-    singleCore: 3414,
-    multiCore: 25590,
   },
   {
     key: 'mac-macbook-pro-16-inch-2024-16c-cpu',
@@ -283,8 +249,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 16,
       gpuCores: 40,
     },
-    singleCore: 3389,
-    multiCore: 28322,
   },
   {
     key: 'mac-macbook-pro-14-inch-2024-16c-cpu',
@@ -299,8 +263,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 16,
       gpuCores: 40,
     },
-    singleCore: 3355,
-    multiCore: 28816,
   },
   {
     key: 'mac-macbook-pro-14-inch-2024-12c-cpu',
@@ -315,8 +277,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 16,
     },
-    singleCore: 3335,
-    multiCore: 21787,
   },
   {
     key: 'mac-macbook-pro-14-inch-2024-14c-cpu-32c-gpu',
@@ -331,8 +291,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 14,
       gpuCores: 32,
     },
-    singleCore: 3323,
-    multiCore: 25166,
   },
   {
     key: 'mac-macbook-pro-14-inch-2024-14c-cpu-20c-gpu',
@@ -347,8 +305,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 14,
       gpuCores: 20,
     },
-    singleCore: 3318,
-    multiCore: 24404,
   },
   {
     key: 'mac-macbook-pro-14-inch-2024-10c-cpu',
@@ -363,8 +319,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 3237,
-    multiCore: 15149,
   },
   {
     key: 'mac-macbook-air-15-inch-2025',
@@ -379,8 +333,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 3206,
-    multiCore: 15049,
   },
   {
     key: 'mac-macbook-air-13-inch-2025-10c-cpu-8c-gpu',
@@ -395,8 +347,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 8,
     },
-    singleCore: 3198,
-    multiCore: 15012,
   },
   {
     key: 'mac-macbook-air-13-inch-2025-10c-cpu-10c-gpu',
@@ -411,8 +361,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 3198,
-    multiCore: 15012,
   },
   {
     key: 'mac-macbook-pro-14-inch-nov-2023-14c-cpu-30c-gpu',
@@ -427,8 +375,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 14,
       gpuCores: 30,
     },
-    singleCore: 2841,
-    multiCore: 22387,
   },
   {
     key: 'mac-macbook-pro-14-inch-nov-2023-16c-cpu-40c-gpu',
@@ -443,8 +389,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 16,
       gpuCores: 40,
     },
-    singleCore: 2824,
-    multiCore: 24115,
   },
   {
     key: 'mac-macbook-pro-16-inch-nov-2023-14c-cpu-30c-gpu',
@@ -459,8 +403,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 14,
       gpuCores: 30,
     },
-    singleCore: 2815,
-    multiCore: 21882,
   },
   {
     key: 'mac-macbook-pro-16-inch-nov-2023-16c-cpu-40c-gpu',
@@ -475,8 +417,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 16,
       gpuCores: 40,
     },
-    singleCore: 2810,
-    multiCore: 24676,
   },
   {
     key: 'mac-macbook-pro-16-inch-nov-2023-12c-cpu-18c-gpu',
@@ -491,8 +431,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 18,
     },
-    singleCore: 2803,
-    multiCore: 16758,
   },
   {
     key: 'mac-macbook-pro-14-inch-nov-2023-12c-cpu-18c-gpu',
@@ -507,8 +445,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 18,
     },
-    singleCore: 2777,
-    multiCore: 16463,
   },
   {
     key: 'mac-macbook-pro-14-inch-nov-2023-11c-cpu-14c-gpu',
@@ -523,8 +459,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 11,
       gpuCores: 14,
     },
-    singleCore: 2762,
-    multiCore: 14929,
   },
   {
     key: 'mac-macbook-pro-14-inch-nov-2023-8c-cpu-10c-gpu',
@@ -539,8 +473,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 10,
     },
-    singleCore: 2734,
-    multiCore: 11277,
   },
   {
     key: 'mac-macbook-pro-16-inch-2023-m2-max-38c-gpu',
@@ -555,8 +487,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 38,
     },
-    singleCore: 2479,
-    multiCore: 16990,
   },
   {
     key: 'mac-macbook-pro-16-inch-2023-m2-max-30c-gpu',
@@ -571,8 +501,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 30,
     },
-    singleCore: 2479,
-    multiCore: 16990,
   },
   {
     key: 'mac-macbook-pro-16-inch-2023-m2-pro',
@@ -587,8 +515,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 19,
     },
-    singleCore: 2435,
-    multiCore: 16766,
   },
   {
     key: 'mac-macbook-pro-14-inch-2023-m2-pro-12c-cpu',
@@ -603,8 +529,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 12,
       gpuCores: 19,
     },
-    singleCore: 2408,
-    multiCore: 16609,
   },
   {
     key: 'mac-macbook-pro-14-inch-2023-m2-pro-10c-cpu',
@@ -619,8 +543,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 16,
     },
-    singleCore: 2387,
-    multiCore: 13625,
   },
   {
     key: 'mac-macbook-pro-13-inch-2022',
@@ -634,8 +556,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2352,
-    multiCore: 9663,
   },
   {
     key: 'mac-macbook-air-2022',
@@ -649,8 +569,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2351,
-    multiCore: 9702,
   },
   {
     key: 'mac-mac14-15',
@@ -665,8 +583,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 10,
     },
-    singleCore: 2343,
-    multiCore: 9564,
   },
   {
     key: 'mac-macbook-pro-16-inch-2021-apple-m1-pro',
@@ -681,8 +597,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 10,
       gpuCores: 10,
     },
-    singleCore: 2205,
-    multiCore: 14032,
   },
   {
     key: 'mac-macbook-pro-16-inch-2021-apple-m1-max',
@@ -696,8 +610,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 10,
     },
-    singleCore: 2205,
-    multiCore: 14032,
   },
   {
     key: 'mac-macbook-pro-14-inch-2021-apple-m1-pro-10-core-cpu',
@@ -711,8 +623,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 10,
     },
-    singleCore: 2196,
-    multiCore: 13907,
   },
   {
     key: 'mac-macbook-pro-14-inch-2021-apple-m1-max',
@@ -726,8 +636,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 10,
     },
-    singleCore: 2196,
-    multiCore: 13907,
   },
   {
     key: 'mac-macbook-pro-14-inch-2021-apple-m1-pro-8-core-cpu',
@@ -741,8 +649,6 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2188,
-    multiCore: 11201,
   },
   {
     key: 'mac-macbook-air-late-2020',
@@ -757,8 +663,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 8,
     },
-    singleCore: 2168,
-    multiCore: 8168,
   },
   {
     key: 'mac-macbook-air-late-2020-7c-gpu',
@@ -773,8 +677,6 @@ export const GENERATED_MAC_IDENTITIES = [
       physicalCores: 8,
       gpuCores: 7,
     },
-    singleCore: 2168,
-    multiCore: 8168,
   },
   {
     key: 'mac-macbook-pro-13-inch-late-2020',
@@ -788,7 +690,5 @@ export const GENERATED_MAC_IDENTITIES = [
     requiredConfiguration: {
       physicalCores: 8,
     },
-    singleCore: 2167,
-    multiCore: 8346,
   },
 ] as const;

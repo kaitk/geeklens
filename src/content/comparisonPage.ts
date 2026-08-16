@@ -17,6 +17,7 @@ import { extractIndividualInstructions, type Instruction } from '../isa/instruct
 import { workloadInstructions } from '../isa/workloadInstructions';
 import { debugLog } from '../logger';
 import type { Settings } from '../settings/settings';
+import { loadRuntimeScoreReference } from '../scoreReferences/refresh';
 import {
   annotationErrorStatus,
   completedAnnotationStatus,
@@ -51,6 +52,7 @@ interface ComparisonPageDependencies {
   mountSystemInstructionSets: typeof mountSystemInstructionSets;
   mountWorkloadBadges: typeof mountWorkloadBadges;
   withClearedBaseline: typeof withClearedComparisonBaseline;
+  loadScoreReference?: typeof loadRuntimeScoreReference;
 }
 
 interface ComparisonLane {
@@ -83,6 +85,7 @@ const comparisonPageDependencies: ComparisonPageDependencies = {
   mountSystemInstructionSets,
   mountWorkloadBadges,
   withClearedBaseline: withClearedComparisonBaseline,
+  loadScoreReference: loadRuntimeScoreReference,
 };
 
 async function loadComparisonLaneMetadata(
@@ -258,8 +261,14 @@ export async function annotateGeekbenchComparisonPage(
       combinePayloadValidity(validity[0], primaryContext),
       combinePayloadValidity(validity[1], baselineContext),
     ]);
-    const primaryProcessor = buildProcessorContextViewModel(primaryContext);
-    const baselineProcessor = buildProcessorContextViewModel(baselineContext);
+    const runtimeReferences = settings.showReferenceComparison
+      ? await Promise.all([
+          dependencies.loadScoreReference?.(primaryContext) ?? null,
+          dependencies.loadScoreReference?.(baselineContext) ?? null,
+        ])
+      : ([null, null] as const);
+    const primaryProcessor = buildProcessorContextViewModel(primaryContext, runtimeReferences[0]);
+    const baselineProcessor = buildProcessorContextViewModel(baselineContext, runtimeReferences[1]);
     if (primaryProcessor || baselineProcessor) {
       renderComparisonProcessorContext([primaryProcessor, baselineProcessor], settings);
     }

@@ -8,17 +8,41 @@
 // with that while vite only builds.
 
 import { spawn, type ChildProcess } from 'child_process';
-import { statSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const rootDirectory = join(dirname(fileURLToPath(import.meta.url)), '..');
 const distPath = join(rootDirectory, 'dist/chrome');
-const startUrls = [
-  'https://browser.geekbench.com/v5/cpu/18449406',
-  'https://browser.geekbench.com/v6/cpu/16897404',
-  'https://browser.geekbench.com/v7/cpu/1248',
-];
+function developmentLoginConfigured(): boolean {
+  try {
+    const environment = readFileSync(join(rootDirectory, '.env.local'), 'utf8');
+    const values = new Map(
+      environment
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith('#') && line.includes('='))
+        .map((line) => {
+          const separator = line.indexOf('=');
+          return [line.slice(0, separator).trim(), line.slice(separator + 1).trim()];
+        }),
+    );
+    return Boolean(
+      values.get('GEEKLENS_DEV_GEEKBENCH_USERNAME') &&
+      values.get('GEEKLENS_DEV_GEEKBENCH_PASSWORD'),
+    );
+  } catch {
+    return false;
+  }
+}
+
+const startUrls = developmentLoginConfigured()
+  ? ['https://browser.geekbench.com/session/new', 'https://browser.geekbench.com/v7/cpu/1248']
+  : [
+      'https://browser.geekbench.com/v5/cpu/18449406',
+      'https://browser.geekbench.com/v6/cpu/16897404',
+      'https://browser.geekbench.com/v7/cpu/1248',
+    ];
 
 const children: ChildProcess[] = [];
 

@@ -5,6 +5,7 @@ import type {
   ResultMetadata,
 } from '../geekbench/resultPayload';
 import type { ProcessorContextViewModel } from './processorContext/model';
+import type { StoredScoreReference } from '../scoreReferences/ScoreReferenceCache';
 import { processorPresentation } from './processorPresentation';
 import { resolveProcessorIdentity } from '../catalogue/processorIdentity';
 import type { ProcessorIdentityMatch } from '../catalogue/processorIdentity';
@@ -201,17 +202,20 @@ function scoreScaling(metadata: ResultMetadata): ProcessorContextViewModel['scal
 function reference(
   metadata: ResultMetadata,
   identity: ProcessorIdentityMatch,
+  runtimeReference: StoredScoreReference | null,
 ): ProcessorContextViewModel['reference'] {
   if (identity.kind === 'unmatched' || metadata.generation !== 7) return null;
-  const score = identity.entry.scoreReferences?.find((candidate) => candidate.generation === 7);
-  return score
-    ? {
-        singleCore: score.singleCore,
-        multiCore: score.multiCore,
-        generation: 'Geekbench 7',
-        minimumUniqueResults: score.minimumUniqueResults,
-      }
-    : null;
+  if (runtimeReference?.catalogueKey === identity.catalogueKey) {
+    return {
+      singleCore: runtimeReference.singleCore,
+      multiCore: runtimeReference.multiCore,
+      generation: 'Geekbench 7',
+      minimumUniqueResults: runtimeReference.minimumUniqueResults,
+      sourceUrl: runtimeReference.sourceUrl,
+      fetchedAt: runtimeReference.fetchedAt,
+    };
+  }
+  return null;
 }
 
 function formatCapacity(bytes: number): string {
@@ -349,6 +353,7 @@ function memory(
 
 export function buildProcessorContextViewModel(
   context: CachedResultContext | null,
+  runtimeReference: StoredScoreReference | null = null,
 ): ProcessorContextViewModel | null {
   if (!context?.metadata) return null;
 
@@ -374,7 +379,7 @@ export function buildProcessorContextViewModel(
     coreComposition: coreComposition(identity),
     scaling: scoreScaling(context.metadata),
     hasReferenceDataset: context.metadata.generation === 7,
-    reference: reference(context.metadata, identity),
+    reference: reference(context.metadata, identity, runtimeReference),
     disputedL3Cache: disputedL3Cache(identity),
     hasReportedMemoryTransferRate: context.metadata.memory.transferRateMTs !== null,
     memory: memory(context.metadata, identity),

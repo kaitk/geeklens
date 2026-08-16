@@ -90,10 +90,14 @@ evidence of LPDDR because desktop DDR5 exposes the same topology.
 
 ## Processor catalogue and identity
 
-The extension bundles a curated catalogue; it never fetches processor, Mac, or
-score-reference pages at runtime. Generated snapshots provide broad Geekbench
-processor/Mac identities, while reviewed overlays provide aliases, hardware
-facts, system-specific corrections, and published core compositions.
+The extension bundles a curated identity catalogue. Generated snapshots provide
+broad Geekbench processor and Mac identities. Reviewed overlays provide aliases,
+hardware facts, system-specific corrections, and published core compositions.
+
+When Reference averages is enabled, GeekLens requests Geekbench 7 chart pages
+from `browser.geekbench.com`. A strict shared parser accepts only complete score
+pairs linked by one canonical processor or Mac path. The runtime snapshot can
+change scores only. It cannot change identity or reviewed hardware facts.
 
 Identity precedence is exact Mac path, exact processor path, then reviewed
 alias. Configuration constraints must match, ambiguous aliases remain
@@ -102,9 +106,9 @@ matches may coexist, but a family match must not inherit chassis-specific facts.
 Only an exact, generation-compatible identity exposes catalogue links or score
 references.
 
-Hardware facts and Geekbench score averages are separate provenance blocks even
-when they belong to one identity. Every external fact records its source URL,
-publisher, and retrieval date. Core-type composition is also published data:
+Hardware facts and runtime Geekbench score averages remain separate provenance
+blocks even when they belong to one identity. Every reviewed external fact
+records its source URL, publisher, and retrieval date. Core-type composition is also published data:
 retain the source's terminology (for example, Zen 5/Zen 5c or Intel
 Performance-/Efficient-cores) instead of normalizing vendors into a fabricated
 taxonomy. The matcher assigns those names to reported topology clusters only when
@@ -117,8 +121,10 @@ it or infer a die layout. The warning disappears if Geekbench stops rendering a
 multiplied per-die value, so an upstream correction cannot leave a stale claim.
 
 Geekbench score references are generation-specific mutable averages of
-user-submitted results, not official processor scores. Exact generated Mac
-identities carry averages from the Geekbench 7 Mac tables.
+user-submitted results, not official processor scores. GeekLens selects a fresh
+runtime value and then a usable obsolete runtime value. It shows no average when
+neither exists. Runtime provenance gives the source URL and fetch date. Failed
+requests retain usable cached data and do not affect other annotations.
 
 ## Fixtures and provenance
 
@@ -149,9 +155,9 @@ Run `bun run catalogue:generate:processor` or
 offline regeneration, either generator still accepts an input HTML path and an
 optional output path as its first two arguments.
 
-The processor generator replaces generated AMD, Intel, and Qualcomm identities
-and Geekbench 7 averages. The Mac generator replaces identities, configuration
-constraints, and Geekbench 7 averages.
+The processor generator replaces generated AMD, Intel, and Qualcomm identities.
+The Mac generator replaces identities and configuration constraints. Neither
+generator stores averages in the generated catalogue.
 
 After regeneration:
 

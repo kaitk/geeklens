@@ -33,6 +33,8 @@ export interface ProcessorContextViewModel {
     multiCore: number;
     generation: 'Geekbench 7';
     minimumUniqueResults?: number;
+    sourceUrl?: string;
+    fetchedAt?: number;
   } | null;
   disputedL3Cache: { detail: string; source: { url: string; label: string } } | null;
   hasReportedMemoryTransferRate: boolean;

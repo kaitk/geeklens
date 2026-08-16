@@ -39,8 +39,8 @@ and adds an Instruction Sets row to the rendered system information.
 All three generations share payload-backed processor context when the visitor
 is signed in. Geekbench 6 retains its rendered instruction-set row as a public
 fallback, so signed-out visitors still receive ISA annotations but not payload-
-only processor context. Generation-matched Browser averages remain available
-only where the bundled catalogue carries a reference for that generation.
+only processor context. Geekbench 7 averages come only from the user-local
+runtime cache. First use and unavailable refreshes show no average.
 
 The rendered Geekbench 6 row is a direct, page-local opportunity, not a general
 HTML data API. Comparison pages never fetch result HTML for instruction sets or
@@ -148,6 +148,13 @@ best-effort basis. Once the cache exceeds 5,000 results, opportunistic backgroun
 cleanup removes least-recently-used entries until 4,000 remain. Cache writes
 never prevent otherwise successful page annotation, including when an upgrade is
 blocked by a tab using an older schema.
+
+`GeekLensScoreReferences` is a separate disposable IndexedDB database. Its
+`scoreReferences` store holds atomic score pairs by generation and catalogue key.
+Its `sourceAttempts` store coordinates requests across tabs: a successful source
+refresh is eligible again after 24 hours, while a failed refresh is eligible
+again after five minutes. References remain fresh for 24 hours and usable for 30
+days. Result-cache LRU removal cannot remove them.
 
 Canonical-link parsing lives in `src/geekbench/processorLinks.ts`. It accepts
 only same-origin `/processors/<slug>` and `/macs/<slug>` paths from system tables.

@@ -1,4 +1,5 @@
 import { parseHTML } from 'linkedom';
+import { parseScoreReferenceDocument } from '../src/geekbench/scoreReferenceParser';
 
 const DEFAULT_SOURCES = [
   'https://browser.geekbench.com/macs/mac-mini-2024-12c-cpu',
@@ -22,55 +23,45 @@ for (const source of sources) {
   const html = await readSource(source);
   const document = parseHTML(html).document;
 
-  const pageText = document.body.textContent?.replaceAll(/\s+/g, ' ') ?? '';
-  if (!pageText.includes('Geekbench 7 CPU scores are calibrated')) {
-    throw new Error(`Mac catalogue source is not in the Geekbench 7 chart context: ${source}`);
-  }
+  const scores = parseScoreReferenceDocument(document as unknown as Document, 'mac-family');
+  if (!scores)
+    throw new Error(`Mac catalogue source is not a valid Geekbench 7 snapshot: ${source}`);
 
-  for (const [tableId, scoreKey] of [
-    ['family-64-single', 'singleCore'],
-    ['family-64-multi', 'multiCore'],
-  ] as const) {
-    for (const row of document.querySelectorAll(`#${tableId} tbody tr`)) {
-      const link = row.querySelector<HTMLAnchorElement>('td.name a[href*="/macs/"]');
-      const description = row
-        .querySelector('.description')
-        ?.textContent?.trim()
-        .replaceAll(/\s+/g, ' ');
-      if (!link || !description) continue;
+  for (const score of scores) {
+    const row = Array.from(document.querySelectorAll('#family-64-single tbody tr')).find(
+      (candidate) => {
+        const href = candidate.querySelector('td.name a')?.getAttribute('href');
+        return href ? new URL(href, source).pathname.replace(/\/$/, '') === score.path : false;
+      },
+    );
+    const link = row?.querySelector<HTMLAnchorElement>('td.name a[href*="/macs/"]');
+    const description = row
+      ?.querySelector('.description')
+      ?.textContent?.trim()
+      .replaceAll(/\s+/g, ' ');
+    const key = score.path.split('/').at(-1);
+    const deviceName = link?.textContent?.trim().replaceAll(/\s+/g, ' ');
+    const processor = description?.match(/^(Apple .+?)\s+@/i)?.[1];
+    const cpuCores = Number(
+      description?.match(/\((\d+) CPU cores?/)?.[1] ?? description?.match(/\((\d+) cores?/)?.[1],
+    );
+    const gpuCores = Number(description?.match(/(\d+) GPU cores?/)?.[1]);
+    if (!key || !deviceName || !processor || !Number.isInteger(cpuCores)) continue;
 
-      const url = new URL(link.href, source);
-      const path = url.pathname.replace(/\/$/, '');
-      const key = path.split('/').at(-1);
-      const deviceName = link.textContent?.trim().replaceAll(/\s+/g, ' ');
-      const processor = description.match(/^(Apple .+?)\s+@/i)?.[1];
-      const cpuCores = Number(
-        description.match(/\((\d+) CPU cores?/)?.[1] ?? description.match(/\((\d+) cores?/)?.[1],
-      );
-      const gpuCores = Number(description.match(/(\d+) GPU cores?/)?.[1]);
-      if (!key || !deviceName || !processor || !Number.isInteger(cpuCores)) continue;
-
-      const score = Number(row.querySelector('td.score')?.textContent?.trim());
-      if (!Number.isFinite(score) || score <= 0) continue;
-
-      entries.set(key, {
-        ...(entries.get(key) ?? {
-          key: `mac-${key}`,
-          displayName: `${deviceName} — ${processor}`,
-          vendor: 'apple',
-          architecture: 'arm',
-          pageUrl: `https://browser.geekbench.com${path}`,
-          processorPaths: [],
-          macPaths: [path],
-          aliases: [],
-          requiredConfiguration: {
-            physicalCores: cpuCores,
-            ...(Number.isInteger(gpuCores) ? { gpuCores } : {}),
-          },
-        }),
-        [scoreKey]: score,
-      });
-    }
+    entries.set(key, {
+      key: `mac-${key}`,
+      displayName: `${deviceName} — ${processor}`,
+      vendor: 'apple',
+      architecture: 'arm',
+      pageUrl: `https://browser.geekbench.com${score.path}`,
+      processorPaths: [],
+      macPaths: [score.path],
+      aliases: [],
+      requiredConfiguration: {
+        physicalCores: cpuCores,
+        ...(Number.isInteger(gpuCores) ? { gpuCores } : {}),
+      },
+    });
   }
 }
 

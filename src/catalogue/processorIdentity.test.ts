@@ -47,7 +47,6 @@ describe('resolveProcessorIdentity', () => {
       displayName: 'Mac mini (2024) — Apple M4 Pro',
       macPaths: ['/macs/mac-mini-2024-12c-cpu'],
       requiredConfiguration: { physicalCores: 12, gpuCores: 16 },
-      scoreReferences: [{ generation: 7, singleCore: 3333, multiCore: 21768 }],
     });
     expect(
       PROCESSOR_CATALOGUE.find((entry) => entry.key === 'mac-macbook-pro-14-inch-2024-12c-cpu'),

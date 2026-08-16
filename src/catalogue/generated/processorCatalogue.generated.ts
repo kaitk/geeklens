@@ -10,8 +10,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-9950x3d',
     processorPaths: ['/processors/amd-ryzen-9-9950x3d'],
-    singleCore: 3079,
-    multiCore: 26994,
   },
   {
     key: 'amd-ryzen-9-9950x',
@@ -20,8 +18,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-9950x',
     processorPaths: ['/processors/amd-ryzen-9-9950x'],
-    singleCore: 3060,
-    multiCore: 25918,
   },
   {
     key: 'snapdragon-x2-elite-extreme-x2e-94-100',
@@ -30,8 +26,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x2-elite-extreme-x2e-94-100',
     processorPaths: ['/processors/snapdragon-x2-elite-extreme-x2e-94-100'],
-    singleCore: 3049,
-    multiCore: 25052,
   },
   {
     key: 'snapdragon-x2-elite-x2e-88-100',
@@ -40,8 +34,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x2-elite-x2e-88-100',
     processorPaths: ['/processors/snapdragon-x2-elite-x2e-88-100'],
-    singleCore: 3044,
-    multiCore: 21074,
   },
   {
     key: 'amd-ryzen-9-9900x3d',
@@ -50,8 +42,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-9900x3d',
     processorPaths: ['/processors/amd-ryzen-9-9900x3d'],
-    singleCore: 3043,
-    multiCore: 22882,
   },
   {
     key: 'amd-ryzen-7-9700x',
@@ -60,8 +50,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-9700x',
     processorPaths: ['/processors/amd-ryzen-7-9700x'],
-    singleCore: 3031,
-    multiCore: 18000,
   },
   {
     key: 'amd-ryzen-9-9900x',
@@ -70,8 +58,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-9900x',
     processorPaths: ['/processors/amd-ryzen-9-9900x'],
-    singleCore: 3015,
-    multiCore: 22376,
   },
   {
     key: 'amd-ryzen-7-9800x3d',
@@ -80,8 +66,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-9800x3d',
     processorPaths: ['/processors/amd-ryzen-7-9800x3d'],
-    singleCore: 2970,
-    multiCore: 18773,
   },
   {
     key: 'amd-ryzen-5-9600x',
@@ -90,8 +74,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-9600x',
     processorPaths: ['/processors/amd-ryzen-5-9600x'],
-    singleCore: 2923,
-    multiCore: 14522,
   },
   {
     key: 'intel-core-ultra-9-285k',
@@ -100,8 +82,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-9-285k',
     processorPaths: ['/processors/intel-core-ultra-9-285k'],
-    singleCore: 2863,
-    multiCore: 26796,
   },
   {
     key: 'intel-core-i9-14900ks',
@@ -110,8 +90,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-14900ks',
     processorPaths: ['/processors/intel-core-i9-14900ks'],
-    singleCore: 2820,
-    multiCore: 25276,
   },
   {
     key: 'intel-core-i9-13900ks',
@@ -120,8 +98,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-13900ks',
     processorPaths: ['/processors/intel-core-i9-13900ks'],
-    singleCore: 2763,
-    multiCore: 23192,
   },
   {
     key: 'intel-core-i9-14900kf',
@@ -130,8 +106,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-14900kf',
     processorPaths: ['/processors/intel-core-i9-14900kf'],
-    singleCore: 2729,
-    multiCore: 24115,
   },
   {
     key: 'intel-core-ultra-7-265k',
@@ -140,8 +114,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-7-265k',
     processorPaths: ['/processors/intel-core-ultra-7-265k'],
-    singleCore: 2706,
-    multiCore: 23224,
   },
   {
     key: 'intel-core-i9-13900kf',
@@ -150,8 +122,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-13900kf',
     processorPaths: ['/processors/intel-core-i9-13900kf'],
-    singleCore: 2662,
-    multiCore: 22369,
   },
   {
     key: 'snapdragon-x-elite-x1e-84-100',
@@ -160,8 +130,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x-elite-x1e-84-100',
     processorPaths: ['/processors/snapdragon-x-elite-x1e-84-100'],
-    singleCore: 2634,
-    multiCore: 16983,
   },
   {
     key: 'intel-core-i9-13900k',
@@ -170,8 +138,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-13900k',
     processorPaths: ['/processors/intel-core-i9-13900k'],
-    singleCore: 2627,
-    multiCore: 22822,
   },
   {
     key: 'amd-ryzen-9-7950x',
@@ -180,8 +146,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7950x',
     processorPaths: ['/processors/amd-ryzen-9-7950x'],
-    singleCore: 2620,
-    multiCore: 22806,
   },
   {
     key: 'intel-core-i7-14700kf',
@@ -190,8 +154,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-14700kf',
     processorPaths: ['/processors/intel-core-i7-14700kf'],
-    singleCore: 2596,
-    multiCore: 21429,
   },
   {
     key: 'intel-core-i9-14900k',
@@ -200,8 +162,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-14900k',
     processorPaths: ['/processors/intel-core-i9-14900k'],
-    singleCore: 2594,
-    multiCore: 22133,
   },
   {
     key: 'amd-ryzen-5-7600x',
@@ -210,8 +170,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-7600x',
     processorPaths: ['/processors/amd-ryzen-5-7600x'],
-    singleCore: 2593,
-    multiCore: 13777,
   },
   {
     key: 'amd-ryzen-9-7900x',
@@ -220,8 +178,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7900x',
     processorPaths: ['/processors/amd-ryzen-9-7900x'],
-    singleCore: 2571,
-    multiCore: 19813,
   },
   {
     key: 'intel-core-i7-14700k',
@@ -230,8 +186,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-14700k',
     processorPaths: ['/processors/intel-core-i7-14700k'],
-    singleCore: 2559,
-    multiCore: 20711,
   },
   {
     key: 'intel-core-i7-13700k',
@@ -240,8 +194,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-13700k',
     processorPaths: ['/processors/intel-core-i7-13700k'],
-    singleCore: 2541,
-    multiCore: 19462,
   },
   {
     key: 'amd-ryzen-9-7950x3d',
@@ -250,8 +202,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7950x3d',
     processorPaths: ['/processors/amd-ryzen-9-7950x3d'],
-    singleCore: 2539,
-    multiCore: 22268,
   },
   {
     key: 'amd-ryzen-5-7600',
@@ -260,8 +210,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-7600',
     processorPaths: ['/processors/amd-ryzen-5-7600'],
-    singleCore: 2534,
-    multiCore: 13572,
   },
   {
     key: 'amd-ryzen-7-7700',
@@ -270,8 +218,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7700',
     processorPaths: ['/processors/amd-ryzen-7-7700'],
-    singleCore: 2520,
-    multiCore: 15479,
   },
   {
     key: 'intel-core-i5-14600k',
@@ -280,8 +226,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-14600k',
     processorPaths: ['/processors/intel-core-i5-14600k'],
-    singleCore: 2517,
-    multiCore: 17062,
   },
   {
     key: 'intel-core-i7-13700kf',
@@ -290,8 +234,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-13700kf',
     processorPaths: ['/processors/intel-core-i7-13700kf'],
-    singleCore: 2510,
-    multiCore: 18756,
   },
   {
     key: 'intel-core-i7-14700f',
@@ -300,8 +242,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-14700f',
     processorPaths: ['/processors/intel-core-i7-14700f'],
-    singleCore: 2504,
-    multiCore: 20620,
   },
   {
     key: 'intel-core-i5-13600kf',
@@ -310,8 +250,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-13600kf',
     processorPaths: ['/processors/intel-core-i5-13600kf'],
-    singleCore: 2488,
-    multiCore: 17876,
   },
   {
     key: 'intel-core-i9-14900',
@@ -320,8 +258,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-14900',
     processorPaths: ['/processors/intel-core-i9-14900'],
-    singleCore: 2488,
-    multiCore: 18495,
   },
   {
     key: 'amd-ryzen-9-7900x3d',
@@ -330,8 +266,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7900x3d',
     processorPaths: ['/processors/amd-ryzen-9-7900x3d'],
-    singleCore: 2486,
-    multiCore: 19159,
   },
   {
     key: 'amd-ryzen-9-7900',
@@ -340,8 +274,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7900',
     processorPaths: ['/processors/amd-ryzen-9-7900'],
-    singleCore: 2467,
-    multiCore: 17300,
   },
   {
     key: 'intel-core-ultra-9-275hx',
@@ -350,8 +282,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-9-275hx',
     processorPaths: ['/processors/intel-core-ultra-9-275hx'],
-    singleCore: 2462,
-    multiCore: 20861,
   },
   {
     key: 'amd-ryzen-threadripper-7970x',
@@ -360,8 +290,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-threadripper-7970x',
     processorPaths: ['/processors/amd-ryzen-threadripper-7970x'],
-    singleCore: 2461,
-    multiCore: 33840,
   },
   {
     key: 'amd-ryzen-ai-9-hx-370',
@@ -370,8 +298,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-ai-9-hx-370',
     processorPaths: ['/processors/amd-ryzen-ai-9-hx-370'],
-    singleCore: 2444,
-    multiCore: 15498,
   },
   {
     key: 'amd-ryzen-7-7800x3d',
@@ -380,8 +306,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7800x3d',
     processorPaths: ['/processors/amd-ryzen-7-7800x3d'],
-    singleCore: 2436,
-    multiCore: 15750,
   },
   {
     key: 'intel-core-i7-14700',
@@ -390,8 +314,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-14700',
     processorPaths: ['/processors/intel-core-i7-14700'],
-    singleCore: 2425,
-    multiCore: 17833,
   },
   {
     key: 'amd-ryzen-ai-max-395',
@@ -400,8 +322,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-ai-max-395',
     processorPaths: ['/processors/amd-ryzen-ai-max-395'],
-    singleCore: 2425,
-    multiCore: 20579,
   },
   {
     key: 'snapdragon-x-elite-x1e-80-100',
@@ -410,8 +330,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x-elite-x1e-80-100',
     processorPaths: ['/processors/snapdragon-x-elite-x1e-80-100'],
-    singleCore: 2411,
-    multiCore: 15700,
   },
   {
     key: 'intel-core-i5-14600kf',
@@ -420,8 +338,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-14600kf',
     processorPaths: ['/processors/intel-core-i5-14600kf'],
-    singleCore: 2409,
-    multiCore: 17165,
   },
   {
     key: 'amd-ryzen-9-7845hx',
@@ -430,8 +346,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7845hx',
     processorPaths: ['/processors/amd-ryzen-9-7845hx'],
-    singleCore: 2405,
-    multiCore: 16623,
   },
   {
     key: 'amd-ryzen-7-7745hx',
@@ -440,8 +354,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7745hx',
     processorPaths: ['/processors/amd-ryzen-7-7745hx'],
-    singleCore: 2404,
-    multiCore: 13660,
   },
   {
     key: 'amd-ryzen-9-7945hx',
@@ -450,8 +362,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-7945hx',
     processorPaths: ['/processors/amd-ryzen-9-7945hx'],
-    singleCore: 2385,
-    multiCore: 18378,
   },
   {
     key: 'intel-core-i9-12900kf',
@@ -460,8 +370,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-12900kf',
     processorPaths: ['/processors/intel-core-i9-12900kf'],
-    singleCore: 2356,
-    multiCore: 17846,
   },
   {
     key: 'intel-core-i9-13900f',
@@ -470,8 +378,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-13900f',
     processorPaths: ['/processors/intel-core-i9-13900f'],
-    singleCore: 2349,
-    multiCore: 19829,
   },
   {
     key: 'intel-core-ultra-7-255h',
@@ -480,8 +386,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-7-255h',
     processorPaths: ['/processors/intel-core-ultra-7-255h'],
-    singleCore: 2349,
-    multiCore: 14223,
   },
   {
     key: 'intel-core-i9-12900ks',
@@ -490,8 +394,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-12900ks',
     processorPaths: ['/processors/intel-core-i9-12900ks'],
-    singleCore: 2347,
-    multiCore: 17665,
   },
   {
     key: 'amd-ryzen-7-8700g',
@@ -500,8 +402,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-8700g',
     processorPaths: ['/processors/amd-ryzen-7-8700g'],
-    singleCore: 2319,
-    multiCore: 14535,
   },
   {
     key: 'intel-core-i7-12700k',
@@ -510,8 +410,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-12700k',
     processorPaths: ['/processors/intel-core-i7-12700k'],
-    singleCore: 2313,
-    multiCore: 15915,
   },
   {
     key: 'intel-core-i7-13700',
@@ -520,8 +418,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-13700',
     processorPaths: ['/processors/intel-core-i7-13700'],
-    singleCore: 2305,
-    multiCore: 16835,
   },
   {
     key: 'intel-core-i5-13600k',
@@ -530,8 +426,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-13600k',
     processorPaths: ['/processors/intel-core-i5-13600k'],
-    singleCore: 2294,
-    multiCore: 15675,
   },
   {
     key: 'intel-core-i7-13700f',
@@ -540,8 +434,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-13700f',
     processorPaths: ['/processors/intel-core-i7-13700f'],
-    singleCore: 2292,
-    multiCore: 16562,
   },
   {
     key: 'intel-core-i9-14900hx',
@@ -550,8 +442,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-14900hx',
     processorPaths: ['/processors/intel-core-i9-14900hx'],
-    singleCore: 2281,
-    multiCore: 17431,
   },
   {
     key: 'amd-ryzen-7-8700f',
@@ -560,8 +450,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-8700f',
     processorPaths: ['/processors/amd-ryzen-7-8700f'],
-    singleCore: 2272,
-    multiCore: 13286,
   },
   {
     key: 'intel-core-i7-12700kf',
@@ -570,8 +458,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-12700kf',
     processorPaths: ['/processors/intel-core-i7-12700kf'],
-    singleCore: 2264,
-    multiCore: 14359,
   },
   {
     key: 'amd-ryzen-ai-9-365',
@@ -580,8 +466,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-ai-9-365',
     processorPaths: ['/processors/amd-ryzen-ai-9-365'],
-    singleCore: 2257,
-    multiCore: 13806,
   },
   {
     key: 'intel-core-i9-11900k',
@@ -590,8 +474,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-11900k',
     processorPaths: ['/processors/intel-core-i9-11900k'],
-    singleCore: 2234,
-    multiCore: 13196,
   },
   {
     key: 'intel-core-i5-12600k',
@@ -600,8 +482,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-12600k',
     processorPaths: ['/processors/intel-core-i5-12600k'],
-    singleCore: 2233,
-    multiCore: 12780,
   },
   {
     key: 'intel-core-ultra-9-285h',
@@ -610,8 +490,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-9-285h',
     processorPaths: ['/processors/intel-core-ultra-9-285h'],
-    singleCore: 2230,
-    multiCore: 15051,
   },
   {
     key: 'amd-ryzen-7-7700x',
@@ -620,8 +498,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7700x',
     processorPaths: ['/processors/amd-ryzen-7-7700x'],
-    singleCore: 2204,
-    multiCore: 11428,
   },
   {
     key: 'amd-ryzen-ai-9-hx-375',
@@ -630,8 +506,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-ai-9-hx-375',
     processorPaths: ['/processors/amd-ryzen-ai-9-hx-375'],
-    singleCore: 2183,
-    multiCore: 14573,
   },
   {
     key: 'intel-core-i9-12900k',
@@ -640,8 +514,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-12900k',
     processorPaths: ['/processors/intel-core-i9-12900k'],
-    singleCore: 2173,
-    multiCore: 16476,
   },
   {
     key: 'intel-core-i7-12700f',
@@ -650,8 +522,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-12700f',
     processorPaths: ['/processors/intel-core-i7-12700f'],
-    singleCore: 2166,
-    multiCore: 13272,
   },
   {
     key: 'intel-core-i7-14700hx',
@@ -660,8 +530,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-14700hx',
     processorPaths: ['/processors/intel-core-i7-14700hx'],
-    singleCore: 2165,
-    multiCore: 14672,
   },
   {
     key: 'intel-core-i5-13500',
@@ -670,8 +538,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-13500',
     processorPaths: ['/processors/intel-core-i5-13500'],
-    singleCore: 2157,
-    multiCore: 14176,
   },
   {
     key: 'amd-ryzen-ai-7-350',
@@ -680,8 +546,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-ai-7-350',
     processorPaths: ['/processors/amd-ryzen-ai-7-350'],
-    singleCore: 2155,
-    multiCore: 11574,
   },
   {
     key: 'intel-core-i9-12900',
@@ -690,8 +554,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-12900',
     processorPaths: ['/processors/intel-core-i9-12900'],
-    singleCore: 2148,
-    multiCore: 14321,
   },
   {
     key: 'intel-core-i5-12600kf',
@@ -700,8 +562,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-12600kf',
     processorPaths: ['/processors/intel-core-i5-12600kf'],
-    singleCore: 2147,
-    multiCore: 12185,
   },
   {
     key: 'intel-core-i5-14500t',
@@ -710,8 +570,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-14500t',
     processorPaths: ['/processors/intel-core-i5-14500t'],
-    singleCore: 2147,
-    multiCore: 7306,
   },
   {
     key: 'snapdragon-x-plus-x1p-42-100',
@@ -720,8 +578,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x-plus-x1p-42-100',
     processorPaths: ['/processors/snapdragon-x-plus-x1p-42-100'],
-    singleCore: 2146,
-    multiCore: 11714,
   },
   {
     key: 'snapdragon-x-plus-x1p-64-100',
@@ -730,8 +586,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x-plus-x1p-64-100',
     processorPaths: ['/processors/snapdragon-x-plus-x1p-64-100'],
-    singleCore: 2146,
-    multiCore: 14639,
   },
   {
     key: 'intel-core-i7-14650hx',
@@ -740,8 +594,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-14650hx',
     processorPaths: ['/processors/intel-core-i7-14650hx'],
-    singleCore: 2119,
-    multiCore: 13941,
   },
   {
     key: 'intel-core-ultra-7-258v',
@@ -750,8 +602,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-7-258v',
     processorPaths: ['/processors/intel-core-ultra-7-258v'],
-    singleCore: 2118,
-    multiCore: 9274,
   },
   {
     key: 'intel-core-i5-14500',
@@ -760,8 +610,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-14500',
     processorPaths: ['/processors/intel-core-i5-14500'],
-    singleCore: 2111,
-    multiCore: 13569,
   },
   {
     key: 'intel-core-i9-11900kf',
@@ -770,8 +618,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-11900kf',
     processorPaths: ['/processors/intel-core-i9-11900kf'],
-    singleCore: 2108,
-    multiCore: 11678,
   },
   {
     key: 'amd-ryzen-9-5950x',
@@ -780,8 +626,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-5950x',
     processorPaths: ['/processors/amd-ryzen-9-5950x'],
-    singleCore: 2095,
-    multiCore: 15276,
   },
   {
     key: 'intel-core-i5-14400f',
@@ -790,8 +634,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-14400f',
     processorPaths: ['/processors/intel-core-i5-14400f'],
-    singleCore: 2087,
-    multiCore: 11352,
   },
   {
     key: 'snapdragon-x-elite-x1e-78-100',
@@ -800,8 +642,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x-elite-x1e-78-100',
     processorPaths: ['/processors/snapdragon-x-elite-x1e-78-100'],
-    singleCore: 2080,
-    multiCore: 14859,
   },
   {
     key: 'amd-ryzen-9-5900x',
@@ -810,8 +650,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-5900x',
     processorPaths: ['/processors/amd-ryzen-9-5900x'],
-    singleCore: 2074,
-    multiCore: 13997,
   },
   {
     key: 'intel-core-7-150u',
@@ -820,8 +658,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-7-150u',
     processorPaths: ['/processors/intel-core-7-150u'],
-    singleCore: 2058,
-    multiCore: 7146,
   },
   {
     key: 'intel-core-i3-13100f',
@@ -830,8 +666,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-13100f',
     processorPaths: ['/processors/intel-core-i3-13100f'],
-    singleCore: 2056,
-    multiCore: 7655,
   },
   {
     key: 'intel-core-i5-12500',
@@ -840,8 +674,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-12500',
     processorPaths: ['/processors/intel-core-i5-12500'],
-    singleCore: 2048,
-    multiCore: 9668,
   },
   {
     key: 'intel-core-ultra-7-256v',
@@ -850,8 +682,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-7-256v',
     processorPaths: ['/processors/intel-core-ultra-7-256v'],
-    singleCore: 2046,
-    multiCore: 8900,
   },
   {
     key: 'amd-ryzen-7-5800x',
@@ -860,8 +690,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x',
     processorPaths: ['/processors/amd-ryzen-7-5800x'],
-    singleCore: 2032,
-    multiCore: 11041,
   },
   {
     key: 'intel-core-i5-13400f',
@@ -870,8 +698,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-13400f',
     processorPaths: ['/processors/intel-core-i5-13400f'],
-    singleCore: 2029,
-    multiCore: 11409,
   },
   {
     key: 'amd-ryzen-7-5700x',
@@ -880,8 +706,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5700x',
     processorPaths: ['/processors/amd-ryzen-7-5700x'],
-    singleCore: 2018,
-    multiCore: 10730,
   },
   {
     key: 'amd-ryzen-7-5800x3d',
@@ -890,8 +714,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5800x3d',
     processorPaths: ['/processors/amd-ryzen-7-5800x3d'],
-    singleCore: 2016,
-    multiCore: 11720,
   },
   {
     key: 'amd-ryzen-5-220',
@@ -900,8 +722,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-220',
     processorPaths: ['/processors/amd-ryzen-5-220'],
-    singleCore: 2013,
-    multiCore: 7973,
   },
   {
     key: 'intel-core-i7-11700kf',
@@ -910,8 +730,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11700kf',
     processorPaths: ['/processors/intel-core-i7-11700kf'],
-    singleCore: 1992,
-    multiCore: 10949,
   },
   {
     key: 'amd-ryzen-5-5600x',
@@ -920,8 +738,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5600x',
     processorPaths: ['/processors/amd-ryzen-5-5600x'],
-    singleCore: 1991,
-    multiCore: 9194,
   },
   {
     key: 'intel-core-i5-11600k',
@@ -930,8 +746,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11600k',
     processorPaths: ['/processors/intel-core-i5-11600k'],
-    singleCore: 1990,
-    multiCore: 9272,
   },
   {
     key: 'intel-core-i7-11700k',
@@ -940,8 +754,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11700k',
     processorPaths: ['/processors/intel-core-i7-11700k'],
-    singleCore: 1988,
-    multiCore: 10671,
   },
   {
     key: 'intel-core-i3-12100',
@@ -950,8 +762,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-12100',
     processorPaths: ['/processors/intel-core-i3-12100'],
-    singleCore: 1963,
-    multiCore: 7262,
   },
   {
     key: 'amd-ryzen-z1-extreme',
@@ -960,8 +770,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-z1-extreme',
     processorPaths: ['/processors/amd-ryzen-z1-extreme'],
-    singleCore: 1961,
-    multiCore: 10871,
   },
   {
     key: 'intel-core-i5-12400f',
@@ -970,8 +778,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-12400f',
     processorPaths: ['/processors/intel-core-i5-12400f'],
-    singleCore: 1950,
-    multiCore: 9352,
   },
   {
     key: 'amd-ryzen-5-5600',
@@ -980,8 +786,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5600',
     processorPaths: ['/processors/amd-ryzen-5-5600'],
-    singleCore: 1939,
-    multiCore: 9199,
   },
   {
     key: 'amd-ryzen-7-5700g',
@@ -990,8 +794,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5700g',
     processorPaths: ['/processors/amd-ryzen-7-5700g'],
-    singleCore: 1938,
-    multiCore: 10280,
   },
   {
     key: 'intel-core-i7-11700',
@@ -1000,8 +802,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11700',
     processorPaths: ['/processors/intel-core-i7-11700'],
-    singleCore: 1927,
-    multiCore: 9069,
   },
   {
     key: 'intel-core-i3-12100f',
@@ -1010,8 +810,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-12100f',
     processorPaths: ['/processors/intel-core-i3-12100f'],
-    singleCore: 1923,
-    multiCore: 7236,
   },
   {
     key: 'amd-ryzen-9-6900hx',
@@ -1020,8 +818,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-6900hx',
     processorPaths: ['/processors/amd-ryzen-9-6900hx'],
-    singleCore: 1920,
-    multiCore: 10412,
   },
   {
     key: 'intel-core-i5-13400',
@@ -1030,8 +826,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-13400',
     processorPaths: ['/processors/intel-core-i5-13400'],
-    singleCore: 1916,
-    multiCore: 10371,
   },
   {
     key: 'intel-core-i5-13400t',
@@ -1040,8 +834,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-13400t',
     processorPaths: ['/processors/intel-core-i5-13400t'],
-    singleCore: 1899,
-    multiCore: 10227,
   },
   {
     key: 'amd-ryzen-9-6900hs',
@@ -1050,8 +842,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-6900hs',
     processorPaths: ['/processors/amd-ryzen-9-6900hs'],
-    singleCore: 1885,
-    multiCore: 9903,
   },
   {
     key: 'intel-core-i5-14400',
@@ -1060,8 +850,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-14400',
     processorPaths: ['/processors/intel-core-i5-14400'],
-    singleCore: 1874,
-    multiCore: 9528,
   },
   {
     key: 'intel-core-i7-11700f',
@@ -1070,8 +858,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11700f',
     processorPaths: ['/processors/intel-core-i7-11700f'],
-    singleCore: 1868,
-    multiCore: 9433,
   },
   {
     key: 'intel-core-i5-12400',
@@ -1080,8 +866,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-12400',
     processorPaths: ['/processors/intel-core-i5-12400'],
-    singleCore: 1856,
-    multiCore: 8655,
   },
   {
     key: 'intel-core-i5-12500t',
@@ -1090,8 +874,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-12500t',
     processorPaths: ['/processors/intel-core-i5-12500t'],
-    singleCore: 1830,
-    multiCore: 7969,
   },
   {
     key: 'amd-ryzen-7-6800h',
@@ -1100,8 +882,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-6800h',
     processorPaths: ['/processors/amd-ryzen-7-6800h'],
-    singleCore: 1820,
-    multiCore: 9832,
   },
   {
     key: 'intel-core-ultra-9-185h',
@@ -1110,8 +890,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-9-185h',
     processorPaths: ['/processors/intel-core-ultra-9-185h'],
-    singleCore: 1819,
-    multiCore: 12106,
   },
   {
     key: 'amd-ryzen-5-5600g',
@@ -1120,8 +898,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5600g',
     processorPaths: ['/processors/amd-ryzen-5-5600g'],
-    singleCore: 1813,
-    multiCore: 8654,
   },
   {
     key: 'amd-ryzen-9-5900hx',
@@ -1130,8 +906,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-5900hx',
     processorPaths: ['/processors/amd-ryzen-9-5900hx'],
-    singleCore: 1783,
-    multiCore: 8713,
   },
   {
     key: 'intel-core-i5-11500h',
@@ -1140,8 +914,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11500h',
     processorPaths: ['/processors/intel-core-i5-11500h'],
-    singleCore: 1778,
-    multiCore: 7135,
   },
   {
     key: 'intel-core-i5-11400f',
@@ -1150,8 +922,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11400f',
     processorPaths: ['/processors/intel-core-i5-11400f'],
-    singleCore: 1777,
-    multiCore: 7760,
   },
   {
     key: 'amd-ryzen-7-6800u',
@@ -1160,8 +930,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-6800u',
     processorPaths: ['/processors/amd-ryzen-7-6800u'],
-    singleCore: 1774,
-    multiCore: 9181,
   },
   {
     key: 'intel-core-i5-1155g7',
@@ -1170,8 +938,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-1155g7',
     processorPaths: ['/processors/intel-core-i5-1155g7'],
-    singleCore: 1768,
-    multiCore: 4814,
   },
   {
     key: 'intel-core-i9-10850k',
@@ -1180,8 +946,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10850k',
     processorPaths: ['/processors/intel-core-i9-10850k'],
-    singleCore: 1744,
-    multiCore: 10775,
   },
   {
     key: 'intel-core-i7-8086k',
@@ -1190,8 +954,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-8086k',
     processorPaths: ['/processors/intel-core-i7-8086k'],
-    singleCore: 1739,
-    multiCore: 8232,
   },
   {
     key: 'amd-ryzen-5-5500',
@@ -1200,8 +962,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5500',
     processorPaths: ['/processors/amd-ryzen-5-5500'],
-    singleCore: 1739,
-    multiCore: 8047,
   },
   {
     key: 'intel-core-i5-11400',
@@ -1210,8 +970,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11400',
     processorPaths: ['/processors/intel-core-i5-11400'],
-    singleCore: 1735,
-    multiCore: 7613,
   },
   {
     key: 'amd-ryzen-7-7735hs',
@@ -1220,8 +978,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7735hs',
     processorPaths: ['/processors/amd-ryzen-7-7735hs'],
-    singleCore: 1724,
-    multiCore: 8199,
   },
   {
     key: 'snapdragon-x-x1-26-100',
@@ -1230,8 +986,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'arm',
     pageUrl: 'https://browser.geekbench.com/processors/snapdragon-x-x1-26-100',
     processorPaths: ['/processors/snapdragon-x-x1-26-100'],
-    singleCore: 1724,
-    multiCore: 9631,
   },
   {
     key: 'intel-core-i7-10700k',
@@ -1240,8 +994,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10700k',
     processorPaths: ['/processors/intel-core-i7-10700k'],
-    singleCore: 1716,
-    multiCore: 9638,
   },
   {
     key: 'intel-core-5-120u',
@@ -1250,8 +1002,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-5-120u',
     processorPaths: ['/processors/intel-core-5-120u'],
-    singleCore: 1703,
-    multiCore: 5813,
   },
   {
     key: 'intel-core-i9-10900k',
@@ -1260,8 +1010,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10900k',
     processorPaths: ['/processors/intel-core-i9-10900k'],
-    singleCore: 1700,
-    multiCore: 10550,
   },
   {
     key: 'intel-core-i9-9900',
@@ -1270,8 +1018,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-9900',
     processorPaths: ['/processors/intel-core-i9-9900'],
-    singleCore: 1695,
-    multiCore: 8276,
   },
   {
     key: 'intel-core-i7-11800h',
@@ -1280,8 +1026,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11800h',
     processorPaths: ['/processors/intel-core-i7-11800h'],
-    singleCore: 1693,
-    multiCore: 8147,
   },
   {
     key: 'amd-ryzen-5-7535hs',
@@ -1290,8 +1034,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-7535hs',
     processorPaths: ['/processors/amd-ryzen-5-7535hs'],
-    singleCore: 1689,
-    multiCore: 7689,
   },
   {
     key: 'intel-core-i9-9900kf',
@@ -1300,8 +1042,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-9900kf',
     processorPaths: ['/processors/intel-core-i9-9900kf'],
-    singleCore: 1687,
-    multiCore: 8935,
   },
   {
     key: 'amd-ryzen-7-5800h',
@@ -1310,8 +1050,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5800h',
     processorPaths: ['/processors/amd-ryzen-7-5800h'],
-    singleCore: 1683,
-    multiCore: 8269,
   },
   {
     key: 'amd-ryzen-9-3900x',
@@ -1320,8 +1058,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-3900x',
     processorPaths: ['/processors/amd-ryzen-9-3900x'],
-    singleCore: 1674,
-    multiCore: 12047,
   },
   {
     key: 'intel-core-i7-1265u',
@@ -1330,8 +1066,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-1265u',
     processorPaths: ['/processors/intel-core-i7-1265u'],
-    singleCore: 1674,
-    multiCore: 5368,
   },
   {
     key: 'amd-ryzen-7-pro-6850h',
@@ -1340,8 +1074,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-pro-6850h',
     processorPaths: ['/processors/amd-ryzen-7-pro-6850h'],
-    singleCore: 1671,
-    multiCore: 9492,
   },
   {
     key: 'amd-ryzen-7-3800x',
@@ -1350,8 +1082,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-3800x',
     processorPaths: ['/processors/amd-ryzen-7-3800x'],
-    singleCore: 1670,
-    multiCore: 9425,
   },
   {
     key: 'intel-core-i9-9900k',
@@ -1360,8 +1090,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-9900k',
     processorPaths: ['/processors/intel-core-i9-9900k'],
-    singleCore: 1663,
-    multiCore: 9232,
   },
   {
     key: 'intel-core-i7-9700kf',
@@ -1370,8 +1098,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-9700kf',
     processorPaths: ['/processors/intel-core-i7-9700kf'],
-    singleCore: 1658,
-    multiCore: 7544,
   },
   {
     key: 'intel-xeon-w-11855m',
@@ -1380,8 +1106,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-w-11855m',
     processorPaths: ['/processors/intel-xeon-w-11855m'],
-    singleCore: 1650,
-    multiCore: 7249,
   },
   {
     key: 'amd-ryzen-7-6800hs',
@@ -1390,8 +1114,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-6800hs',
     processorPaths: ['/processors/amd-ryzen-7-6800hs'],
-    singleCore: 1650,
-    multiCore: 9640,
   },
   {
     key: 'intel-core-i9-10900',
@@ -1400,8 +1122,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10900',
     processorPaths: ['/processors/intel-core-i9-10900'],
-    singleCore: 1647,
-    multiCore: 8626,
   },
   {
     key: 'intel-core-i9-10900kf',
@@ -1410,8 +1130,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10900kf',
     processorPaths: ['/processors/intel-core-i9-10900kf'],
-    singleCore: 1646,
-    multiCore: 10136,
   },
   {
     key: 'intel-core-i7-9700k',
@@ -1420,8 +1138,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-9700k',
     processorPaths: ['/processors/intel-core-i7-9700k'],
-    singleCore: 1636,
-    multiCore: 7737,
   },
   {
     key: 'amd-ryzen-5-5600u',
@@ -1430,8 +1146,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5600u',
     processorPaths: ['/processors/amd-ryzen-5-5600u'],
-    singleCore: 1631,
-    multiCore: 6275,
   },
   {
     key: 'intel-core-i7-1185g7',
@@ -1440,8 +1154,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-1185g7',
     processorPaths: ['/processors/intel-core-i7-1185g7'],
-    singleCore: 1622,
-    multiCore: 4891,
   },
   {
     key: 'intel-core-i5-1235u',
@@ -1450,8 +1162,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-1235u',
     processorPaths: ['/processors/intel-core-i5-1235u'],
-    singleCore: 1619,
-    multiCore: 5429,
   },
   {
     key: 'amd-ryzen-5-7535u',
@@ -1460,8 +1170,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-7535u',
     processorPaths: ['/processors/amd-ryzen-5-7535u'],
-    singleCore: 1612,
-    multiCore: 6566,
   },
   {
     key: 'amd-ryzen-7-3700x',
@@ -1470,8 +1178,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-3700x',
     processorPaths: ['/processors/amd-ryzen-7-3700x'],
-    singleCore: 1604,
-    multiCore: 8923,
   },
   {
     key: 'intel-core-i7-11850h',
@@ -1480,8 +1186,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11850h',
     processorPaths: ['/processors/intel-core-i7-11850h'],
-    singleCore: 1603,
-    multiCore: 7311,
   },
   {
     key: 'intel-core-i5-11300h',
@@ -1490,8 +1194,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11300h',
     processorPaths: ['/processors/intel-core-i5-11300h'],
-    singleCore: 1602,
-    multiCore: 4713,
   },
   {
     key: 'intel-core-i7-1165g7',
@@ -1500,8 +1202,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-1165g7',
     processorPaths: ['/processors/intel-core-i7-1165g7'],
-    singleCore: 1600,
-    multiCore: 4528,
   },
   {
     key: 'intel-core-i5-9600kf',
@@ -1510,8 +1210,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9600kf',
     processorPaths: ['/processors/intel-core-i5-9600kf'],
-    singleCore: 1595,
-    multiCore: 6184,
   },
   {
     key: 'intel-core-i7-8700k',
@@ -1520,8 +1218,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-8700k',
     processorPaths: ['/processors/intel-core-i7-8700k'],
-    singleCore: 1590,
-    multiCore: 7159,
   },
   {
     key: 'intel-core-i7-11370h',
@@ -1530,8 +1226,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-11370h',
     processorPaths: ['/processors/intel-core-i7-11370h'],
-    singleCore: 1589,
-    multiCore: 5445,
   },
   {
     key: 'amd-ryzen-5-5625u',
@@ -1540,8 +1234,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5625u',
     processorPaths: ['/processors/amd-ryzen-5-5625u'],
-    singleCore: 1583,
-    multiCore: 5890,
   },
   {
     key: 'amd-ryzen-threadripper-pro-3975wx',
@@ -1550,8 +1242,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-threadripper-pro-3975wx',
     processorPaths: ['/processors/amd-ryzen-threadripper-pro-3975wx'],
-    singleCore: 1581,
-    multiCore: 15503,
   },
   {
     key: 'intel-core-i5-11260h',
@@ -1560,8 +1250,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11260h',
     processorPaths: ['/processors/intel-core-i5-11260h'],
-    singleCore: 1578,
-    multiCore: 5354,
   },
   {
     key: 'intel-core-i5-10505',
@@ -1570,8 +1258,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10505',
     processorPaths: ['/processors/intel-core-i5-10505'],
-    singleCore: 1578,
-    multiCore: 6471,
   },
   {
     key: 'amd-ryzen-5-6600h',
@@ -1580,8 +1266,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-6600h',
     processorPaths: ['/processors/amd-ryzen-5-6600h'],
-    singleCore: 1576,
-    multiCore: 7392,
   },
   {
     key: 'amd-ryzen-5-3600x',
@@ -1590,8 +1274,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3600x',
     processorPaths: ['/processors/amd-ryzen-5-3600x'],
-    singleCore: 1574,
-    multiCore: 7815,
   },
   {
     key: 'intel-core-i7-10700f',
@@ -1600,8 +1282,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10700f',
     processorPaths: ['/processors/intel-core-i7-10700f'],
-    singleCore: 1568,
-    multiCore: 8181,
   },
   {
     key: 'intel-core-i5-9600k',
@@ -1610,8 +1290,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9600k',
     processorPaths: ['/processors/intel-core-i5-9600k'],
-    singleCore: 1563,
-    multiCore: 6126,
   },
   {
     key: 'amd-ryzen-5-5600h',
@@ -1620,8 +1298,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5600h',
     processorPaths: ['/processors/amd-ryzen-5-5600h'],
-    singleCore: 1560,
-    multiCore: 6427,
   },
   {
     key: 'intel-core-i7-10700t',
@@ -1630,8 +1306,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10700t',
     processorPaths: ['/processors/intel-core-i7-10700t'],
-    singleCore: 1556,
-    multiCore: 6591,
   },
   {
     key: 'amd-ryzen-3-3300x',
@@ -1640,8 +1314,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-3300x',
     processorPaths: ['/processors/amd-ryzen-3-3300x'],
-    singleCore: 1555,
-    multiCore: 5772,
   },
   {
     key: 'amd-ryzen-5-3600',
@@ -1650,8 +1322,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3600',
     processorPaths: ['/processors/amd-ryzen-5-3600'],
-    singleCore: 1546,
-    multiCore: 7401,
   },
   {
     key: 'intel-core-i5-11400h',
@@ -1660,8 +1330,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11400h',
     processorPaths: ['/processors/intel-core-i5-11400h'],
-    singleCore: 1544,
-    multiCore: 6190,
   },
   {
     key: 'intel-core-i7-9700',
@@ -1670,8 +1338,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-9700',
     processorPaths: ['/processors/intel-core-i7-9700'],
-    singleCore: 1543,
-    multiCore: 6691,
   },
   {
     key: 'intel-core-i7-8700',
@@ -1680,8 +1346,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-8700',
     processorPaths: ['/processors/intel-core-i7-8700'],
-    singleCore: 1538,
-    multiCore: 6543,
   },
   {
     key: 'amd-ryzen-7-5825u',
@@ -1690,8 +1354,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5825u',
     processorPaths: ['/processors/amd-ryzen-7-5825u'],
-    singleCore: 1537,
-    multiCore: 7021,
   },
   {
     key: 'amd-ryzen-5-7530u',
@@ -1700,8 +1362,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-7530u',
     processorPaths: ['/processors/amd-ryzen-5-7530u'],
-    singleCore: 1534,
-    multiCore: 5781,
   },
   {
     key: 'intel-core-i3-1215u',
@@ -1710,8 +1370,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-1215u',
     processorPaths: ['/processors/intel-core-i3-1215u'],
-    singleCore: 1529,
-    multiCore: 4264,
   },
   {
     key: 'intel-core-i7-7700k',
@@ -1720,8 +1378,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-7700k',
     processorPaths: ['/processors/intel-core-i7-7700k'],
-    singleCore: 1517,
-    multiCore: 5229,
   },
   {
     key: 'amd-ryzen-5-pro-5650u',
@@ -1730,8 +1386,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-pro-5650u',
     processorPaths: ['/processors/amd-ryzen-5-pro-5650u'],
-    singleCore: 1514,
-    multiCore: 5730,
   },
   {
     key: 'amd-ryzen-5-3500x',
@@ -1740,8 +1394,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3500x',
     processorPaths: ['/processors/amd-ryzen-5-3500x'],
-    singleCore: 1497,
-    multiCore: 5871,
   },
   {
     key: 'amd-ryzen-9-3950x',
@@ -1750,8 +1402,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-3950x',
     processorPaths: ['/processors/amd-ryzen-9-3950x'],
-    singleCore: 1496,
-    multiCore: 12150,
   },
   {
     key: 'intel-core-i5-1145g7',
@@ -1760,8 +1410,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-1145g7',
     processorPaths: ['/processors/intel-core-i5-1145g7'],
-    singleCore: 1495,
-    multiCore: 4209,
   },
   {
     key: 'intel-core-i7-9850h',
@@ -1770,8 +1418,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-9850h',
     processorPaths: ['/processors/intel-core-i7-9850h'],
-    singleCore: 1491,
-    multiCore: 6201,
   },
   {
     key: 'amd-ryzen-5-4500',
@@ -1780,8 +1426,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-4500',
     processorPaths: ['/processors/amd-ryzen-5-4500'],
-    singleCore: 1489,
-    multiCore: 6802,
   },
   {
     key: 'intel-core-i5-11320h',
@@ -1790,8 +1434,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-11320h',
     processorPaths: ['/processors/intel-core-i5-11320h'],
-    singleCore: 1483,
-    multiCore: 5813,
   },
   {
     key: 'intel-core-i9-10980xe',
@@ -1800,8 +1442,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10980xe',
     processorPaths: ['/processors/intel-core-i9-10980xe'],
-    singleCore: 1483,
-    multiCore: 14461,
   },
   {
     key: 'intel-core-i5-10500',
@@ -1810,8 +1450,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10500',
     processorPaths: ['/processors/intel-core-i5-10500'],
-    singleCore: 1481,
-    multiCore: 6074,
   },
   {
     key: 'intel-core-i9-10885h',
@@ -1820,8 +1458,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10885h',
     processorPaths: ['/processors/intel-core-i9-10885h'],
-    singleCore: 1480,
-    multiCore: 7059,
   },
   {
     key: 'intel-core-i5-8600k',
@@ -1830,8 +1466,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-8600k',
     processorPaths: ['/processors/intel-core-i5-8600k'],
-    singleCore: 1473,
-    multiCore: 5759,
   },
   {
     key: 'amd-ryzen-7-pro-6850u',
@@ -1840,8 +1474,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-pro-6850u',
     processorPaths: ['/processors/amd-ryzen-7-pro-6850u'],
-    singleCore: 1470,
-    multiCore: 7806,
   },
   {
     key: 'intel-core-i3-10105f',
@@ -1850,8 +1482,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-10105f',
     processorPaths: ['/processors/intel-core-i3-10105f'],
-    singleCore: 1466,
-    multiCore: 4864,
   },
   {
     key: 'amd-ryzen-5-4600g',
@@ -1860,8 +1490,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-4600g',
     processorPaths: ['/processors/amd-ryzen-5-4600g'],
-    singleCore: 1460,
-    multiCore: 6720,
   },
   {
     key: 'amd-ryzen-5-3500',
@@ -1870,8 +1498,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3500',
     processorPaths: ['/processors/amd-ryzen-5-3500'],
-    singleCore: 1459,
-    multiCore: 5611,
   },
   {
     key: 'amd-ryzen-threadripper-3990x',
@@ -1880,8 +1506,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-threadripper-3990x',
     processorPaths: ['/processors/amd-ryzen-threadripper-3990x'],
-    singleCore: 1459,
-    multiCore: 22059,
   },
   {
     key: 'amd-ryzen-5-pro-4650g',
@@ -1890,8 +1514,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-pro-4650g',
     processorPaths: ['/processors/amd-ryzen-5-pro-4650g'],
-    singleCore: 1453,
-    multiCore: 6719,
   },
   {
     key: 'intel-core-i7-6700k',
@@ -1900,8 +1522,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6700k',
     processorPaths: ['/processors/intel-core-i7-6700k'],
-    singleCore: 1447,
-    multiCore: 5139,
   },
   {
     key: 'intel-core-i5-9500',
@@ -1910,8 +1530,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9500',
     processorPaths: ['/processors/intel-core-i5-9500'],
-    singleCore: 1447,
-    multiCore: 5408,
   },
   {
     key: 'amd-ryzen-7-7730u',
@@ -1920,8 +1538,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7730u',
     processorPaths: ['/processors/amd-ryzen-7-7730u'],
-    singleCore: 1444,
-    multiCore: 6441,
   },
   {
     key: 'intel-xeon-e-2124g',
@@ -1930,8 +1546,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e-2124g',
     processorPaths: ['/processors/intel-xeon-e-2124g'],
-    singleCore: 1438,
-    multiCore: 4263,
   },
   {
     key: 'intel-core-i5-10400f',
@@ -1940,8 +1554,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10400f',
     processorPaths: ['/processors/intel-core-i5-10400f'],
-    singleCore: 1436,
-    multiCore: 6482,
   },
   {
     key: 'amd-ryzen-3-3100',
@@ -1950,8 +1562,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-3100',
     processorPaths: ['/processors/amd-ryzen-3-3100'],
-    singleCore: 1434,
-    multiCore: 5117,
   },
   {
     key: 'amd-ryzen-7-pro-5850u',
@@ -1960,8 +1570,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-pro-5850u',
     processorPaths: ['/processors/amd-ryzen-7-pro-5850u'],
-    singleCore: 1433,
-    multiCore: 5376,
   },
   {
     key: 'intel-core-i9-9900t',
@@ -1970,8 +1578,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-9900t',
     processorPaths: ['/processors/intel-core-i9-9900t'],
-    singleCore: 1432,
-    multiCore: 6975,
   },
   {
     key: 'intel-core-i3-8350k',
@@ -1980,8 +1586,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-8350k',
     processorPaths: ['/processors/intel-core-i3-8350k'],
-    singleCore: 1426,
-    multiCore: 4619,
   },
   {
     key: 'intel-core-i5-10400',
@@ -1990,8 +1594,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10400',
     processorPaths: ['/processors/intel-core-i5-10400'],
-    singleCore: 1425,
-    multiCore: 6362,
   },
   {
     key: 'intel-core-i7-10750h',
@@ -2000,8 +1602,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10750h',
     processorPaths: ['/processors/intel-core-i7-10750h'],
-    singleCore: 1423,
-    multiCore: 5547,
   },
   {
     key: 'amd-ryzen-3-5400u',
@@ -2010,8 +1610,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-5400u',
     processorPaths: ['/processors/amd-ryzen-3-5400u'],
-    singleCore: 1419,
-    multiCore: 4473,
   },
   {
     key: 'intel-core-i9-10900x',
@@ -2020,8 +1618,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-10900x',
     processorPaths: ['/processors/intel-core-i9-10900x'],
-    singleCore: 1417,
-    multiCore: 9345,
   },
   {
     key: 'intel-core-i7-10700',
@@ -2030,8 +1626,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10700',
     processorPaths: ['/processors/intel-core-i7-10700'],
-    singleCore: 1415,
-    multiCore: 7708,
   },
   {
     key: 'intel-core-i5-1135g7',
@@ -2040,8 +1634,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-1135g7',
     processorPaths: ['/processors/intel-core-i5-1135g7'],
-    singleCore: 1412,
-    multiCore: 3975,
   },
   {
     key: 'intel-core-i9-9880h',
@@ -2050,8 +1642,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-9880h',
     processorPaths: ['/processors/intel-core-i9-9880h'],
-    singleCore: 1403,
-    multiCore: 6201,
   },
   {
     key: 'intel-core-i3-10100f',
@@ -2060,8 +1650,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-10100f',
     processorPaths: ['/processors/intel-core-i3-10100f'],
-    singleCore: 1390,
-    multiCore: 4740,
   },
   {
     key: 'intel-core-i5-9400',
@@ -2070,8 +1658,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9400',
     processorPaths: ['/processors/intel-core-i5-9400'],
-    singleCore: 1388,
-    multiCore: 5087,
   },
   {
     key: 'intel-core-i7-9700t',
@@ -2080,8 +1666,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-9700t',
     processorPaths: ['/processors/intel-core-i7-9700t'],
-    singleCore: 1385,
-    multiCore: 5430,
   },
   {
     key: 'intel-core-i3-9100f',
@@ -2090,8 +1674,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-9100f',
     processorPaths: ['/processors/intel-core-i3-9100f'],
-    singleCore: 1383,
-    multiCore: 4027,
   },
   {
     key: 'intel-core-i7-10870h',
@@ -2100,8 +1682,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10870h',
     processorPaths: ['/processors/intel-core-i7-10870h'],
-    singleCore: 1381,
-    multiCore: 7132,
   },
   {
     key: 'intel-core-i5-6600k',
@@ -2110,8 +1690,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-6600k',
     processorPaths: ['/processors/intel-core-i5-6600k'],
-    singleCore: 1377,
-    multiCore: 3978,
   },
   {
     key: 'intel-core-i7-7700',
@@ -2120,8 +1698,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-7700',
     processorPaths: ['/processors/intel-core-i7-7700'],
-    singleCore: 1376,
-    multiCore: 4674,
   },
   {
     key: 'amd-ryzen-7-4800h',
@@ -2130,8 +1706,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-4800h',
     processorPaths: ['/processors/amd-ryzen-7-4800h'],
-    singleCore: 1376,
-    multiCore: 6873,
   },
   {
     key: 'intel-core-ultra-7-165u',
@@ -2140,8 +1714,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-ultra-7-165u',
     processorPaths: ['/processors/intel-core-ultra-7-165u'],
-    singleCore: 1371,
-    multiCore: 6500,
   },
   {
     key: 'intel-core-i3-10100',
@@ -2150,8 +1722,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-10100',
     processorPaths: ['/processors/intel-core-i3-10100'],
-    singleCore: 1367,
-    multiCore: 4453,
   },
   {
     key: 'intel-core-i7-4790k',
@@ -2160,8 +1730,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4790k',
     processorPaths: ['/processors/intel-core-i7-4790k'],
-    singleCore: 1360,
-    multiCore: 4535,
   },
   {
     key: 'intel-core-i7-9750h',
@@ -2170,8 +1738,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-9750h',
     processorPaths: ['/processors/intel-core-i7-9750h'],
-    singleCore: 1359,
-    multiCore: 5501,
   },
   {
     key: 'intel-core-i5-9400f',
@@ -2180,8 +1746,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9400f',
     processorPaths: ['/processors/intel-core-i5-9400f'],
-    singleCore: 1358,
-    multiCore: 4961,
   },
   {
     key: 'intel-xeon-w-2145',
@@ -2190,8 +1754,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-w-2145',
     processorPaths: ['/processors/intel-xeon-w-2145'],
-    singleCore: 1353,
-    multiCore: 8833,
   },
   {
     key: 'intel-core-i5-7600',
@@ -2200,8 +1762,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-7600',
     processorPaths: ['/processors/intel-core-i5-7600'],
-    singleCore: 1350,
-    multiCore: 3777,
   },
   {
     key: 'intel-core-i5-8500',
@@ -2210,8 +1770,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-8500',
     processorPaths: ['/processors/intel-core-i5-8500'],
-    singleCore: 1348,
-    multiCore: 4830,
   },
   {
     key: 'intel-core-i5-8400',
@@ -2220,8 +1778,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-8400',
     processorPaths: ['/processors/intel-core-i5-8400'],
-    singleCore: 1345,
-    multiCore: 5079,
   },
   {
     key: 'intel-core-i7-8700t',
@@ -2230,8 +1786,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-8700t',
     processorPaths: ['/processors/intel-core-i7-8700t'],
-    singleCore: 1344,
-    multiCore: 5189,
   },
   {
     key: 'intel-core-i9-9980hk',
@@ -2240,8 +1794,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i9-9980hk',
     processorPaths: ['/processors/intel-core-i9-9980hk'],
-    singleCore: 1338,
-    multiCore: 6528,
   },
   {
     key: 'intel-core-i7-10875h',
@@ -2250,8 +1802,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10875h',
     processorPaths: ['/processors/intel-core-i7-10875h'],
-    singleCore: 1337,
-    multiCore: 6458,
   },
   {
     key: 'intel-core-i3-1115g4',
@@ -2260,8 +1810,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-1115g4',
     processorPaths: ['/processors/intel-core-i3-1115g4'],
-    singleCore: 1325,
-    multiCore: 2426,
   },
   {
     key: 'intel-core-i5-8300h',
@@ -2270,8 +1818,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-8300h',
     processorPaths: ['/processors/intel-core-i5-8300h'],
-    singleCore: 1324,
-    multiCore: 4043,
   },
   {
     key: 'intel-core-i5-9300h',
@@ -2280,8 +1826,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9300h',
     processorPaths: ['/processors/intel-core-i5-9300h'],
-    singleCore: 1324,
-    multiCore: 3895,
   },
   {
     key: 'intel-core-i7-6950x',
@@ -2290,8 +1834,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6950x',
     processorPaths: ['/processors/intel-core-i7-6950x'],
-    singleCore: 1315,
-    multiCore: 10556,
   },
   {
     key: 'amd-ryzen-9-4900hs',
@@ -2300,8 +1842,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-9-4900hs',
     processorPaths: ['/processors/amd-ryzen-9-4900hs'],
-    singleCore: 1311,
-    multiCore: 6926,
   },
   {
     key: 'amd-ryzen-5-5500u',
@@ -2310,8 +1850,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-5500u',
     processorPaths: ['/processors/amd-ryzen-5-5500u'],
-    singleCore: 1304,
-    multiCore: 5051,
   },
   {
     key: 'amd-ryzen-threadripper-2990wx',
@@ -2320,8 +1858,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-threadripper-2990wx',
     processorPaths: ['/processors/amd-ryzen-threadripper-2990wx'],
-    singleCore: 1303,
-    multiCore: 11821,
   },
   {
     key: 'intel-core-i5-10300h',
@@ -2330,8 +1866,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10300h',
     processorPaths: ['/processors/intel-core-i5-10300h'],
-    singleCore: 1293,
-    multiCore: 4111,
   },
   {
     key: 'intel-core-i7-10850h',
@@ -2340,8 +1874,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-10850h',
     processorPaths: ['/processors/intel-core-i7-10850h'],
-    singleCore: 1293,
-    multiCore: 4800,
   },
   {
     key: 'intel-core-i7-6850k',
@@ -2350,8 +1882,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6850k',
     processorPaths: ['/processors/intel-core-i7-6850k'],
-    singleCore: 1292,
-    multiCore: 6895,
   },
   {
     key: 'intel-core-i7-8850h',
@@ -2360,8 +1890,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-8850h',
     processorPaths: ['/processors/intel-core-i7-8850h'],
-    singleCore: 1287,
-    multiCore: 4707,
   },
   {
     key: 'amd-ryzen-7-5700u',
@@ -2370,8 +1898,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-5700u',
     processorPaths: ['/processors/amd-ryzen-7-5700u'],
-    singleCore: 1283,
-    multiCore: 5164,
   },
   {
     key: 'intel-core-i5-7500',
@@ -2380,8 +1906,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-7500',
     processorPaths: ['/processors/intel-core-i5-7500'],
-    singleCore: 1282,
-    multiCore: 3636,
   },
   {
     key: 'intel-core-i7-8750h',
@@ -2390,8 +1914,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-8750h',
     processorPaths: ['/processors/intel-core-i7-8750h'],
-    singleCore: 1271,
-    multiCore: 4814,
   },
   {
     key: 'amd-ryzen-3-4100',
@@ -2400,8 +1922,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-4100',
     processorPaths: ['/processors/amd-ryzen-3-4100'],
-    singleCore: 1268,
-    multiCore: 4811,
   },
   {
     key: 'amd-ryzen-7-2700x',
@@ -2410,8 +1930,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-2700x',
     processorPaths: ['/processors/amd-ryzen-7-2700x'],
-    singleCore: 1262,
-    multiCore: 7304,
   },
   {
     key: 'amd-ryzen-7-4700u-with-radeon-graphics',
@@ -2420,8 +1938,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-4700u-with-radeon-graphics',
     processorPaths: ['/processors/amd-ryzen-7-4700u-with-radeon-graphics'],
-    singleCore: 1254,
-    multiCore: 5160,
   },
   {
     key: 'amd-ryzen-5-2600x',
@@ -2430,8 +1946,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-2600x',
     processorPaths: ['/processors/amd-ryzen-5-2600x'],
-    singleCore: 1245,
-    multiCore: 6289,
   },
   {
     key: 'intel-core-i3-8100',
@@ -2440,8 +1954,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-8100',
     processorPaths: ['/processors/intel-core-i3-8100'],
-    singleCore: 1244,
-    multiCore: 3490,
   },
   {
     key: 'intel-core-i3-9100',
@@ -2450,8 +1962,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-9100',
     processorPaths: ['/processors/intel-core-i3-9100'],
-    singleCore: 1240,
-    multiCore: 3281,
   },
   {
     key: 'amd-ryzen-5-4600h',
@@ -2460,8 +1970,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-4600h',
     processorPaths: ['/processors/amd-ryzen-5-4600h'],
-    singleCore: 1238,
-    multiCore: 5563,
   },
   {
     key: 'intel-core-i7-4770k',
@@ -2470,8 +1978,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4770k',
     processorPaths: ['/processors/intel-core-i7-4770k'],
-    singleCore: 1235,
-    multiCore: 4365,
   },
   {
     key: 'intel-core-i3-7100',
@@ -2480,8 +1986,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-7100',
     processorPaths: ['/processors/intel-core-i3-7100'],
-    singleCore: 1229,
-    multiCore: 2145,
   },
   {
     key: 'intel-core-i7-6700',
@@ -2490,8 +1994,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6700',
     processorPaths: ['/processors/intel-core-i7-6700'],
-    singleCore: 1226,
-    multiCore: 4112,
   },
   {
     key: 'intel-core-i5-6600',
@@ -2500,8 +2002,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-6600',
     processorPaths: ['/processors/intel-core-i5-6600'],
-    singleCore: 1225,
-    multiCore: 3701,
   },
   {
     key: 'amd-ryzen-3-5300u',
@@ -2510,8 +2010,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-5300u',
     processorPaths: ['/processors/amd-ryzen-3-5300u'],
-    singleCore: 1223,
-    multiCore: 3929,
   },
   {
     key: 'intel-core-i5-10500t',
@@ -2520,8 +2018,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10500t',
     processorPaths: ['/processors/intel-core-i5-10500t'],
-    singleCore: 1222,
-    multiCore: 4775,
   },
   {
     key: 'amd-ryzen-threadripper-1900x',
@@ -2530,8 +2026,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-threadripper-1900x',
     processorPaths: ['/processors/amd-ryzen-threadripper-1900x'],
-    singleCore: 1205,
-    multiCore: 6588,
   },
   {
     key: 'intel-core-i3-9100t',
@@ -2540,8 +2034,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-9100t',
     processorPaths: ['/processors/intel-core-i3-9100t'],
-    singleCore: 1204,
-    multiCore: 3390,
   },
   {
     key: 'intel-pentium-gold-7505',
@@ -2550,8 +2042,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-pentium-gold-7505',
     processorPaths: ['/processors/intel-pentium-gold-7505'],
-    singleCore: 1203,
-    multiCore: 2445,
   },
   {
     key: 'amd-ryzen-5-pro-4650u',
@@ -2560,8 +2050,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-pro-4650u',
     processorPaths: ['/processors/amd-ryzen-5-pro-4650u'],
-    singleCore: 1202,
-    multiCore: 4659,
   },
   {
     key: 'amd-ryzen-7-7735u',
@@ -2570,8 +2058,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-7735u',
     processorPaths: ['/processors/amd-ryzen-7-7735u'],
-    singleCore: 1201,
-    multiCore: 6501,
   },
   {
     key: 'intel-core-i7-7820hq',
@@ -2580,8 +2066,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-7820hq',
     processorPaths: ['/processors/intel-core-i7-7820hq'],
-    singleCore: 1200,
-    multiCore: 3741,
   },
   {
     key: 'intel-core-i5-9500t',
@@ -2590,8 +2074,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9500t',
     processorPaths: ['/processors/intel-core-i5-9500t'],
-    singleCore: 1187,
-    multiCore: 4339,
   },
   {
     key: 'amd-ryzen-5-7520u',
@@ -2600,8 +2082,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-7520u',
     processorPaths: ['/processors/amd-ryzen-5-7520u'],
-    singleCore: 1176,
-    multiCore: 3708,
   },
   {
     key: 'intel-xeon-e5-2667-v4',
@@ -2610,8 +2090,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e5-2667-v4',
     processorPaths: ['/processors/intel-xeon-e5-2667-v4'],
-    singleCore: 1168,
-    multiCore: 7670,
   },
   {
     key: 'intel-core-i5-9300hf',
@@ -2620,8 +2098,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-9300hf',
     processorPaths: ['/processors/intel-core-i5-9300hf'],
-    singleCore: 1158,
-    multiCore: 3339,
   },
   {
     key: 'amd-ryzen-5-2600',
@@ -2630,8 +2106,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-2600',
     processorPaths: ['/processors/amd-ryzen-5-2600'],
-    singleCore: 1141,
-    multiCore: 5566,
   },
   {
     key: 'intel-core-i7-4790',
@@ -2640,8 +2114,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4790',
     processorPaths: ['/processors/intel-core-i7-4790'],
-    singleCore: 1141,
-    multiCore: 3843,
   },
   {
     key: 'intel-core-i5-4690k',
@@ -2650,8 +2122,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4690k',
     processorPaths: ['/processors/intel-core-i5-4690k'],
-    singleCore: 1141,
-    multiCore: 3118,
   },
   {
     key: 'amd-ryzen-5-1600x',
@@ -2660,8 +2130,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-1600x',
     processorPaths: ['/processors/amd-ryzen-5-1600x'],
-    singleCore: 1141,
-    multiCore: 5857,
   },
   {
     key: 'amd-ryzen-5-1500x',
@@ -2670,8 +2138,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-1500x',
     processorPaths: ['/processors/amd-ryzen-5-1500x'],
-    singleCore: 1130,
-    multiCore: 4316,
   },
   {
     key: 'amd-ryzen-7-2700',
@@ -2680,8 +2146,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-2700',
     processorPaths: ['/processors/amd-ryzen-7-2700'],
-    singleCore: 1129,
-    multiCore: 6745,
   },
   {
     key: 'intel-core-i7-6700t',
@@ -2690,8 +2154,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6700t',
     processorPaths: ['/processors/intel-core-i7-6700t'],
-    singleCore: 1128,
-    multiCore: 3906,
   },
   {
     key: 'intel-core-i5-8400t',
@@ -2700,8 +2162,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-8400t',
     processorPaths: ['/processors/intel-core-i5-8400t'],
-    singleCore: 1119,
-    multiCore: 4160,
   },
   {
     key: 'intel-core-i5-10500h',
@@ -2710,8 +2170,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-10500h',
     processorPaths: ['/processors/intel-core-i5-10500h'],
-    singleCore: 1117,
-    multiCore: 3381,
   },
   {
     key: 'intel-core-i3-6100',
@@ -2720,8 +2178,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-6100',
     processorPaths: ['/processors/intel-core-i3-6100'],
-    singleCore: 1117,
-    multiCore: 2080,
   },
   {
     key: 'intel-core-i7-4770',
@@ -2730,8 +2186,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4770',
     processorPaths: ['/processors/intel-core-i7-4770'],
-    singleCore: 1108,
-    multiCore: 3792,
   },
   {
     key: 'amd-ryzen-7-pro-4750u',
@@ -2740,8 +2194,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-pro-4750u',
     processorPaths: ['/processors/amd-ryzen-7-pro-4750u'],
-    singleCore: 1107,
-    multiCore: 4685,
   },
   {
     key: 'intel-core-i5-6500',
@@ -2750,8 +2202,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-6500',
     processorPaths: ['/processors/intel-core-i5-6500'],
-    singleCore: 1106,
-    multiCore: 3067,
   },
   {
     key: 'intel-core-i7-6820hq',
@@ -2760,8 +2210,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6820hq',
     processorPaths: ['/processors/intel-core-i7-6820hq'],
-    singleCore: 1104,
-    multiCore: 3757,
   },
   {
     key: 'intel-xeon-e3-1231-v3',
@@ -2770,8 +2218,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e3-1231-v3',
     processorPaths: ['/processors/intel-xeon-e3-1231-v3'],
-    singleCore: 1099,
-    multiCore: 3967,
   },
   {
     key: 'amd-ryzen-3-7320u',
@@ -2780,8 +2226,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-7320u',
     processorPaths: ['/processors/amd-ryzen-3-7320u'],
-    singleCore: 1097,
-    multiCore: 3504,
   },
   {
     key: 'amd-ryzen-5-1600',
@@ -2790,8 +2234,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-1600',
     processorPaths: ['/processors/amd-ryzen-5-1600'],
-    singleCore: 1095,
-    multiCore: 5586,
   },
   {
     key: 'amd-ryzen-5-3400g',
@@ -2800,8 +2242,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3400g',
     processorPaths: ['/processors/amd-ryzen-5-3400g'],
-    singleCore: 1087,
-    multiCore: 3737,
   },
   {
     key: 'intel-core-i5-4590',
@@ -2810,8 +2250,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4590',
     processorPaths: ['/processors/intel-core-i5-4590'],
-    singleCore: 1069,
-    multiCore: 3188,
   },
   {
     key: 'intel-core-i5-7500t',
@@ -2820,8 +2258,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-7500t',
     processorPaths: ['/processors/intel-core-i5-7500t'],
-    singleCore: 1065,
-    multiCore: 3000,
   },
   {
     key: 'intel-core-i7-6700hq',
@@ -2830,8 +2266,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-6700hq',
     processorPaths: ['/processors/intel-core-i7-6700hq'],
-    singleCore: 1056,
-    multiCore: 3484,
   },
   {
     key: 'intel-core-i3-n305',
@@ -2840,8 +2274,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-n305',
     processorPaths: ['/processors/intel-core-i3-n305'],
-    singleCore: 1049,
-    multiCore: 3896,
   },
   {
     key: 'intel-core-i7-4710mq',
@@ -2850,8 +2282,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4710mq',
     processorPaths: ['/processors/intel-core-i7-4710mq'],
-    singleCore: 1047,
-    multiCore: 3523,
   },
   {
     key: 'intel-core-i3-1005g1',
@@ -2860,8 +2290,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-1005g1',
     processorPaths: ['/processors/intel-core-i3-1005g1'],
-    singleCore: 1035,
-    multiCore: 1817,
   },
   {
     key: 'intel-core-i7-7700hq',
@@ -2870,8 +2298,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-7700hq',
     processorPaths: ['/processors/intel-core-i7-7700hq'],
-    singleCore: 1030,
-    multiCore: 3379,
   },
   {
     key: 'amd-ryzen-7-1700',
@@ -2880,8 +2306,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-1700',
     processorPaths: ['/processors/amd-ryzen-7-1700'],
-    singleCore: 1023,
-    multiCore: 5475,
   },
   {
     key: 'intel-core-i5-4570',
@@ -2890,8 +2314,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4570',
     processorPaths: ['/processors/intel-core-i5-4570'],
-    singleCore: 1017,
-    multiCore: 3060,
   },
   {
     key: 'intel-core-i5-7300hq',
@@ -2900,8 +2322,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-7300hq',
     processorPaths: ['/processors/intel-core-i5-7300hq'],
-    singleCore: 1015,
-    multiCore: 3017,
   },
   {
     key: 'intel-core-i5-6500t',
@@ -2910,8 +2330,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-6500t',
     processorPaths: ['/processors/intel-core-i5-6500t'],
-    singleCore: 1003,
-    multiCore: 2776,
   },
   {
     key: 'intel-core-i5-4460',
@@ -2920,8 +2338,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4460',
     processorPaths: ['/processors/intel-core-i5-4460'],
-    singleCore: 1003,
-    multiCore: 2952,
   },
   {
     key: 'intel-core-i5-7400t',
@@ -2930,8 +2346,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-7400t',
     processorPaths: ['/processors/intel-core-i5-7400t'],
-    singleCore: 1003,
-    multiCore: 2746,
   },
   {
     key: 'intel-core-i7-5960x',
@@ -2940,8 +2354,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-5960x',
     processorPaths: ['/processors/intel-core-i7-5960x'],
-    singleCore: 998,
-    multiCore: 6360,
   },
   {
     key: 'intel-xeon-e5-2697a-v4',
@@ -2950,8 +2362,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e5-2697a-v4',
     processorPaths: ['/processors/intel-xeon-e5-2697a-v4'],
-    singleCore: 997,
-    multiCore: 9785,
   },
   {
     key: 'intel-xeon-e5-2696-v4',
@@ -2960,8 +2370,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e5-2696-v4',
     processorPaths: ['/processors/intel-xeon-e5-2696-v4'],
-    singleCore: 996,
-    multiCore: 10753,
   },
   {
     key: 'intel-core-i3-6100t',
@@ -2970,8 +2378,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-6100t',
     processorPaths: ['/processors/intel-core-i3-6100t'],
-    singleCore: 994,
-    multiCore: 2056,
   },
   {
     key: 'amd-ryzen-3-2200g',
@@ -2980,8 +2386,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-2200g',
     processorPaths: ['/processors/amd-ryzen-3-2200g'],
-    singleCore: 991,
-    multiCore: 3067,
   },
   {
     key: 'amd-ryzen-5-3550h',
@@ -2990,8 +2394,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3550h',
     processorPaths: ['/processors/amd-ryzen-5-3550h'],
-    singleCore: 983,
-    multiCore: 3162,
   },
   {
     key: 'intel-core-i5-7400',
@@ -3000,8 +2402,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-7400',
     processorPaths: ['/processors/intel-core-i5-7400'],
-    singleCore: 981,
-    multiCore: 2465,
   },
   {
     key: 'intel-xeon-e5-2680-v4',
@@ -3010,8 +2410,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e5-2680-v4',
     processorPaths: ['/processors/intel-xeon-e5-2680-v4'],
-    singleCore: 979,
-    multiCore: 8399,
   },
   {
     key: 'amd-ryzen-7-3750h',
@@ -3020,8 +2418,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-3750h',
     processorPaths: ['/processors/amd-ryzen-7-3750h'],
-    singleCore: 971,
-    multiCore: 3502,
   },
   {
     key: 'intel-core-i7-4710hq',
@@ -3030,8 +2426,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4710hq',
     processorPaths: ['/processors/intel-core-i7-4710hq'],
-    singleCore: 951,
-    multiCore: 2717,
   },
   {
     key: 'intel-core-i3-8130u',
@@ -3040,8 +2434,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-8130u',
     processorPaths: ['/processors/intel-core-i3-8130u'],
-    singleCore: 927,
-    multiCore: 1843,
   },
   {
     key: 'amd-ryzen-5-pro-3500u',
@@ -3050,8 +2442,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-pro-3500u',
     processorPaths: ['/processors/amd-ryzen-5-pro-3500u'],
-    singleCore: 902,
-    multiCore: 2475,
   },
   {
     key: 'intel-xeon-e5-2630-v4',
@@ -3060,8 +2450,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e5-2630-v4',
     processorPaths: ['/processors/intel-xeon-e5-2630-v4'],
-    singleCore: 878,
-    multiCore: 5830,
   },
   {
     key: 'intel-core-i5-4300m',
@@ -3070,8 +2458,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4300m',
     processorPaths: ['/processors/intel-core-i5-4300m'],
-    singleCore: 876,
-    multiCore: 1805,
   },
   {
     key: 'amd-ryzen-5-3500u',
@@ -3080,8 +2466,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-3500u',
     processorPaths: ['/processors/amd-ryzen-5-3500u'],
-    singleCore: 871,
-    multiCore: 2508,
   },
   {
     key: 'amd-ryzen-3-3200g',
@@ -3090,8 +2474,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-3200g',
     processorPaths: ['/processors/amd-ryzen-3-3200g'],
-    singleCore: 856,
-    multiCore: 2880,
   },
   {
     key: 'intel-core-i7-3770k',
@@ -3100,8 +2482,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-3770k',
     processorPaths: ['/processors/intel-core-i7-3770k'],
-    singleCore: 848,
-    multiCore: 3029,
   },
   {
     key: 'intel-core-i7-4600u',
@@ -3110,8 +2490,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4600u',
     processorPaths: ['/processors/intel-core-i7-4600u'],
-    singleCore: 837,
-    multiCore: 1607,
   },
   {
     key: 'intel-core-i7-3770',
@@ -3120,8 +2498,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-3770',
     processorPaths: ['/processors/intel-core-i7-3770'],
-    singleCore: 818,
-    multiCore: 2646,
   },
   {
     key: 'intel-xeon-e5-2667-v2',
@@ -3130,8 +2506,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-xeon-e5-2667-v2',
     processorPaths: ['/processors/intel-xeon-e5-2667-v2'],
-    singleCore: 806,
-    multiCore: 5120,
   },
   {
     key: 'amd-ryzen-5-2500u',
@@ -3140,8 +2514,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-5-2500u',
     processorPaths: ['/processors/amd-ryzen-5-2500u'],
-    singleCore: 792,
-    multiCore: 2588,
   },
   {
     key: 'intel-core-i3-6100u',
@@ -3150,8 +2522,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-6100u',
     processorPaths: ['/processors/intel-core-i3-6100u'],
-    singleCore: 785,
-    multiCore: 1605,
   },
   {
     key: 'amd-ryzen-3-3200u',
@@ -3160,8 +2530,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-3200u',
     processorPaths: ['/processors/amd-ryzen-3-3200u'],
-    singleCore: 784,
-    multiCore: 1454,
   },
   {
     key: 'intel-core-i5-3570',
@@ -3170,8 +2538,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-3570',
     processorPaths: ['/processors/intel-core-i5-3570'],
-    singleCore: 782,
-    multiCore: 2307,
   },
   {
     key: 'intel-core-i7-4510u',
@@ -3180,8 +2546,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4510u',
     processorPaths: ['/processors/intel-core-i7-4510u'],
-    singleCore: 782,
-    multiCore: 1434,
   },
   {
     key: 'intel-core-i7-2600k',
@@ -3190,8 +2554,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-2600k',
     processorPaths: ['/processors/intel-core-i7-2600k'],
-    singleCore: 778,
-    multiCore: 2611,
   },
   {
     key: 'intel-core-i5-4200m',
@@ -3200,8 +2562,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4200m',
     processorPaths: ['/processors/intel-core-i5-4200m'],
-    singleCore: 772,
-    multiCore: 1673,
   },
   {
     key: 'intel-core-i7-4712mq',
@@ -3210,8 +2570,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-4712mq',
     processorPaths: ['/processors/intel-core-i7-4712mq'],
-    singleCore: 772,
-    multiCore: 2827,
   },
   {
     key: 'intel-core-i5-3570k',
@@ -3220,8 +2578,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-3570k',
     processorPaths: ['/processors/intel-core-i5-3570k'],
-    singleCore: 768,
-    multiCore: 2078,
   },
   {
     key: 'intel-core-i5-5300u',
@@ -3230,8 +2586,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-5300u',
     processorPaths: ['/processors/intel-core-i5-5300u'],
-    singleCore: 766,
-    multiCore: 1479,
   },
   {
     key: 'amd-ryzen-3-3250u',
@@ -3240,8 +2594,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-3-3250u',
     processorPaths: ['/processors/amd-ryzen-3-3250u'],
-    singleCore: 731,
-    multiCore: 1548,
   },
   {
     key: 'intel-core-i5-4200u',
@@ -3250,8 +2602,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-4200u',
     processorPaths: ['/processors/intel-core-i5-4200u'],
-    singleCore: 729,
-    multiCore: 1259,
   },
   {
     key: 'intel-core-i5-5200u',
@@ -3260,8 +2610,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-5200u',
     processorPaths: ['/processors/intel-core-i5-5200u'],
-    singleCore: 726,
-    multiCore: 1414,
   },
   {
     key: 'intel-core-i7-3720qm',
@@ -3270,8 +2618,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-3720qm',
     processorPaths: ['/processors/intel-core-i7-3720qm'],
-    singleCore: 726,
-    multiCore: 2457,
   },
   {
     key: 'intel-core-i3-7100u',
@@ -3280,8 +2626,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-7100u',
     processorPaths: ['/processors/intel-core-i3-7100u'],
-    singleCore: 723,
-    multiCore: 1512,
   },
   {
     key: 'intel-core-i7-2600',
@@ -3290,8 +2634,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-2600',
     processorPaths: ['/processors/intel-core-i7-2600'],
-    singleCore: 711,
-    multiCore: 2410,
   },
   {
     key: 'intel-core-i3-7020u',
@@ -3300,8 +2642,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-7020u',
     processorPaths: ['/processors/intel-core-i3-7020u'],
-    singleCore: 711,
-    multiCore: 1448,
   },
   {
     key: 'intel-core-i5-3470',
@@ -3310,8 +2650,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-3470',
     processorPaths: ['/processors/intel-core-i5-3470'],
-    singleCore: 705,
-    multiCore: 1963,
   },
   {
     key: 'amd-ryzen-7-3700u',
@@ -3320,8 +2658,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-ryzen-7-3700u',
     processorPaths: ['/processors/amd-ryzen-7-3700u'],
-    singleCore: 682,
-    multiCore: 2377,
   },
   {
     key: 'intel-core-i5-3450',
@@ -3330,8 +2666,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-3450',
     processorPaths: ['/processors/intel-core-i5-3450'],
-    singleCore: 681,
-    multiCore: 1985,
   },
   {
     key: 'intel-core-i3-6006u',
@@ -3340,8 +2674,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-6006u',
     processorPaths: ['/processors/intel-core-i3-6006u'],
-    singleCore: 679,
-    multiCore: 1344,
   },
   {
     key: 'intel-core-i3-3240',
@@ -3350,8 +2682,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-3240',
     processorPaths: ['/processors/intel-core-i3-3240'],
-    singleCore: 679,
-    multiCore: 1224,
   },
   {
     key: 'intel-core-i5-2500',
@@ -3360,8 +2690,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-2500',
     processorPaths: ['/processors/intel-core-i5-2500'],
-    singleCore: 676,
-    multiCore: 1943,
   },
   {
     key: 'intel-core-i5-2400',
@@ -3370,8 +2698,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-2400',
     processorPaths: ['/processors/intel-core-i5-2400'],
-    singleCore: 659,
-    multiCore: 1983,
   },
   {
     key: 'intel-core-i7-3537u',
@@ -3380,8 +2706,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i7-3537u',
     processorPaths: ['/processors/intel-core-i7-3537u'],
-    singleCore: 643,
-    multiCore: 1243,
   },
   {
     key: 'intel-core-i5-3210m',
@@ -3390,8 +2714,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-3210m',
     processorPaths: ['/processors/intel-core-i5-3210m'],
-    singleCore: 625,
-    multiCore: 1146,
   },
   {
     key: 'intel-core-i5-3320m',
@@ -3400,8 +2722,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-3320m',
     processorPaths: ['/processors/intel-core-i5-3320m'],
-    singleCore: 623,
-    multiCore: 1188,
   },
   {
     key: 'intel-core-i3-5005u',
@@ -3410,8 +2730,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-5005u',
     processorPaths: ['/processors/intel-core-i3-5005u'],
-    singleCore: 608,
-    multiCore: 1098,
   },
   {
     key: 'intel-core-i3-4030u',
@@ -3420,8 +2738,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-4030u',
     processorPaths: ['/processors/intel-core-i3-4030u'],
-    singleCore: 588,
-    multiCore: 1071,
   },
   {
     key: 'intel-core-i5-2520m',
@@ -3430,8 +2746,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-2520m',
     processorPaths: ['/processors/intel-core-i5-2520m'],
-    singleCore: 582,
-    multiCore: 1150,
   },
   {
     key: 'intel-core-i5-2400s',
@@ -3440,8 +2754,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-2400s',
     processorPaths: ['/processors/intel-core-i5-2400s'],
-    singleCore: 581,
-    multiCore: 1701,
   },
   {
     key: 'amd-fx-8350',
@@ -3450,8 +2762,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/amd-fx-8350',
     processorPaths: ['/processors/amd-fx-8350'],
-    singleCore: 568,
-    multiCore: 2610,
   },
   {
     key: 'intel-celeron-n5105',
@@ -3460,8 +2770,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-celeron-n5105',
     processorPaths: ['/processors/intel-celeron-n5105'],
-    singleCore: 522,
-    multiCore: 1216,
   },
   {
     key: 'intel-core-2-extreme-x9650',
@@ -3470,8 +2778,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-2-extreme-x9650',
     processorPaths: ['/processors/intel-core-2-extreme-x9650'],
-    singleCore: 509,
-    multiCore: 1443,
   },
   {
     key: 'intel-core-i5-2450m',
@@ -3480,8 +2786,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i5-2450m',
     processorPaths: ['/processors/intel-core-i5-2450m'],
-    singleCore: 484,
-    multiCore: 818,
   },
   {
     key: 'intel-core-i3-3110m',
@@ -3490,8 +2794,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-core-i3-3110m',
     processorPaths: ['/processors/intel-core-i3-3110m'],
-    singleCore: 467,
-    multiCore: 871,
   },
   {
     key: 'intel-celeron-n4500',
@@ -3500,8 +2802,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-celeron-n4500',
     processorPaths: ['/processors/intel-celeron-n4500'],
-    singleCore: 455,
-    multiCore: 668,
   },
   {
     key: 'intel-pentium-silver-n5030',
@@ -3510,8 +2810,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-pentium-silver-n5030',
     processorPaths: ['/processors/intel-pentium-silver-n5030'],
-    singleCore: 436,
-    multiCore: 800,
   },
   {
     key: 'intel-celeron-n4000',
@@ -3520,8 +2818,6 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-celeron-n4000',
     processorPaths: ['/processors/intel-celeron-n4000'],
-    singleCore: 365,
-    multiCore: 563,
   },
   {
     key: 'intel-celeron-n4120',
@@ -3530,7 +2826,5 @@ export const GENERATED_PROCESSOR_IDENTITIES = [
     architecture: 'x86',
     pageUrl: 'https://browser.geekbench.com/processors/intel-celeron-n4120',
     processorPaths: ['/processors/intel-celeron-n4120'],
-    singleCore: 363,
-    multiCore: 690,
   },
 ] as const;

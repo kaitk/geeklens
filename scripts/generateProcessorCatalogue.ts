@@ -1,4 +1,5 @@
 import { parseHTML } from 'linkedom';
+import { parseScoreReferenceDocument } from '../src/geekbench/scoreReferenceParser';
 
 const DEFAULT_SOURCE = 'https://browser.geekbench.com/processor-benchmarks';
 const DEFAULT_OUTPUT = 'src/catalogue/generated/processorCatalogue.generated.ts';
@@ -16,46 +17,34 @@ const outputPath = process.argv[3] ?? DEFAULT_OUTPUT;
 const html = await readSource(source);
 const document = parseHTML(html).document;
 const entries = new Map<string, Record<string, unknown>>();
+const scores = parseScoreReferenceDocument(document as unknown as Document, 'processor');
+if (!scores) throw new Error('Processor catalogue source is not a valid Geekbench 7 snapshot');
 
-if (!document.body.textContent?.includes('Geekbench 7')) {
-  throw new Error('Processor catalogue source does not identify itself as Geekbench 7');
-}
-
-for (const [tableId, scoreKey] of [
-  ['single-core', 'singleCore'],
-  ['multi-core', 'multiCore'],
-] as const) {
-  for (const row of document.querySelectorAll(`#${tableId} tbody tr`)) {
-    const link = row.querySelector<HTMLAnchorElement>('td.name a[href*="/processors/"]');
-    if (!link) continue;
-    const url = new URL(link.href, DEFAULT_SOURCE);
-    const path = url.pathname.replace(/\/$/, '');
-    const key = path.split('/').at(-1);
-    const displayName = link.textContent?.trim().replaceAll(/\s+/g, ' ');
-    const iconClass = row.querySelector('.device-icon')?.className ?? '';
-    const vendor = iconClass.includes('qualcomm')
-      ? 'qualcomm'
-      : iconClass.includes('amd')
-        ? 'amd'
-        : iconClass.includes('intel')
-          ? 'intel'
-          : null;
-    if (!key || !displayName || !vendor) continue;
-
-    const score = Number(row.querySelector('td.score')?.textContent?.trim());
-    if (!Number.isFinite(score) || score <= 0) continue;
-    entries.set(key, {
-      ...(entries.get(key) ?? {
-        key,
-        displayName,
-        vendor,
-        architecture: vendor === 'qualcomm' ? 'arm' : 'x86',
-        pageUrl: `https://browser.geekbench.com${path}`,
-        processorPaths: [path],
-      }),
-      [scoreKey]: score,
-    });
-  }
+for (const score of scores) {
+  const row = Array.from(document.querySelectorAll('#single-core tbody tr')).find((candidate) => {
+    const href = candidate.querySelector('td.name a')?.getAttribute('href');
+    return href ? new URL(href, DEFAULT_SOURCE).pathname.replace(/\/$/, '') === score.path : false;
+  });
+  const link = row?.querySelector<HTMLAnchorElement>('td.name a[href*="/processors/"]');
+  const key = score.path.split('/').at(-1);
+  const displayName = link?.textContent?.trim().replaceAll(/\s+/g, ' ');
+  const iconClass = row?.querySelector('.device-icon')?.className ?? '';
+  const vendor = iconClass.includes('qualcomm')
+    ? 'qualcomm'
+    : iconClass.includes('amd')
+      ? 'amd'
+      : iconClass.includes('intel')
+        ? 'intel'
+        : null;
+  if (!key || !displayName || !vendor) continue;
+  entries.set(key, {
+    key,
+    displayName,
+    vendor,
+    architecture: vendor === 'qualcomm' ? 'arm' : 'x86',
+    pageUrl: `https://browser.geekbench.com${score.path}`,
+    processorPaths: [score.path],
+  });
 }
 
 const generated = `/** Generated from the Geekbench 7 Processor Benchmark Chart.\n * Source capture and provenance are documented in processorCatalogue.ts.\n * Regenerate with scripts/generateProcessorCatalogue.ts; do not edit by hand.\n */\nexport const GENERATED_PROCESSOR_IDENTITIES = ${JSON.stringify([...entries.values()], null, 2)} as const;\n`;

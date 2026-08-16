@@ -31,6 +31,7 @@ function referenceLink(
   cataloguePath: string,
   generation: string,
   minimumUniqueResults?: number,
+  fetchedAt?: number,
 ): HTMLElement {
   const delta = scoreDelta(current, reference);
   if (!delta) return unavailableReference();
@@ -71,9 +72,12 @@ function referenceLink(
   }
   const provenance = document.createElement('span');
   provenance.className = 'geeklens-preview-reference-tooltip-note';
-  provenance.textContent = minimumUniqueResults
+  const sourceDetail = minimumUniqueResults
     ? `${generation} · at least ${minimumUniqueResults} unique results`
     : generation;
+  provenance.textContent = fetchedAt
+    ? `${sourceDetail} · Fetched ${new Date(fetchedAt).toLocaleDateString()}`
+    : sourceDetail;
   const action = document.createElement('span');
   action.className = 'geeklens-preview-reference-tooltip-note';
   action.textContent = 'Click to open source';
@@ -92,9 +96,10 @@ function referenceElement(
     return referenceLink(
       current,
       reference[scoreKind],
-      viewModel.cataloguePath,
+      reference.sourceUrl ?? viewModel.cataloguePath,
       reference.generation,
       reference.minimumUniqueResults,
+      reference.fetchedAt,
     );
   }
   return viewModel.hasReferenceDataset ? unavailableReference() : null;
