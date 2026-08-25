@@ -9,6 +9,7 @@ import { extractIndividualInstructions, type Instruction } from '../isa/instruct
 import { workloadInstructions } from '../isa/workloadInstructions';
 import { debugLog } from '../logger';
 import type { Settings } from '../settings/settings';
+import { loadRuntimeScoreReference } from '../scoreReferences/refresh';
 import {
   annotationErrorStatus,
   completedAnnotationStatus,
@@ -35,6 +36,7 @@ interface SingleResultPageDependencies {
   fetchMetadata: typeof fetchResultMetadataFromPayload;
   mountSystemInstructionSets: typeof mountSystemInstructionSets;
   mountWorkloadBadges: typeof mountWorkloadBadges;
+  loadScoreReference?: typeof loadRuntimeScoreReference;
 }
 
 type MountSystemInstructionSets = (
@@ -53,6 +55,7 @@ const singleResultPageDependencies: SingleResultPageDependencies = {
   fetchMetadata: fetchResultMetadataFromPayload,
   mountSystemInstructionSets,
   mountWorkloadBadges,
+  loadScoreReference: loadRuntimeScoreReference,
 };
 
 export async function annotateGeekbenchResults(
@@ -87,7 +90,10 @@ export async function annotateGeekbenchResults(
         : generation === 7
           ? (context?.metadata?.instructionSets?.value ?? null)
           : null;
-    const processorContext = buildProcessorContextViewModel(context);
+    const runtimeReference = settings.showReferenceComparison
+      ? await (dependencies.loadScoreReference?.(context) ?? null)
+      : null;
+    const processorContext = buildProcessorContextViewModel(context, runtimeReference);
     if (processorContext) renderSingleProcessorContext(processorContext, settings);
 
     if (settings.showIsaAnnotations && instructionSets) {

@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.8.0] - 2026-08-25
+
+### Changed
+
+- Geekbench 7 Browser-average score references now refresh periodically and are
+  cached locally.
+- Updated the bundled processor and Mac catalogue.
+
 ## [v0.7.0] - 2026-08-07
 
 ### Added

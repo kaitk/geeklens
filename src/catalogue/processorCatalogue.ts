@@ -19,7 +19,6 @@ export type {
   CatalogueSource,
   CoreComposition,
   CoreCompositionGroup,
-  GeekbenchScoreReference,
   HardwareSpecification,
   ProcessorCatalogueEntry,
   ReportedValueDispute,

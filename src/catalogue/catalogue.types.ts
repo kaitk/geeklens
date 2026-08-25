@@ -17,7 +17,6 @@ export interface ProcessorCatalogueEntry {
   hardware?: HardwareSpecification;
   coreComposition?: CoreComposition;
   l3CacheDispute?: ReportedValueDispute;
-  scoreReferences?: readonly GeekbenchScoreReference[];
 }
 
 /** A value Geekbench reports that a reviewed source contradicts.
@@ -71,13 +70,6 @@ export interface CoreComposition {
  * individual clusters. */
 export function coreCompositionDescription(composition: CoreComposition): string {
   return composition.groups.map((group) => `${group.count} ${group.label}`).join(' + ');
-}
-
-export interface GeekbenchScoreReference {
-  generation: 7;
-  singleCore: number;
-  multiCore: number;
-  minimumUniqueResults?: number;
 }
 
 export interface CatalogueSource {

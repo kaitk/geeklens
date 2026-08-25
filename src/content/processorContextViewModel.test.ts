@@ -515,16 +515,24 @@ describe('buildProcessorContextViewModel', () => {
     );
   });
 
-  test('maps generation-matched chart averages only for exact catalogue matches', async () => {
-    const amd = buildProcessorContextViewModel(await context('1248'));
-    expect(amd?.reference).toMatchObject({
-      generation: 'Geekbench 7',
+  test('uses only generation-matched runtime averages', async () => {
+    const cached = await context('1248');
+    const withoutRuntime = buildProcessorContextViewModel(cached);
+    expect(withoutRuntime?.reference).toBeNull();
+    expect(withoutRuntime?.hasReferenceDataset).toBeTrue();
+
+    const runtime = buildProcessorContextViewModel(cached, {
+      cacheKey: 'v7:amd-ryzen-7-5800x3d',
+      generation: 7,
+      catalogueKey: 'amd-ryzen-7-5800x3d',
+      singleCore: 3200,
+      multiCore: 21000,
+      fetchedAt: 1,
+      sourceUrl: 'https://browser.geekbench.com/processor-benchmarks',
       minimumUniqueResults: 5,
-      singleCore: expect.any(Number),
-      multiCore: expect.any(Number),
+      parserVersion: 1,
     });
-    expect(amd?.hasReferenceDataset).toBeTrue();
-    expect(buildProcessorContextViewModel(await context('58949'))?.reference).toBeNull();
+    expect(runtime?.reference).toMatchObject({ singleCore: 3200, multiCore: 21000, fetchedAt: 1 });
     expect(buildProcessorContextViewModel(await context('18873252'))?.reference ?? null).toBeNull();
   });
 
