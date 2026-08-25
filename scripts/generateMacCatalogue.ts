@@ -22,6 +22,7 @@ const entries = new Map<string, Record<string, unknown>>();
 for (const source of sources) {
   const html = await readSource(source);
   const document = parseHTML(html).document;
+  const sourceUrl = URL.canParse(source) ? source : DEFAULT_SOURCES[0];
 
   const scores = parseScoreReferenceDocument(document as unknown as Document, 'mac-family');
   if (!scores)
@@ -31,7 +32,7 @@ for (const source of sources) {
     const row = Array.from(document.querySelectorAll('#family-64-single tbody tr')).find(
       (candidate) => {
         const href = candidate.querySelector('td.name a')?.getAttribute('href');
-        return href ? new URL(href, source).pathname.replace(/\/$/, '') === score.path : false;
+        return href ? new URL(href, sourceUrl).pathname.replace(/\/$/, '') === score.path : false;
       },
     );
     const link = row?.querySelector<HTMLAnchorElement>('td.name a[href*="/macs/"]');
@@ -41,12 +42,19 @@ for (const source of sources) {
       .replaceAll(/\s+/g, ' ');
     const key = score.path.split('/').at(-1);
     const deviceName = link?.textContent?.trim().replaceAll(/\s+/g, ' ');
+    if (!key || !deviceName || !description) {
+      throw new Error(`Could not read a Mac identity for ${score.path} from ${source}`);
+    }
+    if (!description.startsWith('Apple ')) continue;
+
     const processor = description?.match(/^(Apple .+?)\s+@/i)?.[1];
     const cpuCores = Number(
       description?.match(/\((\d+) CPU cores?/)?.[1] ?? description?.match(/\((\d+) cores?/)?.[1],
     );
     const gpuCores = Number(description?.match(/(\d+) GPU cores?/)?.[1]);
-    if (!key || !deviceName || !processor || !Number.isInteger(cpuCores)) continue;
+    if (!processor || !Number.isInteger(cpuCores)) {
+      throw new Error(`Could not build a Mac identity for ${score.path} from ${source}`);
+    }
 
     entries.set(key, {
       key: `mac-${key}`,
@@ -65,6 +73,9 @@ for (const source of sources) {
   }
 }
 
-const generated = `/** Generated from the Geekbench 7 Mac benchmark family tables.\n * Source capture and provenance are documented in processorCatalogue.ts.\n * Regenerate with scripts/generateMacCatalogue.ts; do not edit by hand.\n */\nexport const GENERATED_MAC_IDENTITIES = ${JSON.stringify([...entries.values()], null, 2)} as const;\n`;
+const sortedEntries = [...entries.values()].toSorted((left, right) =>
+  String(left.key).localeCompare(String(right.key), 'en'),
+);
+const generated = `/** Generated from the Geekbench 7 Mac benchmark family tables.\n * Source capture and provenance are documented in processorCatalogue.ts.\n * Regenerate with scripts/generateMacCatalogue.ts; do not edit by hand.\n */\nexport const GENERATED_MAC_IDENTITIES = ${JSON.stringify(sortedEntries, null, 2)} as const;\n`;
 await Bun.write(outputPath, generated);
 console.log(`Wrote ${entries.size} Mac identities from ${sources.join(', ')} to ${outputPath}`);

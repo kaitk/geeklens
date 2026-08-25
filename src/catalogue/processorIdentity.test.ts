@@ -26,7 +26,7 @@ describe('resolveProcessorIdentity', () => {
     expect(PROCESSOR_CATALOGUE.length).toBeGreaterThan(250);
     expect(PROCESSOR_CATALOGUE_SOURCE).toEqual({
       url: 'https://browser.geekbench.com/processor-benchmarks',
-      retrievedOn: '2026-08-07',
+      retrievedOn: '2026-08-25',
       generation: 7,
       minimumUniqueResults: 5,
     });
@@ -35,7 +35,7 @@ describe('resolveProcessorIdentity', () => {
         'https://browser.geekbench.com/macs/mac-mini-2024-12c-cpu',
         'https://browser.geekbench.com/macs/macbook-pro-14-inch-2024-12c-cpu',
       ],
-      retrievedOn: '2026-08-07',
+      retrievedOn: '2026-08-25',
       generation: 7,
     });
     expect(PROCESSOR_CATALOGUE.filter((entry) => entry.macPaths.length > 0).length).toBeGreaterThan(

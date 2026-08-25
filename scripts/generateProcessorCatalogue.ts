@@ -28,15 +28,16 @@ for (const score of scores) {
   const link = row?.querySelector<HTMLAnchorElement>('td.name a[href*="/processors/"]');
   const key = score.path.split('/').at(-1);
   const displayName = link?.textContent?.trim().replaceAll(/\s+/g, ' ');
-  const iconClass = row?.querySelector('.device-icon')?.className ?? '';
-  const vendor = iconClass.includes('qualcomm')
-    ? 'qualcomm'
-    : iconClass.includes('amd')
-      ? 'amd'
-      : iconClass.includes('intel')
-        ? 'intel'
+  const vendor = key?.startsWith('amd-')
+    ? 'amd'
+    : key?.startsWith('intel-')
+      ? 'intel'
+      : key?.startsWith('snapdragon-')
+        ? 'qualcomm'
         : null;
-  if (!key || !displayName || !vendor) continue;
+  if (!key || !displayName || !vendor) {
+    throw new Error(`Could not build a processor identity for ${score.path}`);
+  }
   entries.set(key, {
     key,
     displayName,
@@ -47,6 +48,9 @@ for (const score of scores) {
   });
 }
 
-const generated = `/** Generated from the Geekbench 7 Processor Benchmark Chart.\n * Source capture and provenance are documented in processorCatalogue.ts.\n * Regenerate with scripts/generateProcessorCatalogue.ts; do not edit by hand.\n */\nexport const GENERATED_PROCESSOR_IDENTITIES = ${JSON.stringify([...entries.values()], null, 2)} as const;\n`;
+const sortedEntries = [...entries.values()].toSorted((left, right) =>
+  String(left.key).localeCompare(String(right.key), 'en'),
+);
+const generated = `/** Generated from the Geekbench 7 Processor Benchmark Chart.\n * Source capture and provenance are documented in processorCatalogue.ts.\n * Regenerate with scripts/generateProcessorCatalogue.ts; do not edit by hand.\n */\nexport const GENERATED_PROCESSOR_IDENTITIES = ${JSON.stringify(sortedEntries, null, 2)} as const;\n`;
 await Bun.write(outputPath, generated);
 console.log(`Wrote ${entries.size} processor identities from ${source} to ${outputPath}`);
